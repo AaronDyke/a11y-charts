@@ -1,5 +1,12 @@
 # Angular data-rep replacement: functional parity
 
+> **Update, November 13, 2026:** Commit `9270c47` removed two features that the
+> October 22 implementation status lists: per-row `valueSuppressed` and XLSX
+> export. Suppression is now one chart-level `suppressed` flag (zero reads
+> "Suppressed"), and CSV is the only built-in export. For current readiness, see
+> [Status — November 13, 2026](#status--november-13-2026) below and
+> `ADAPT-REPLACEMENT-AUDIT-2026-11-13.md`.
+
 Assessment date: October 22, 2026. The inventory below records the initial gaps.
 Implementation followed in the same review cycle; see the implementation status
 section below for the current local state.
@@ -217,12 +224,12 @@ The local library and comprehensive gallery now include:
   content callbacks. Application-specific ADAPT glossary and template resolution
   remain in its consuming adapter.
 - `valueSuppressed` per row with protected count redaction, explicit true zeros,
-  and independent missing states.
+  and independent missing states. *(Removed November 13, 2026; see below.)*
 - `scaleMaximum` for shared count scales and `inferTotal` for authoritative unknown
   totals. The user chose shared scales as the grouped default; demo customization
   also exposes rescaling and population-share modes.
 - Authored `explanation`, selected-view context, and actual XLSX downloads, alongside
-  CSV, using the canonical semantic model.
+  CSV, using the canonical semantic model. *(XLSX removed November 13, 2026; see below.)*
 - Three gallery compositions: age, race/ethnicity, and multiple sections with
   availability states. Screenshot-derived values and illustrative additions are
   identified separately.
@@ -233,3 +240,25 @@ production payload mapping, original template output verification, and human
 assistive-technology testing in the actual consumer remain integration work.
 Visual matching remains deferred. See `GROUPED-PARITY-VERIFICATION.md` for local
 verification evidence.
+
+## Status — November 13, 2026
+
+Commit `9270c47` (`refactor!: unify chart options, events and suppression before
+launch`) changed two items from the October 22 status:
+
+- **Suppression is chart-level only.** `valueSuppressed` was removed. When
+  `suppressed` is true, every `0` value reads "Suppressed" and is redacted from
+  the getter, events, table, and CSV; `null` is always "Not reported". This
+  matches the legacy ADAPT data-rep rule (values ≤ 0 read "Suppressed" under the
+  global flag). A true zero can no longer sit beside a suppressed row in the same
+  chart, so the per-row compatibility decision above is closed in favor of the
+  global rule. `prepareBarViewSection` protects aggregates that include a
+  suppressed zero.
+- **Excel export was removed.** CSV, with a UTF-8 byte-order mark, is the only
+  built-in download. ADAPT currently offers "Download Excel", so that row of the
+  initial inventory is a gap again. Before replacement, either accept dropping
+  it, or add a host export hook or workbook support.
+
+Everything else in the October 22 status still applies. The ADAPT adapter,
+distribution, and SSR-safe loading haven't been started; see
+`ADAPT-REPLACEMENT-AUDIT-2026-11-13.md`.
