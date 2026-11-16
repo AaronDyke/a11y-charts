@@ -1,5 +1,5 @@
 {
-  "name": "@a11y-charts/line-chart",
+  "name": "@mzebley-aem/line-chart",
   "version": "0.0.0",
   "description": "Framework-free, accessible actual-versus-target line chart custom element",
   "private": true,

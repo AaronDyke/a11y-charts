@@ -3,8 +3,8 @@
 A framework-free custom element for a single proportional breakdown or a value compared with a reference total. Load the stylesheet and register the element:
 
 ```js
-import '@a11y-charts/segmented-bar-chart/styles.css';
-import '@a11y-charts/segmented-bar-chart/define';
+import '@mzebley-aem/segmented-bar-chart/styles.css';
+import '@mzebley-aem/segmented-bar-chart/define';
 
 const chart = document.querySelector('a11y-segmented-bar-chart');
 chart.chartTitle = 'Children served';

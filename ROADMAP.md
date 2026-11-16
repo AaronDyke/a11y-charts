@@ -186,11 +186,11 @@ The first implementation should validate this contract in plain HTML and all fra
 Provide both entry points:
 
 ```ts
-import '@a11y-charts/line-chart/define'; // idempotently registers a11y-line-chart
+import '@mzebley-aem/line-chart/define'; // idempotently registers a11y-line-chart
 ```
 
 ```ts
-import { A11yLineChartElement, defineA11yLineChart } from '@a11y-charts/line-chart';
+import { A11yLineChartElement, defineA11yLineChart } from '@mzebley-aem/line-chart';
 
 defineA11yLineChart(); // safe to call more than once
 ```

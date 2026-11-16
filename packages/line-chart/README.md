@@ -1,4 +1,4 @@
-# `@a11y-charts/line-chart`
+# `@mzebley-aem/line-chart`
 
 Framework-free `a11y-line-chart` autonomous custom element.
 
@@ -380,7 +380,7 @@ event.
 
 ## Server helpers and CSV metadata
 
-Import pure helpers from `@a11y-charts/line-chart/core` in Node or SSR code. The
+Import pure helpers from `@mzebley-aem/line-chart/core` in Node or SSR code. The
 normal package entry exports the browser element and requires DOM globals.
 The build checks the `./core` entry in a separate Node process.
 

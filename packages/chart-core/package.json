@@ -1,5 +1,5 @@
 {
-  "name": "@a11y-charts/chart-core-source",
+  "name": "@mzebley-aem/chart-core-source",
   "version": "0.0.0",
   "private": true,
   "type": "module"

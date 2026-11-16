@@ -1,4 +1,4 @@
-const core = await import('@a11y-charts/bar-chart/core');
+const core = await import('@mzebley-aem/bar-chart/core');
 if (typeof globalThis.HTMLElement !== 'undefined') throw new Error('Smoke must run without a DOM global.');
 if (typeof core.resolveConfig !== 'function' || typeof core.buildBarModel !== 'function' || typeof core.validateBarData !== 'function') {
   throw new Error('The built bar core entry is missing expected helpers.');

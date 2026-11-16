@@ -68,7 +68,7 @@ gap. On top of that, a few behavior differences need a product decision.
    from an Angular component would most likely fail in Node SSR. A guard inside
    `registration.ts` alone can't fix this, because the class modules are evaluated first. Load it
    browser-only, for example with
-   `isPlatformBrowser` + `afterNextRender(() => import('@a11y-charts/bar-chart/define'))`,
+   `isPlatformBrowser` + `afterNextRender(() => import('@mzebley-aem/bar-chart/define'))`,
    or add an SSR-safe entry point that defers loading the element modules until
    `customElements` exists. Pure helpers from `/core` are already SSR-safe.
 3. **No ADAPT adapter.** Someone has to translate `raw.chart.data` (including the
@@ -122,3 +122,19 @@ Both were removed in `9270c47`. Update them so nobody plans a migration on stale
 
 Browser/Playwright suites weren't rerun (only unit tests and typecheck). Nothing was
 rendered inside ADAPT. No production payloads or template outputs were compared. No AT testing.
+
+## Pilot decisions (November 16, 2026)
+
+These settle the open questions from **Blockers** and **Behavior differences that need
+sign-off** above.
+
+| Question | Decision | Work it creates |
+| --- | --- | --- |
+| Distribution | **GitHub Packages** | Remove `"private": true`, set real versions and `publishConfig.registry`, and add a publish workflow. GitHub Packages requires the npm scope to match the owning account, so the packages were renamed from `@a11y-charts/*` to `@mzebley-aem/*` (decided November 16, 2026). ADAPT's CI and Docker build need a `read:packages` token and an `.npmrc` entry for the scope. |
+| Excel export | **Host export hook** | Add a documented extension point so the host can add its own download action (ADAPT builds the workbook with its existing `xlsx` dependency). The chart package stays free of `xlsx`. The hook needs the same rows, metadata and suppression redaction that CSV export uses. |
+| Total policy (and percentages, explain denominator) | **New policy** | No library change. Use an authoritative `total` when supplied; with suppressed rows and no total, the total reads "Suppressed". Percentages and explain text can differ from production for the same payload; the fixture comparison must flag these differences as expected, not as regressions. |
+| Zero-value rows | **New library option, off by default** | Add an opt-in option that removes unsuppressed zero-value categories from the bars and adds a sentence naming them (ADAPT's "Categories with values of zero: …"). The data table and CSV keep every row. Suppressed rows are never hidden. The ADAPT adapter turns the option on. |
+| Explain/Glossary preference persistence | **New library option** | Add an opt-in storage key so a consumer can persist the Explain and Glossary open state across charts and page loads. Storage access is wrapped so a blocked or empty `localStorage` falls back to the default. No storage is used unless the key is set. |
+
+Still open: visual (USWDS) token mapping, and the container-query compact layout for the
+single bar chart (agreed as needed; no product decision required).

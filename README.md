@@ -111,9 +111,9 @@ chart together.
 ## Direct consumption
 
 ```ts
-import '@a11y-charts/line-chart/define';
-import '@a11y-charts/line-chart/styles.css';
-import type { A11yLineChartElement } from '@a11y-charts/line-chart';
+import '@mzebley-aem/line-chart/define';
+import '@mzebley-aem/line-chart/styles.css';
+import type { A11yLineChartElement } from '@mzebley-aem/line-chart';
 
 const chart = document.querySelector<A11yLineChartElement>('a11y-line-chart');
 
@@ -248,7 +248,7 @@ through explicitly named `reference:start`, `reference:build`, and `reference:te
 commands (or `ng`). Its old dependency tree still has audit findings; this work
 does not upgrade or claim to secure that reference application.
 
-Both packages expose `@a11y-charts/{line-chart|bar-chart}/core` for DOM-free
+Both packages expose `@mzebley-aem/{line-chart|bar-chart}/core` for DOM-free
 semantic/validation/message helpers and CSV generation. Pass plain-text metadata
 as `contextText` and `dataNoteText` for server exports. These fields take
 precedence even when empty. HTML `context`/`dataNote` conversion requires a browser
