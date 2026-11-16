@@ -198,13 +198,19 @@ test('detail cards follow their segment or legend trigger and clamp at the right
   const button = chart.locator('[data-focus-key="group:other"]');
   const card = chart.locator('[data-group-members] .a11y-segmented-bar-chart__card');
   const segment = chart.locator('.a11y-segmented-bar-chart__segment[data-other]');
-  const checkPosition = async (anchor: typeof button) => {
+  // `clamped` asserts the anchor sits past the right-edge limit, so the clamp branch is exercised.
+  // Only the data-driven Other segment guarantees that: legend wrapping depends on platform fonts.
+  const checkPosition = async (anchor: typeof button, { clamped = false } = {}) => {
     const [a, c, legend] = await Promise.all([anchor.boundingBox(), card.boundingBox(), chart.locator('.a11y-segmented-bar-chart__legend').boundingBox()]);
     if (!a || !c || !legend) throw new Error('Missing geometry');
     const maxLeft = Math.min(1440 - 8, legend.x + legend.width) - c.width;
     expect(Math.abs(c.x - Math.max(legend.x, Math.min(a.x, maxLeft)))).toBeLessThan(2);
-    expect(c.x).toBeGreaterThan(legend.x + legend.width / 2);
-    expect(c.x + c.width).toBeLessThanOrEqual(1440 - 8);
+    if (clamped) {
+      expect(a.x).toBeGreaterThan(maxLeft);
+      expect(Math.abs(c.x - maxLeft)).toBeLessThan(2);
+    }
+    expect(c.x).toBeGreaterThanOrEqual(legend.x - 1);
+    expect(c.x + c.width).toBeLessThanOrEqual(Math.min(1440 - 8, legend.x + legend.width) + 1);
     const gap = Math.min(Math.abs(c.y - (a.y + a.height)), Math.abs(a.y - (c.y + c.height)));
     expect(gap).toBeGreaterThanOrEqual(7);
     expect(gap).toBeLessThanOrEqual(9);
@@ -220,11 +226,11 @@ test('detail cards follow their segment or legend trigger and clamp at the right
   await expect(card).toBeHidden();
   await segment.hover();
   await expect(card).toBeVisible();
-  await checkPosition(segment);
+  await checkPosition(segment, { clamped: true });
   await card.hover();
   await page.waitForTimeout(250);
   await expect(card).toBeVisible();
-  await checkPosition(segment);
+  await checkPosition(segment, { clamped: true });
   await page.mouse.move(0, 0);
   await expect(card).toBeHidden();
   await button.focus();
