@@ -11,8 +11,7 @@ const routes: { route: string; include?: string[] }[] = [
   { route: '/examples/line-charts/', include: ['.example-entry'] },
   { route: '/examples/bar-charts/', include: ['.example-entry'] },
   { route: '/examples/grouped-bar-charts/', include: ['.example-entry'] },
-  // Not swept at AAA, as in the former gallery: the segmented chart's default
-  // muted text (#565c65, 6.74:1) meets AA but not the 7:1 enhanced contrast.
+  { route: '/examples/segmented-bar-charts/', include: ['.segmented-demo'] },
   { route: '/examples/theme-comparison/', include: ['.theme-comparison'] },
   { route: '/reports/report-demo/' },
 ];

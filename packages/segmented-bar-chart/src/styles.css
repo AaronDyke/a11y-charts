@@ -12,7 +12,7 @@ a11y-segmented-bar-chart .a11y-segmented-bar-chart__dialog-layer {
 a11y-segmented-bar-chart .a11y-segmented-bar-chart__root,
 a11y-segmented-bar-chart .a11y-segmented-bar-chart__dialog-layer {
   --segmented-ink: var(--a11y-segmented-bar-chart-color, var(--a11y-charts-segmented-color, #1d467e));
-  --segmented-muted: var(--a11y-segmented-bar-chart-muted, var(--a11y-charts-muted, #565c65));
+  --segmented-muted: var(--a11y-segmented-bar-chart-muted, var(--a11y-charts-muted, #4b5b68));
   --segmented-surface: var(--a11y-segmented-bar-chart-surface, var(--a11y-charts-surface, #fff));
   --segmented-border: var(--a11y-segmented-bar-chart-border, var(--a11y-charts-border, #c6cace));
   --segmented-focus: var(--a11y-segmented-bar-chart-focus, var(--a11y-charts-focus, #005ea8));
@@ -45,10 +45,18 @@ a11y-segmented-bar-chart .a11y-segmented-bar-chart__total strong {
   display: block;
   color: var(--segmented-ink);
   font-size: var(--a11y-segmented-bar-chart-metric-size, var(--a11y-charts-segmented-metric-size, 3.5rem));
+  /* Shrink the metric to fit a narrow chart with enlarged text, and wrap its digits
+     as a last resort, so it never forces horizontal scrolling (WCAG 1.4.10). */
+  font-size: min(var(--a11y-segmented-bar-chart-metric-size, var(--a11y-charts-segmented-metric-size, 3.5rem)), 25cqi);
+  overflow-wrap: anywhere;
   font-weight: 750;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
 }
+/* The metric's size cap is relative to the width of the visual that holds it. The
+   container is this wrapper, not the chart root, so absolutely positioned overlays
+   such as the whole-card link keep their containing block. */
+a11y-segmented-bar-chart .a11y-segmented-bar-chart__visual { container-type: inline-size; }
 a11y-segmented-bar-chart .a11y-segmented-bar-chart__total span { display: block; margin-top: .5rem; color: var(--segmented-muted); }
 a11y-segmented-bar-chart .a11y-segmented-bar-chart__bar {
   display: flex;
