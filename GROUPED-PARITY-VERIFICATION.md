@@ -3,6 +3,12 @@
 October 22, 2026. Implementation is local and uncommitted. No ADAPT source,
 production CMS, or deployment was changed.
 
+> **Update, November 13, 2026:** Commit `9270c47` removed per-row suppression
+> (`valueSuppressed`) and XLSX export after this verification ran. The suppression
+> and Excel results below are historical. The current chart uses one chart-level
+> `suppressed` flag and exports CSV only. See the November 13 status in
+> `BAR-CHART-REPLACEMENT-PARITY.md` and `ADAPT-REPLACEMENT-AUDIT-2026-11-13.md`.
+
 ## Review entry
 
 Run `npm run gallery:dev` and open
@@ -26,12 +32,14 @@ The selected configuration disclosure shows the prepared view and settings.
 ## Implemented boundary
 
 The flow is native radio/disclosure selection → a prepared view → the persistent
-bar component's semantic model → chart, Explain, Data table, CSV, and XLSX.
-No network API or database participates in these local fixtures.
+bar component's semantic model → chart, Explain, Data table, and CSV (XLSX at
+the time of this run; since removed). No network API or database participates
+in these local fixtures.
 
-The new companion, pure view-preparation helper, explicit row suppression,
-authoritative-unknown totals, shared scale, authored explanation, and Excel export
-are documented in `packages/bar-chart/README.md`. The original gap inventory and
+The new companion, pure view-preparation helper, chart-level suppression,
+authoritative-unknown totals, shared scale, and authored explanation are
+documented in `packages/bar-chart/README.md`. (Row suppression and Excel export
+were verified here but removed on November 13, 2026.) The original gap inventory and
 integration limits are in `BAR-CHART-REPLACEMENT-PARITY.md`.
 
 ## Verification evidence
