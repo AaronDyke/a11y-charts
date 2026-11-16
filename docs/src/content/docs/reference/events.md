@@ -3,7 +3,7 @@ title: Events
 description: Every event the chart elements dispatch, with its detail payload.
 ---
 
-Every event is a `CustomEvent` that bubbles, so you can listen on the chart or on any ancestor. Event names start with the element name: `a11y-line-chart-`, `a11y-bar-chart-`, or `a11y-segmented-bar-chart-`. The detail types are exported from each package root.
+Every event is a `CustomEvent` that bubbles, so you can listen on the chart or on any ancestor. Event names start with the element name: `a11y-line-chart-`, `a11y-bar-chart-`, or `a11y-segmented-bar-chart-`. The line and bar packages export a type for each event's detail, such as `A11yLineChartPointChangeDetail` or `A11yBarChartDataChangeDetail`. The segmented package doesn't export detail types, so type its payloads locally from the tables below.
 
 ```ts
 import type { A11yBarChartDataChangeDetail } from '@mzebley-aem/bar-chart';

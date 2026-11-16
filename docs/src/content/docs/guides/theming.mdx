@@ -14,19 +14,19 @@ The defaults live inside each package's stylesheet as fallbacks, so they never m
 
 ## Shared roles
 
-These properties apply to every chart. Set them once on a report wrapper:
+Set these once on a report wrapper. The bar, grouped bar, and segmented charts read them; the line chart doesn't yet, so set its own properties alongside:
 
-| Property | Role |
-| --- | --- |
-| `--a11y-charts-text` | Body text |
-| `--a11y-charts-muted` | Secondary text |
-| `--a11y-charts-surface` | Card and dialog background |
-| `--a11y-charts-border` | Borders and dividers |
-| `--a11y-charts-focus` | Focus outline |
-| `--a11y-charts-font-family` | Typeface |
-| `--a11y-charts-font-size` | Base text size |
+| Property | Role | Bar and grouped | Segmented | Line chart |
+| --- | --- | --- | --- | --- |
+| `--a11y-charts-text` | Body text | ✓ | ✓ | Use `--a11y-charts-line-color` |
+| `--a11y-charts-muted` | Secondary text | ✓ | ✓ | No equivalent |
+| `--a11y-charts-surface` | Card and dialog background | ✓ | ✓ | No equivalent; its dialog uses system colors (`Canvas`, `CanvasText`) |
+| `--a11y-charts-border` | Borders and dividers | ✓ | ✓ | No equivalent |
+| `--a11y-charts-focus` | Focus outline | ✓ | ✓ | Use `--a11y-charts-line-focus-color` |
+| `--a11y-charts-font-family` | Typeface | ✓ | ✓ | No equivalent; it uses the system UI font |
+| `--a11y-charts-font-size` | Base text size | Use `--a11y-charts-bar-font-size` | ✓ | No equivalent |
 
-Each chart also has its own prefix for chart-specific properties: `--a11y-charts-line-*`, `--a11y-charts-bar-*`, `--a11y-charts-group-*` for the grouped selector, and `--a11y-segmented-bar-chart-*`. A chart-specific value takes precedence over the shared role.
+Each chart also has its own prefix for chart-specific properties: `--a11y-charts-line-*`, `--a11y-charts-bar-*`, `--a11y-charts-group-*` for the grouped selector, and `--a11y-segmented-bar-chart-*`. Where a chart reads a shared role, a chart-specific value takes precedence over it.
 
 ## A project adapter
 
@@ -48,7 +48,7 @@ Keep a small adapter stylesheet in the consuming project that maps its own desig
 }
 ```
 
-The complete adapter is [`demo-gallery/adapt-report-theme.css`](https://github.com/mzebley-aem/a11y-charts/blob/main/demo-gallery/adapt-report-theme.css). Two wrappers with different themes can sit on the same page.
+The complete adapter is [`demo-gallery/adapt-report-theme.css`](https://github.com/mzebley-aem/a11y-charts/blob/main/demo-gallery/adapt-report-theme.css). Two wrappers with different themes can sit on the same page. If the report has line charts, add `--a11y-charts-line-*` properties to the adapter too, because the line chart doesn't read the shared roles.
 
 ## Per-chart overrides
 
@@ -81,7 +81,7 @@ segmentedChart.theme = {
 
 ## Value types
 
-Most properties are ordinary CSS values. The line chart is the exception: ECharts draws it on a canvas, so its sizes and widths, such as `--a11y-charts-line-line-width` and `--a11y-charts-line-axis-label-font-size`, are **unitless numbers** (pixels). Writing `4px` there doesn't work. The default table in [`CHART-THEMING.md`](https://github.com/mzebley-aem/a11y-charts/blob/main/CHART-THEMING.md#token-defaults) lists every property with its default and type.
+Most properties are ordinary CSS values. The line chart is the exception: ECharts draws it on a canvas, so its sizes and widths, such as `--a11y-charts-line-line-width` and `--a11y-charts-line-axis-label-font-size`, are pixel numbers. Write `4` or `4px`. Don't use other units: the chart reads only the number, so `1rem` becomes 1 pixel rather than an error. The default table in [`CHART-THEMING.md`](https://github.com/mzebley-aem/a11y-charts/blob/main/CHART-THEMING.md#token-defaults) lists every property with its default and type.
 
 ## Keep meaning beyond color
 
