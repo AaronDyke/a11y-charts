@@ -19,7 +19,7 @@ gap. On top of that, a few behavior differences need a product decision.
 | Feature parity: comparison (`data-rep-comparison`) | None, but **not in live use** (only in a commented-out block on `home.component.html`) |
 | ADAPT payload → chart adapter | **Not started** (no ADAPT field names appear anywhere in this repo) |
 | Distribution / installability | **Blocked**: every package is `"private": true`, `0.0.0` |
-| Angular SSR compatibility | **Risk**: unguarded `customElements.define` runs on import |
+| Angular SSR compatibility | **Risk**: element classes are evaluated and `customElements.define` runs on import |
 | Unit tests / typecheck | 383 tests pass (bar 150, line 154, segmented 79); typecheck is clean |
 | Real payloads, real consumer, assistive technology (AT) | Not verified |
 
@@ -48,7 +48,7 @@ gap. On top of that, a few behavior differences need a product decision.
 | `dataModalStateChange` | `a11y-bar-chart-data-view-change` `{ open, dataView }` | ✅ Rename in the host |
 | Download CSV | CSV with BOM, formula protection, metadata | ✅ |
 | **Download Excel** | **Removed in `9270c47`**; README says “no workbook export” | ❌ Gap: decide whether to drop it or restore it |
-| Suppression: when `suppressed`, values ≤ 0 read “Suppressed” | Chart-level flag: when `suppressed`, `0` reads “Suppressed” and is redacted from events and getters | ✅ Same rule |
+| Suppression: when `suppressed`, values ≤ 0 read “Suppressed” | Chart-level flag: when `suppressed`, `0` reads “Suppressed” and is redacted from events and getters | ✅ Same rule for nonnegative values. `validateBarData` rejects negatives even under suppression, so the adapter must turn any legacy negative suppression marker into `0` |
 | Total, formatted with the locale | `total`, `locale`, `formatValue` | ✅ The total policy differs (see below) |
 | Descending sort | Chart keeps the supplied order; `prepareBarViewSection` can sort descending | ✅ Adapter |
 | No-data “This Section is Unavailable.” + `noDataDescription` | Localized `empty` message; `emptyMessage` per group view | ✅ |
@@ -62,11 +62,15 @@ gap. On top of that, a few behavior differences need a product decision.
 1. **No distribution path.** The packages can't be installed from a registry. Options:
    publish to GitHub Packages, `npm pack` tarballs committed to ADAPT, or vendor
    `dist/chart.js` + `styles.css`. Pick one before anything else.
-2. **SSR crash risk.** `define.ts` calls `customElements.define` at import time, and the
-   element class extends `HTMLElement`. Importing `/define` from an Angular component
-   would most likely fail in Node SSR. Load it browser-only, for example with
+2. **SSR crash risk.** `define.ts` calls `customElements.define` at import time.
+   `registration.ts` also statically imports the element classes, which extend `HTMLElement`
+   and are evaluated as soon as the module loads. Importing `/define` (or the package root)
+   from an Angular component would most likely fail in Node SSR. A guard inside
+   `registration.ts` alone can't fix this, because the class modules are evaluated first. Load it
+   browser-only, for example with
    `isPlatformBrowser` + `afterNextRender(() => import('@a11y-charts/bar-chart/define'))`,
-   or add an SSR guard in `registration.ts`. Pure helpers from `/core` are already SSR-safe.
+   or add an SSR-safe entry point that defers loading the element modules until
+   `customElements` exists. Pure helpers from `/core` are already SSR-safe.
 3. **No ADAPT adapter.** Someone has to translate `raw.chart.data` (including the
    `data[0].value` nesting), `xAxisValue`/`yAxisValue`/`groupBy`/`filterBy`, glossary
    lookup by fileSpec, `explainTemplate`, `descriptionTemplate`, `noDataDescription`, and
@@ -82,9 +86,10 @@ gap. On top of that, a few behavior differences need a product decision.
 - **Zero rows:** ADAPT hides unsuppressed zero categories from the bar list and prints
   “Categories with values of zero: …”. The new chart keeps zero rows visible.
 - **Total policy:** ADAPT's single data-rep computes total = sum of values (`processChartData`).
-  The new chart prefers an authoritative `total`. Under suppression with no total, it reads
-  “Suppressed” instead of showing an understated sum. Percentages can therefore differ from
-  production for the same payload.
+  The new chart prefers an authoritative `total`. With `suppressed` on, no total, and at
+  least one suppressed (`0`) row, the total reads “Suppressed” instead of showing an
+  understated sum. If there are no zero rows, it still infers the sum (`inferTotal` defaults
+  to `true`). Percentages can therefore differ from production for the same payload.
 - **Explain denominator:** ADAPT's generated text uses the sum of the values. With an
   authoritative total, the new numbers will differ.
 - **Global preference persistence** (see the table above).
@@ -103,7 +108,8 @@ Both were removed in `9270c47`. Update them so nobody plans a migration on stale
 ## Recommended path
 
 1. Decide on Excel, distribution, and the four behavior differences above.
-2. Add an SSR guard (or a documented browser-only loader) and container-query compact
+2. Add an SSR-safe entry point that defers loading the element modules (or document a
+   browser-only dynamic loader; a guard in `registration.ts` alone isn't enough) and a container-query compact
    layout to the single bar chart.
 3. Build the ADAPT adapter + wrappers in ADAPT (`adapt-shared-component-lib`), keeping
    the current inputs. Gate them behind a feature flag per section type.

@@ -250,7 +250,9 @@ launch`) changed two items from the October 22 status:
   `suppressed` is true, every `0` value reads "Suppressed" and is redacted from
   the getter, events, table, and CSV; `null` is always "Not reported". This
   matches the legacy ADAPT data-rep rule (values ≤ 0 read "Suppressed" under the
-  global flag). A true zero can no longer sit beside a suppressed row in the same
+  global flag), but only for nonnegative values. `validateBarData` rejects negative
+  values even under suppression, so the ADAPT adapter must turn any legacy
+  negative suppression marker into `0`. A true zero can no longer sit beside a suppressed row in the same
   chart, so the per-row compatibility decision above is closed in favor of the
   global rule. `prepareBarViewSection` protects aggregates that include a
   suppressed zero.
