@@ -69,6 +69,7 @@ export const ENGLISH_MESSAGES = {
   summaryNoData: 'No category data has been reported.',
   'summaryAllZero.one': 'The single reported category has a value of zero.',
   'summaryAllZero.other': 'All {count} reported categories have a value of zero.',
+  exportFailed: 'The {label} download could not be completed.',
   'zeroValuesNote.one': 'Category with a value of zero: {labels}.',
   'zeroValuesNote.other': 'Categories with values of zero: {labels}.',
   summaryTotal: 'The reported total is {total}.',

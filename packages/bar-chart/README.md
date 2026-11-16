@@ -619,5 +619,39 @@ consistent with their supplied numeric data.
 
 Data views offer Download CSV when `showExport` is enabled. The download exports
 the formatted display values, carries selected context, authored explanation,
-notes, and totals, and begins with a UTF-8 byte-order mark. The package offers
-no workbook export; applications that need one can build it from the semantic model.
+notes, and totals, and begins with a UTF-8 byte-order mark. The package has no
+workbook dependency; hosts add their own downloads with `exportActions`.
+
+## Host export actions (for example Excel)
+
+Set the `exportActions` property to add buttons after Download CSV in the data
+dialog or inline data view. They follow `showExport`, and the group forwards
+them to its chart.
+
+```ts
+import * as XLSX from 'xlsx';
+
+chart.exportActions = [{
+  id: 'xlsx',
+  label: 'Download Excel',
+  run: ({ rows, fileName }) => {
+    const book = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(book, XLSX.utils.aoa_to_sheet(rows), 'Data');
+    XLSX.writeFile(book, `${fileName}.xlsx`);
+  }
+}];
+```
+
+`run` receives `chartTitle`, a file-name-safe `fileName` (no extension),
+`rows` (the CSV's cells as plain text: metadata, header, one row per category,
+total), `csv` (the CSV text without the byte-order mark), and a copy of the
+semantic `model`. Suppressed values are already redacted in all of them.
+`rows` holds display text such as `"1,234"`; use `model.rows[].value` and
+`percentage` for numeric cells. Cells are not formula-escaped, so writers that
+evaluate formulas must escape them (SheetJS `aoa_to_sheet` keeps strings as
+text). `buildBarExportRows(model, options)` builds the same rows in Node from
+`/core`.
+
+Actions need a unique non-empty `id` and `label` and a `run` function; others
+are dropped. If `run` throws or rejects, the chart announces the localized
+`exportFailed` message and fires `a11y-bar-chart-error` with code `exportFailed`.

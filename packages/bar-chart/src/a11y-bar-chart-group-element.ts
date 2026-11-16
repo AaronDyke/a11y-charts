@@ -1,4 +1,4 @@
-import type { A11yBarChartConfig, A11yBarChartDatum, A11yBarChartTheme, A11yBarChartValueFormatter } from './model.js';
+import type { A11yBarChartConfig, A11yBarChartDatum, A11yBarChartExportAction, A11yBarChartTheme, A11yBarChartValueFormatter } from './model.js';
 import type { MessageDictionary } from './messages.js';
 import { validateBarData, validateBarTotal } from './validation.js';
 import { renderRichContent } from './rich-content.js';
@@ -34,6 +34,7 @@ export class A11yBarChartGroupElement extends HTMLElement {
   #groupMessages: A11yBarChartGroupMessages = {};
   #theme: A11yBarChartTheme = {};
   #formatValue: A11yBarChartValueFormatter | undefined;
+  #exportActions: A11yBarChartExportAction[] = [];
   #expanded = new Map<string, boolean>();
   #error = false;
   #root?: HTMLElement;
@@ -84,6 +85,9 @@ export class A11yBarChartGroupElement extends HTMLElement {
   set theme(value: A11yBarChartTheme) { this.#theme = value && typeof value === 'object' ? { ...value } : {}; this.#syncChart(); }
   get formatValue(): A11yBarChartValueFormatter | undefined { return this.#formatValue; }
   set formatValue(value: A11yBarChartValueFormatter | undefined) { this.#formatValue = typeof value === 'function' ? value : undefined; this.#syncChart(); }
+  /** Passed to the chart; see `A11yBarChartElement.exportActions`. */
+  get exportActions(): A11yBarChartExportAction[] { return this.#exportActions.map((action) => ({ ...action })); }
+  set exportActions(value: A11yBarChartExportAction[] | null | undefined) { this.#exportActions = Array.isArray(value) ? [...value] : []; this.#syncChart(); }
 
   connectedCallback(): void {
     upgradeOwnProperties(this);
@@ -250,6 +254,7 @@ export class A11yBarChartGroupElement extends HTMLElement {
     chart.messages = { ...this.#messages, ...(view.emptyMessage !== undefined ? { empty: view.emptyMessage } : {}) };
     chart.theme = { ...this.#theme };
     chart.formatValue = this.#formatValue;
+    chart.exportActions = this.#exportActions;
     if ('explanation' in chart) chart.explanation = view.explanation ?? '';
   }
 

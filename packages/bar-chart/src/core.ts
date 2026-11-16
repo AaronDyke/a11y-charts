@@ -4,7 +4,7 @@ export { ENGLISH_MESSAGES, ENGLISH_BAR_CHART_MESSAGES, formatMessage, message, r
 export type { MessageDictionary, MessageKey } from './messages.js';
 export { validateBarData, validateBarTotal } from './validation.js';
 export { buildBarModel } from './semantic-model.js';
-export { buildBarCsv } from './csv.js';
+export { buildBarCsv, buildBarExportRows } from './csv.js';
 export type { BarCsvOptions } from './csv.js';
 export { themeToCssVariables } from './theme.js';
 export type { A11yBarChartThemeVariable } from './theme.js';

@@ -214,3 +214,25 @@ export interface ValidationSuccess<T> {
 export type BarValidationResult = ValidationSuccess<A11yBarChartDatum[]> | ValidationFailure;
 
 import type { MessageDictionary } from './messages.js';
+
+/** What a host export action receives when its button is activated. */
+export interface A11yBarChartExportContext {
+  chartTitle: string;
+  /** File-name-safe version of the title, without an extension. */
+  fileName: string;
+  /** Same cells as the CSV download (metadata, header, categories, total) as plain text. */
+  rows: string[][];
+  /** The CSV text the built-in download uses, without the byte-order mark. */
+  csv: string;
+  /** A copy of the semantic model, with suppressed values already redacted. */
+  model: A11yBarChartSemanticModel;
+}
+
+/** A host-provided download, such as an Excel workbook, shown next to Download CSV. */
+export interface A11yBarChartExportAction {
+  /** Unique per chart; also used as the button's focus key. */
+  id: string;
+  /** Visible button text. */
+  label: string;
+  run: (context: A11yBarChartExportContext) => void | Promise<void>;
+}

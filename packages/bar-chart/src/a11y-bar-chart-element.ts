@@ -1,13 +1,15 @@
 import type {
   A11yBarChartConfig,
   A11yBarChartDatum,
+  A11yBarChartExportAction,
+  A11yBarChartExportContext,
   A11yBarChartRow,
   A11yBarChartSemanticModel,
   A11yBarChartTheme,
   A11yBarChartValueFormatter,
   ResolvedA11yBarChartConfig
 } from './model.js';
-import { buildBarCsv } from './csv.js';
+import { buildBarCsv, buildBarExportRows, type BarCsvOptions } from './csv.js';
 import { ENGLISH_MESSAGES, isPluralVariantKey, message, type MessageDictionary, type MessageKey } from './messages.js';
 import { resolveConfig } from './config.js';
 import { buildBarModel } from './semantic-model.js';
@@ -124,6 +126,7 @@ export class A11yBarChartElement extends HTMLElement {
   #dataNote = '';
   #theme: A11yBarChartTheme = {};
   #formatValue: A11yBarChartValueFormatter | undefined;
+  #exportActions: A11yBarChartExportAction[] = [];
   #glossaryOpen = false;
   #explanationOpen = false;
   #inlineDataOpen = false;
@@ -228,6 +231,20 @@ export class A11yBarChartElement extends HTMLElement {
   set theme(value: A11yBarChartTheme) { this.#theme = value && typeof value === 'object' ? { ...value } : {}; this.#queueRender(); }
   get formatValue(): A11yBarChartValueFormatter | undefined { return this.#formatValue; }
   set formatValue(value: A11yBarChartValueFormatter | undefined) { this.#formatValue = typeof value === 'function' ? value : undefined; this.#queueRender(); }
+  /** Host downloads (for example an Excel workbook) shown next to Download CSV when `showExport` is on. */
+  get exportActions(): A11yBarChartExportAction[] { return this.#exportActions.map((action) => ({ ...action })); }
+  set exportActions(value: A11yBarChartExportAction[] | null | undefined) {
+    const ids = new Set<string>();
+    // Invalid entries and repeated ids are dropped so buttons and focus keys stay unique.
+    this.#exportActions = (Array.isArray(value) ? value : []).filter((action): action is A11yBarChartExportAction => {
+      if (!action || typeof action !== 'object' || typeof action.run !== 'function') return false;
+      if (typeof action.id !== 'string' || !action.id.trim() || typeof action.label !== 'string' || !action.label.trim()) return false;
+      if (ids.has(action.id)) return false;
+      ids.add(action.id);
+      return true;
+    }).map(({ id, label, run }) => ({ id, label, run }));
+    this.#queueRender();
+  }
 
   connectedCallback(): void {
     upgradeOwnProperties(this);
@@ -979,17 +996,8 @@ export class A11yBarChartElement extends HTMLElement {
     button.dataset.focusKey = 'export';
     button.textContent = this.#text('exportCsv');
     button.addEventListener('click', () => {
-      const metadata = {
-        messages: { ...ENGLISH_MESSAGES, ...this.#messages },
-        locale: this.#resolvedConfig().locale,
-        contextText: richContentToText(this.#context),
-        explanationText: richContentToText(this.#authoredExplanation),
-        dataNoteText: richContentToText(this.#dataNote),
-        suppressed: this.suppressed,
-        chartTitle: this.chartTitle
-      };
       // The byte-order mark lets spreadsheet applications detect UTF-8.
-      const blob = new Blob([CSV_BYTE_ORDER_MARK + buildBarCsv(model, metadata)], { type: 'text/csv;charset=utf-8' });
+      const blob = new Blob([CSV_BYTE_ORDER_MARK + buildBarCsv(model, this.#exportOptions())], { type: 'text/csv;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
@@ -998,7 +1006,46 @@ export class A11yBarChartElement extends HTMLElement {
       window.setTimeout(() => URL.revokeObjectURL(url), 0);
     });
     buttons.append(button);
+    for (const action of this.#exportActions) {
+      const extra = document.createElement('button');
+      extra.type = 'button';
+      extra.className = 'a11y-bar-chart__action';
+      extra.dataset.focusKey = `export:${action.id}`;
+      extra.textContent = action.label;
+      extra.addEventListener('click', () => { void this.#runExportAction(action, model); });
+      buttons.append(extra);
+    }
     return buttons;
+  }
+
+  #exportOptions(): BarCsvOptions {
+    return {
+      messages: { ...ENGLISH_MESSAGES, ...this.#messages },
+      locale: this.#resolvedConfig().locale,
+      contextText: richContentToText(this.#context),
+      explanationText: richContentToText(this.#authoredExplanation),
+      dataNoteText: richContentToText(this.#dataNote),
+      suppressed: this.suppressed,
+      chartTitle: this.chartTitle
+    };
+  }
+
+  async #runExportAction(action: A11yBarChartExportAction, model: A11yBarChartSemanticModel): Promise<void> {
+    const options = this.#exportOptions();
+    const context: A11yBarChartExportContext = {
+      chartTitle: this.chartTitle,
+      fileName: this.#safeId(this.chartTitle),
+      rows: buildBarExportRows(model, options),
+      csv: buildBarCsv(model, options),
+      model: copyModel(model)
+    };
+    try {
+      await action.run(context);
+    } catch {
+      const message = this.#text('exportFailed', { label: action.label });
+      this.#announce(message);
+      this.#dispatchError('exportFailed', message);
+    }
   }
 
   #message(message: string, error = false): HTMLElement {
