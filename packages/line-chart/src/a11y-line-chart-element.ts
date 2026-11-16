@@ -39,6 +39,7 @@ import { CSV_BYTE_ORDER_MARK, fractionToWholePercent, wholePercentToFraction } f
 import { renderLineRichContent, lineRichContentToText } from './rich-content.js';
 import { ModalController } from '../../chart-core/src/ui/modal-controller.js';
 import { setDisclosure, toggleDisclosure } from '../../chart-core/src/ui/disclosure.js';
+import { upgradeOwnProperties } from '../../chart-core/src/ui/upgrade-properties.js';
 
 const OWNED_ROOT_ATTRIBUTE = 'data-a11y-line-chart-owned';
 let nextInstanceId = 0;
@@ -322,7 +323,10 @@ export class A11yLineChartElement extends HTMLElement {
   get autoPerPointMaxWidth(): boolean { return this.#resolvedConfig().autoPerPointMaxWidth; }
   set autoPerPointMaxWidth(value: boolean) { this.#setConfigField('autoPerPointMaxWidth', value); }
 
-  connectedCallback(): void { this.#queueRender(); }
+  connectedCallback(): void {
+    upgradeOwnProperties(this);
+    this.#queueRender();
+  }
 
   disconnectedCallback(): void {
     this.#lifecycleGeneration++;

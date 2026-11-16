@@ -4,6 +4,7 @@ import { validateBarData, validateBarTotal } from './validation.js';
 import { renderRichContent } from './rich-content.js';
 import type { A11yBarChartElement } from './a11y-bar-chart-element.js';
 import type { A11yBarChartGroupMessages, A11yBarChartGroupSelectionChangeDetail, A11yBarChartPreparedView, A11yBarChartViewSection } from './grouped-model.js';
+import { upgradeOwnProperties } from '../../chart-core/src/ui/upgrade-properties.js';
 
 const DEFAULT_GROUP_MESSAGES: Required<A11yBarChartGroupMessages> = {
   selectorLabel: 'Choose a population view',
@@ -84,7 +85,10 @@ export class A11yBarChartGroupElement extends HTMLElement {
   get formatValue(): A11yBarChartValueFormatter | undefined { return this.#formatValue; }
   set formatValue(value: A11yBarChartValueFormatter | undefined) { this.#formatValue = typeof value === 'function' ? value : undefined; this.#syncChart(); }
 
-  connectedCallback(): void { this.#render(); }
+  connectedCallback(): void {
+    upgradeOwnProperties(this);
+    this.#render();
+  }
 
   #validGroupMessages(value: unknown): A11yBarChartGroupMessages {
     if (!value || typeof value !== 'object' || Array.isArray(value)) return {};

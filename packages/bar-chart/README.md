@@ -70,8 +70,9 @@ experiment and includes an **Explore hover and focus cards** switch.
   Close buttons or other keyboard stops, matching the line chart cards.
   Leaving a pinned category with the keyboard closes its card. Escape on the
   bar retains focus and does not reopen the preview.
-- Cards float near their category on wide screens and join the reading flow
-  at 36rem and below. When a wide-screen card cannot fit above or below its
+- Cards float near their category on wide charts and join the reading flow
+  when the chart itself is 36rem wide or less, so a chart in a narrow grid
+  column on a wide screen also uses the compact layout. When a wide card cannot fit above or below its
   category in the viewport, it also joins the reading flow.
 
 These are nonmodal disclosure regions, with native toggle buttons exposing
@@ -379,6 +380,56 @@ Additional message keys: `targetHeader`, `csvTargetHeader`, `targetUnavailable`,
 `warningTargetScaleUnavailable` (`{label}`), and `validationInvalidTarget` (`{id}`).
 The French and Spanish demo catalogs include these keys. The Reporting status
 example demonstrates range, numeric, and missing-value comparisons.
+
+## Layout and sizing
+
+`<a11y-bar-chart>` and `<a11y-bar-chart-group>` are CSS size containers, so
+their compact layout follows the chart's own width (36rem for the chart, 42rem
+for the group) rather than the viewport. The data dialog still follows the
+viewport because it covers the screen.
+
+Size containment means a chart does not grow to fit its content. In normal
+block flow and in grid or `flex: 1` cells it fills the space it is given. In a
+shrink-to-fit parent (a plain `display: flex` row with default item sizing,
+`inline-block`, or an absolutely positioned box) it falls back to 20rem, the
+320 px reflow width. Give the chart, or the wrapper element around it, a width
+there, for example `width: 100%` or `flex: 1 1 0%; min-width: 0`.
+
+## Server rendering (SSR) and prerendering
+
+The package root and `/define` evaluate classes that extend `HTMLElement`, so
+importing them in Node throws `ReferenceError: HTMLElement is not defined`. Use
+the `/loader` entry from code that also runs on the server:
+
+```ts
+import { loadA11yBarChart } from '@mzebley-aem/bar-chart/loader';
+
+await loadA11yBarChart(); // true in a browser once `<a11y-bar-chart>` and `<a11y-bar-chart-group>` are registered; false on the server
+```
+
+`/loader` has no static imports. In a browser it lazily imports `/define`, so it
+registers the same constructors the package root exports; repeated calls share
+one load. Outside a browser it resolves to `false` and loads nothing. The build
+checks this in a DOM-free Node process. Type-only imports from the package root
+(`import type`) are erased and stay safe.
+
+In Angular (including SSR and prerendering), call it after the first browser render:
+
+```ts
+import { Component, afterNextRender } from '@angular/core';
+import { loadA11yBarChart } from '@mzebley-aem/bar-chart/loader';
+
+@Component({ /* ... */ })
+export class ReportChartComponent {
+  constructor() {
+    afterNextRender(() => { void loadA11yBarChart(); });
+  }
+}
+```
+
+Keep `CUSTOM_ELEMENTS_SCHEMA` on the module or component. The tag renders as an
+empty element on the server and upgrades once the loader runs. Properties Angular sets
+before then (such as `[data]` bindings) are applied when the element upgrades.
 
 ## Server helpers and CSV metadata
 

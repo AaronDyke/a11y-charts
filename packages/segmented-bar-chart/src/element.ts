@@ -24,6 +24,7 @@ import {
   renderSafeHtml,
   safeHtmlToText,
 } from '../../chart-core/src/content.js';
+import { upgradeOwnProperties } from '../../chart-core/src/ui/upgrade-properties.js';
 let serial = 0;
 const DATA_VIEW_VALUES = ['dialog', 'inline', 'none'];
 const PERCENT_SCALE_VALUES = ['whole', 'fraction'];
@@ -226,6 +227,7 @@ export class A11ySegmentedBarChartElement extends HTMLElement {
     else this.removeAttribute('href');
   }
   connectedCallback() {
+    upgradeOwnProperties(this);
     if (!this.#root.isConnected)
       this.append(this.#root, this.#dialogLayer, this.#live);
     this.#queue();

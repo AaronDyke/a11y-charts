@@ -254,7 +254,9 @@ as `contextText` and `dataNoteText` for server exports. These fields take
 precedence even when empty. HTML `context`/`dataNote` conversion requires a browser
 DOM; server callers receive an explicit error rather than different parsing.
 Browser elements and registration continue to use the normal package and
-`/define` entries.
+`/define` entries. Code that also runs on the server (Angular SSR, prerendering)
+should register through each package's `/loader` entry instead, which has no
+static imports and does nothing outside a browser.
 
 
 ## Shared source, standalone outputs

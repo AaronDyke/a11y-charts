@@ -96,3 +96,22 @@ If a focused category becomes grouped during an update, keyboard focus moves to
 Other's detail button. If the group disappears, focus returns to a surviving
 member or the chart heading. Compact charts with navigation and details disabled
 keep the whole-card link; provide complete member data at the linked destination.
+
+## Server rendering (SSR) and prerendering
+
+The package root and `/define` evaluate classes that extend `HTMLElement`, so
+importing them in Node throws `ReferenceError: HTMLElement is not defined`. Use
+the `/loader` entry from code that also runs on the server:
+
+```ts
+import { loadA11ySegmentedBarChart } from '@mzebley-aem/segmented-bar-chart/loader';
+
+await loadA11ySegmentedBarChart(); // true in a browser once `<a11y-segmented-bar-chart>` are registered; false on the server
+```
+
+`/loader` has no static imports. In a browser it lazily imports `/define`, so it
+registers the same constructors the package root exports; repeated calls share
+one load. Outside a browser it resolves to `false` and loads nothing. The build
+checks this in a DOM-free Node process. Type-only imports from the package root
+(`import type`) are erased and stay safe.
+

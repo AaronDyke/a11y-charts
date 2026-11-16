@@ -20,6 +20,7 @@ import { createCardContent } from '../../chart-core/src/ui/card-content.js';
 import { ModalController, type ModalOpenResult } from '../../chart-core/src/ui/modal-controller.js';
 import { setDisclosure } from '../../chart-core/src/ui/disclosure.js';
 import { CSV_BYTE_ORDER_MARK } from '../../chart-core/src/csv.js';
+import { upgradeOwnProperties } from '../../chart-core/src/ui/upgrade-properties.js';
 
 export interface A11yBarChartErrorDetail {
   code: string;
@@ -217,7 +218,10 @@ export class A11yBarChartElement extends HTMLElement {
   get formatValue(): A11yBarChartValueFormatter | undefined { return this.#formatValue; }
   set formatValue(value: A11yBarChartValueFormatter | undefined) { this.#formatValue = typeof value === 'function' ? value : undefined; this.#queueRender(); }
 
-  connectedCallback(): void { this.#queueRender(); }
+  connectedCallback(): void {
+    upgradeOwnProperties(this);
+    this.#queueRender();
+  }
 
   disconnectedCallback(): void {
     this.#details?.destroy();

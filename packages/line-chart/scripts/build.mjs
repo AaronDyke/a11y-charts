@@ -27,6 +27,14 @@ await writeFile(resolve(dist, 'define.js'), `export { A11Y_LINE_CHART_TAG_NAME, 
 import { defineA11yLineChart } from './index.js';
 defineA11yLineChart();
 `);
+// SSR-safe loader: no static imports, so Node can import it without a DOM.
+await writeFile(resolve(dist, 'loader.js'), `let pending;
+export function loadA11yLineChart() {
+  if (typeof customElements === 'undefined' || typeof HTMLElement === 'undefined') return Promise.resolve(false);
+  pending ??= import('./define.js').then(() => true, (error) => { pending = undefined; throw error; });
+  return pending;
+}
+`);
 await build(createStylesConfig({ root }));
 const licenses = [
   ['node_modules/echarts/LICENSE', 'ECHARTS-LICENSE'],

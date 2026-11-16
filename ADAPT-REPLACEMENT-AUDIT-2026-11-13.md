@@ -136,5 +136,11 @@ sign-off** above.
 | Zero-value rows | **New library option, off by default** | Add an opt-in option that removes unsuppressed zero-value categories from the bars and adds a sentence naming them (ADAPT's "Categories with values of zero: …"). The data table and CSV keep every row. Suppressed rows are never hidden. The ADAPT adapter turns the option on. |
 | Explain/Glossary preference persistence | **New library option** | Add an opt-in storage key so a consumer can persist the Explain and Glossary open state across charts and page loads. Storage access is wrapped so a blocked or empty `localStorage` falls back to the default. No storage is used unless the key is set. |
 
-Still open: visual (USWDS) token mapping, and the container-query compact layout for the
-single bar chart (agreed as needed; no product decision required).
+Still open: visual (USWDS) token mapping.
+
+Done since: the SSR-safe `/loader` entry (with pre-upgrade property handling) and the
+container-query compact layout for the single bar chart. Note for the ADAPT wrappers:
+`grid-view.component.html` places `countBreakdown` and `barChartGrouped` data reps in a
+`display-flex` section without `width-full`. Size-contained charts don't grow to fit
+content, so those wrappers must stretch (`:host { display: block; flex: 1 1 0%; min-width: 0; }`
+or `width-full`); otherwise they fall back to 20rem.
