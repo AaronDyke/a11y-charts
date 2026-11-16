@@ -84,7 +84,8 @@ gap. On top of that, a few behavior differences need a product decision.
 ## Behavior differences that need sign-off
 
 - **Zero rows:** ADAPT hides unsuppressed zero categories from the bar list and prints
-  “Categories with values of zero: …”. The new chart keeps zero rows visible.
+  “Categories with values of zero: …”. The new chart keeps zero rows visible by default;
+  `showZeroValues: false` (added November 16, 2026) reproduces ADAPT's behavior.
 - **Total policy:** ADAPT's single data-rep computes total = sum of values (`processChartData`).
   The new chart prefers an authoritative `total`. With `suppressed` on, no total, and at
   least one suppressed (`0`) row, the total reads “Suppressed” instead of showing an
@@ -138,7 +139,7 @@ sign-off** above.
 
 Still open: visual (USWDS) token mapping.
 
-Done since: the SSR-safe `/loader` entry (with pre-upgrade property handling) and the
+Done since: `showZeroValues: false` (the ADAPT adapter should set it), the SSR-safe `/loader` entry (with pre-upgrade property handling) and the
 container-query compact layout for the single bar chart. Note for the ADAPT wrappers:
 `grid-view.component.html` places `countBreakdown` and `barChartGrouped` data reps in a
 `display-flex` section without `width-full`. Size-contained charts don't grow to fit

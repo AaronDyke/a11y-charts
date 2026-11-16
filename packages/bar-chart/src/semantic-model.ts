@@ -171,5 +171,11 @@ export function buildBarModel(data: readonly A11yBarChartDatum[], options: BarMo
   if (total !== null) explanation.push(msg('explanationTotal', { total: totalText }));
   else explanation.push(msg('explanationTotalUnavailable', { total: totalText }));
   explanation.push(...rows.map((row) => row.narrative));
-  return { rows, total, totalText, summary, explanation, indicators, warnings, hasMissingValues };
+  // Suppressed zeros have status 'suppressed', so only genuinely reported zeros are ever hidden.
+  const hiddenRows = config.showZeroValues ? [] : rows.filter((row) => row.status === 'reported' && row.value === 0);
+  const zeroValuesNote = hiddenRows.length
+    ? msg('zeroValuesNote', { count: hiddenRows.length, labels: listFormatter.format(hiddenRows.map((row) => row.label)) })
+    : '';
+  return { rows, total, totalText, summary, explanation, indicators, warnings, hasMissingValues,
+    hiddenRowIds: hiddenRows.map((row) => row.id), zeroValuesNote };
 }

@@ -8,7 +8,7 @@ import type {
   ResolvedA11yBarChartConfig
 } from './model.js';
 import { buildBarCsv } from './csv.js';
-import { ENGLISH_MESSAGES, message, type MessageDictionary, type MessageKey } from './messages.js';
+import { ENGLISH_MESSAGES, isPluralVariantKey, message, type MessageDictionary, type MessageKey } from './messages.js';
 import { resolveConfig } from './config.js';
 import { buildBarModel } from './semantic-model.js';
 import { validateBarData } from './validation.js';
@@ -93,7 +93,8 @@ function copyModel(model: A11yBarChartSemanticModel): A11yBarChartSemanticModel 
     rows: model.rows.map((row) => ({ ...row, target: copyTarget(row.target) })),
     explanation: [...model.explanation],
     indicators: [...model.indicators],
-    warnings: [...model.warnings]
+    warnings: [...model.warnings],
+    hiddenRowIds: [...model.hiddenRowIds]
   };
 }
 
@@ -243,7 +244,7 @@ export class A11yBarChartElement extends HTMLElement {
     const valid: Partial<Record<MessageKey, string>> = {};
     for (const [key, value] of Object.entries(input)) {
       const isCatalogKey = Object.prototype.hasOwnProperty.call(ENGLISH_MESSAGES, key);
-      const isPluralVariant = /^(summaryAllZero|announcementDataUpdated)\.(zero|one|two|few|many|other)$/.test(key);
+      const isPluralVariant = isPluralVariantKey(key);
       if ((isCatalogKey || isPluralVariant) && typeof value === 'string' && value.trim()) valid[key as MessageKey] = value;
     }
     return valid;
@@ -441,13 +442,17 @@ export class A11yBarChartElement extends HTMLElement {
         scale.textContent = this.#text('scaleShared', { maximum });
         root.append(scale);
       }
-      root.append(this.#rows(model, config));
+      // Every row can be hidden when all values are zero; the summary and zero note still describe them.
+      if (model.rows.length > model.hiddenRowIds.length) root.append(this.#rows(model, config));
       if (config.showTotal) {
         const total = document.createElement('div');
         total.className = 'a11y-bar-chart__total';
         total.append(Object.assign(document.createElement('span'), { textContent: this.#text('total') }));
         total.append(Object.assign(document.createElement('span'), { textContent: model.totalText }));
         root.append(total);
+      }
+      if (model.zeroValuesNote) {
+        root.append(Object.assign(document.createElement('p'), { className: 'a11y-bar-chart__zero-note', textContent: model.zeroValuesNote }));
       }
       if (model.warnings.length) root.append(this.#message(model.warnings.join(' ')));
       if (config.dataView !== 'none') root.append(this.#backgroundData(model));
@@ -567,7 +572,11 @@ export class A11yBarChartElement extends HTMLElement {
     const list = document.createElement('ul');
     list.className = 'a11y-bar-chart__rows';
     list.setAttribute('aria-label', this.chartTitle);
+    const hidden = new Set(model.hiddenRowIds);
+    const firstShown = model.rows.findIndex((row) => !hidden.has(row.id));
     model.rows.forEach((row, index) => {
+      // Keep the model index so ids and details stay aligned with the data table and events.
+      if (hidden.has(row.id)) return;
       const item = document.createElement('li');
       item.className = 'a11y-bar-chart__row';
       const heading = document.createElement('div');
@@ -596,7 +605,7 @@ export class A11yBarChartElement extends HTMLElement {
         value.id = `${this.instanceId}-details-trigger-${index}`;
         value.classList.add('a11y-bar-chart__details-trigger');
         value.dataset.focusKey = `details:${row.id}`;
-        if (index === 0) value.setAttribute('aria-describedby', `${this.instanceId}-details-help`);
+        if (index === firstShown) value.setAttribute('aria-describedby', `${this.instanceId}-details-help`);
         value.setAttribute('aria-expanded', 'false');
         value.setAttribute('aria-pressed', 'false');
         value.setAttribute('aria-controls', `${this.instanceId}-details-${index}`);

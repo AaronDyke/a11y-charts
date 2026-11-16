@@ -165,7 +165,8 @@ npm run demo:build --prefix packages/bar-chart
 `exportCsv`, `scaleLargest`, `scalePopulationShare`, `missingValue`,
 `suppressedValue`, `suppressionNote`, `noDefinitions`, `glossary`, `hideGlossary`, `noContext`, `summaryNoData`,
 `summaryAllZero.zero`, `summaryAllZero.one`, `summaryAllZero.two`,
-`summaryAllZero.few`, `summaryAllZero.many`, `summaryAllZero.other`, `summaryTotal`,
+`summaryAllZero.few`, `summaryAllZero.many`, `summaryAllZero.other`,
+`zeroValuesNote.one`, `zeroValuesNote.other` (and the other plural forms), `summaryTotal`,
 `summaryCategoryShare`, `summaryCategoryValue`, `summaryLargestCategory`,
 `summaryLargestCategoryShare`, `summaryTiedLargestCategories`,
 `summaryTiedLargestCategoriesShare`, `summaryReportedCategory`,
@@ -199,7 +200,18 @@ create invisible keyboard stops.
 
 `showSummary`, `showContext`, `showActions`, `showExplanation`,
 `showGlossary`, and `showExport` default to `true`; `showCounts`,
-`showPercentages`, and `showTotal` also default to `true`. The
+`showPercentages`, and `showTotal` also default to `true`.
+
+`showZeroValues` defaults to `true`. Set it to `false` for long category lists
+where many values are zero: categories with a reported value of zero leave the
+bar list, and a sentence after the total names them ("Categories with values
+of zero: Beta and Delta."; message `zeroValuesNote`, `{labels}` and `{count}`).
+The data table, CSV, explanation, getters, and events still include every
+row, and the semantic model lists the hidden ids in `hiddenRowIds`. Zeros that
+read as Suppressed (chart-level `suppressed`) are never hidden. The option
+passes through `<a11y-bar-chart-group>` config to its chart.
+
+The
 `explanationExpanded` and `glossaryExpanded` options set disclosure preferences
 when their input values change. Otherwise, user-opened state survives data and
 unrelated configuration updates.

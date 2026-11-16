@@ -184,6 +184,7 @@ a11y-bar-chart {
 .a11y-bar-chart__definition { margin: 0.5rem 0 0 0.75rem; padding-inline-start: 0.75rem; border-inline-start: 3px solid var(--a11y-bar-chart-border); overflow-wrap: anywhere; }
 .a11y-bar-chart__definition a,
 .a11y-bar-chart__context a { overflow-wrap: anywhere; }
+.a11y-bar-chart__zero-note { margin-block: 0.75rem 0; color: var(--a11y-bar-chart-muted); font-size: 0.875rem; overflow-wrap: anywhere; }
 .a11y-bar-chart__total { display: flex; justify-content: var(--a11y-bar-chart-total-justify); gap: var(--a11y-bar-chart-total-gap); margin-block-start: 1rem; padding-block-start: 0.75rem; border-block-start: var(--a11y-bar-chart-total-border-width) solid var(--a11y-bar-chart-border); font-size: var(--a11y-bar-chart-total-font-size); font-weight: 700; }
 .a11y-bar-chart__total > :first-child::after { content: var(--a11y-charts-bar-total-separator, ''); white-space: pre; }
 .a11y-bar-chart__total > :first-child { font-weight: var(--a11y-bar-chart-total-label-font-weight); }

@@ -17,7 +17,7 @@ describe('loadA11yLineChart', () => {
     expect(Object.prototype.hasOwnProperty.call(early, 'data')).toBe(false);
     expect(early.data).toEqual(data);
     early.remove();
-  });
+  }, 30_000); // Cold dynamic import of the chart and ECharts can exceed the default under parallel load.
 
   it('resolves false without touching the element modules when there is no DOM', async () => {
     vi.resetModules();

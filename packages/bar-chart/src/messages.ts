@@ -69,6 +69,8 @@ export const ENGLISH_MESSAGES = {
   summaryNoData: 'No category data has been reported.',
   'summaryAllZero.one': 'The single reported category has a value of zero.',
   'summaryAllZero.other': 'All {count} reported categories have a value of zero.',
+  'zeroValuesNote.one': 'Category with a value of zero: {labels}.',
+  'zeroValuesNote.other': 'Categories with values of zero: {labels}.',
   summaryTotal: 'The reported total is {total}.',
   summaryCategoryShare: '{label} accounts for {percentage} of the reported total.',
   summaryCategoryValue: '{label}: {value}.',
@@ -108,7 +110,11 @@ export const ENGLISH_MESSAGES = {
 export const ENGLISH_BAR_CHART_MESSAGES = ENGLISH_MESSAGES;
 
 type CatalogKey = keyof typeof ENGLISH_MESSAGES;
-type PluralBaseKey = 'summaryAllZero' | 'announcementDataUpdated';
+const PLURAL_BASE_KEYS = ['summaryAllZero', 'announcementDataUpdated', 'zeroValuesNote'] as const;
+type PluralBaseKey = typeof PLURAL_BASE_KEYS[number];
+const PLURAL_VARIANT_PATTERN = new RegExp(`^(${PLURAL_BASE_KEYS.join('|')})\\.(zero|one|two|few|many|other)$`);
+/** True for plural variant keys such as `summaryAllZero.one`. */
+export function isPluralVariantKey(key: string): boolean { return PLURAL_VARIANT_PATTERN.test(key); }
 type PluralCategory = 'zero' | 'one' | 'two' | 'few' | 'many' | 'other';
 export type MessageKey = CatalogKey | PluralBaseKey | `${PluralBaseKey}.${PluralCategory}`;
 export type MessageDictionary = Partial<Record<MessageKey, string>>;
@@ -117,7 +123,7 @@ export function resolveMessages(messages?: MessageDictionary | null): Record<Cat
   const result = { ...ENGLISH_MESSAGES } as Record<CatalogKey, string>;
   if (messages && typeof messages === 'object') {
     for (const [key, value] of Object.entries(messages)) {
-      if (typeof value === 'string' && value.trim() && (Object.prototype.hasOwnProperty.call(ENGLISH_MESSAGES, key) || /^(summaryAllZero|announcementDataUpdated)\.(zero|one|two|few|many|other)$/.test(key))) {
+      if (typeof value === 'string' && value.trim() && (Object.prototype.hasOwnProperty.call(ENGLISH_MESSAGES, key) || isPluralVariantKey(key))) {
         (result as Record<string, string>)[key] = value;
       }
     }
@@ -149,7 +155,7 @@ export function createMessageResolver(
   const canonicalLocale = safeLocale(locale);
   let selectPlural: ReturnType<typeof createPluralSelector> | undefined;
   return (key, params = {}) => {
-    const isPluralBase = key === 'summaryAllZero' || key === 'announcementDataUpdated';
+    const isPluralBase = (PLURAL_BASE_KEYS as readonly string[]).includes(key);
     let template: string;
     if (typeof key === 'string' && key.includes('.')) {
       const [base] = key.split('.') as [PluralBaseKey, PluralCategory];

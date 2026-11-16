@@ -44,6 +44,12 @@ export interface A11yBarChartConfig {
   showCounts?: boolean;
   showPercentages?: boolean;
   showTotal?: boolean;
+  /**
+   * Show bars for categories whose reported value is zero. Default true. When false, unsuppressed
+   * zero categories leave the bar list and are named in a sentence after the total instead; the
+   * data table, CSV, explanation, and events still include every row. Suppressed rows always show.
+   */
+  showZeroValues?: boolean;
   /** Experimental category cards on hover, focus, or activation. Default false. */
   showDetails?: boolean;
   /** Optional outcome encoding for comparable bars with targets. Default none. */
@@ -74,6 +80,7 @@ export interface ResolvedA11yBarChartConfig {
   showCounts: boolean;
   showPercentages: boolean;
   showTotal: boolean;
+  showZeroValues: boolean;
   showDetails: boolean;
   targetStyle: A11yBarChartTargetStyle;
   positiveDirection: 'above' | 'below';
@@ -168,6 +175,10 @@ export interface A11yBarChartSemanticModel {
   indicators: string[];
   warnings: string[];
   hasMissingValues: boolean;
+  /** Ids of rows left out of the bar list because `showZeroValues` is false. */
+  hiddenRowIds: string[];
+  /** Sentence naming the hidden zero-value categories, or '' when none are hidden. */
+  zeroValuesNote: string;
 }
 
 export interface BarModelOptions {

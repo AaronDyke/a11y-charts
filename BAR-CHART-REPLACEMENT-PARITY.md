@@ -162,6 +162,8 @@ scale parity; this changes quantitative interpretation, not only styling.
 keeping them in its table and no-data narrative. The new chart deliberately
 retains zero rows. Recommend retaining this clearer distinction between zero
 and absent data. Record it as an intentional difference in the swap review.
+Update (November 16, 2026): `config.showZeroValues = false` now reproduces the
+old behavior for hosts that want it, keeping every row in the table and CSV.
 
 **Authored language:** supplied descriptions and Explain templates can contain
 domain meaning beyond generated summaries. Preserve them via explicit content
