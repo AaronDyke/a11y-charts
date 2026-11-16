@@ -104,6 +104,38 @@ describe('disclosureStorageKey', () => {
     expect(expanded(chart, 'explain')).toBe(true);
   });
 
+  it('falls back to the configured defaults for fields the new key has not saved', async () => {
+    localStorage.setItem('full', JSON.stringify({ explanationExpanded: true, glossaryExpanded: true }));
+    const chart = await makeChart({ disclosureStorageKey: 'full', explanationExpanded: false, glossaryExpanded: false });
+    expect(expanded(chart, 'explain')).toBe(true);
+    expect(expanded(chart, 'glossary')).toBe(true);
+
+    localStorage.setItem('partial', JSON.stringify({ glossaryExpanded: true }));
+    chart.config = { disclosureStorageKey: 'partial', explanationExpanded: false, glossaryExpanded: false };
+    await flush();
+    expect(expanded(chart, 'explain')).toBe(false);
+    expect(expanded(chart, 'glossary')).toBe(true);
+
+    chart.config = { disclosureStorageKey: 'empty', explanationExpanded: false, glossaryExpanded: false };
+    await flush();
+    expect(expanded(chart, 'explain')).toBe(false);
+    expect(expanded(chart, 'glossary')).toBe(false);
+
+    chart.config = { explanationExpanded: true, glossaryExpanded: false };
+    await flush();
+    expect(expanded(chart, 'explain')).toBe(true);
+  });
+
+  it('falls back to the configured defaults when the new key cannot be read', async () => {
+    localStorage.setItem('full', JSON.stringify({ explanationExpanded: true, glossaryExpanded: true }));
+    const chart = await makeChart({ disclosureStorageKey: 'full' });
+    vi.spyOn(localStorage, 'getItem').mockImplementation(() => { throw new Error('blocked'); });
+    chart.config = { disclosureStorageKey: 'other' };
+    await flush();
+    expect(expanded(chart, 'explain')).toBe(false);
+    expect(expanded(chart, 'glossary')).toBe(false);
+  });
+
   it('keeps separate keys separate', async () => {
     const chart = await makeChart({ disclosureStorageKey: 'one' });
     button(chart, 'explain').click();

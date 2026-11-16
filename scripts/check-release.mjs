@@ -3,6 +3,7 @@
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
+import { isReleaseVersion } from './semver.mjs';
 
 const PACKAGES = ['line-chart', 'bar-chart', 'segmented-bar-chart'];
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
@@ -11,6 +12,9 @@ const problems = [];
 const versions = new Set(manifests.map((manifest) => manifest.version));
 if (versions.size !== 1) problems.push(`Package versions differ: ${manifests.map((m) => `${m.name}@${m.version}`).join(', ')}`);
 const [version] = versions;
+for (const manifest of manifests) {
+  if (!isReleaseVersion(manifest.version)) problems.push(`${manifest.name}@${manifest.version} is not a valid SemVer release version.`);
+}
 if (version === '0.0.0') problems.push('Version is still 0.0.0; run npm run release:version -- <version>.');
 const tag = process.argv[2];
 if (tag && tag !== `v${version}`) problems.push(`Tag ${tag} does not match package version v${version}.`);

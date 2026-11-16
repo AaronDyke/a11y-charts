@@ -206,10 +206,11 @@ export class A11yBarChartElement extends HTMLElement {
     const storageKey = validStorageKey(next.disclosureStorageKey);
     if (storageKey !== this.#disclosureStorageKey) {
       this.#disclosureStorageKey = storageKey;
-      // A saved user choice outranks the author's default when the chart (or its key) first loads.
+      // A saved choice under the new key outranks the author's default; with nothing saved (or unreadable
+      // storage), fall back to the configured default rather than keeping the previous key's state.
       const saved = storageKey ? readDisclosurePreference(storageKey) : {};
-      if (saved.explanationExpanded !== undefined) this.#explanationOpen = saved.explanationExpanded;
-      if (saved.glossaryExpanded !== undefined) this.#glossaryOpen = saved.glossaryExpanded;
+      this.#explanationOpen = saved.explanationExpanded ?? next.explanationExpanded === true;
+      this.#glossaryOpen = saved.glossaryExpanded ?? next.glossaryExpanded === true;
     }
     this.#config = next;
     this.#queueRender();

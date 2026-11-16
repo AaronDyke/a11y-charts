@@ -3,11 +3,13 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
+import { isReleaseVersion } from './semver.mjs';
 
 const PACKAGES = ['line-chart', 'bar-chart', 'segmented-bar-chart'];
 const version = process.argv[2];
-if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(version ?? '')) {
-  console.error('Usage: npm run release:version -- <major.minor.patch[-prerelease]>');
+if (!isReleaseVersion(version)) {
+  console.error(`Not a valid SemVer release version: ${version ?? '(none)'}`);
+  console.error('Usage: npm run release:version -- <major.minor.patch[-prerelease]>, for example 0.2.0 or 0.2.0-rc.1');
   process.exit(1);
 }
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
