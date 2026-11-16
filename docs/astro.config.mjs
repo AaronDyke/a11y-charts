@@ -2,8 +2,13 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 
+// Vercel sets the production domain at build time; it enables canonical URLs
+// and the sitemap. Local builds leave it unset.
+const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+
 // https://astro.build/config
 export default defineConfig({
+	site: productionHost ? `https://${productionHost}` : undefined,
 	integrations: [
 		starlight({
 			title: 'A11y Charts',
@@ -46,6 +51,14 @@ export default defineConfig({
 				{
 					label: 'Reference',
 					items: [{ label: 'Events', slug: 'reference/events' }],
+				},
+				{
+					label: 'Examples',
+					items: [
+						// Served beside the docs in the deployed site (see scripts/assemble-deploy-site.mjs),
+						// not by the docs dev server.
+						{ label: 'Component gallery', link: '/gallery/' },
+					],
 				},
 			],
 		}),

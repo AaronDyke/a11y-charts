@@ -27,6 +27,18 @@ From the repository root:
 
 | Command | Action |
 | --- | --- |
-| `npm run build` | Build the chart packages (needed once, and after package changes). |
+| `npm run packages:dist` | Build the chart packages' `dist` (needed once, and after package changes). |
 | `npm run docs:dev` | Start the docs dev server at `localhost:4321`. |
 | `npm run docs:build` | Build the packages, then the docs, to `docs/dist/`. |
+| `npm run deploy:build` | Build the deployed site to `dist/site/`. |
+
+## Deployment
+
+Vercel runs `npm run deploy:build` (see `vercel.json`). The deployed site has
+the docs at the root and the existing component gallery, report demos, and
+standalone demos under `/gallery/`, until they move into the docs. Old gallery
+URLs such as `/spp-apr/` redirect to their `/gallery/` paths. The redirects
+are temporary, so they can be changed when the gallery is retired.
+
+The docs dev server doesn't serve `/gallery/`. Use `npm run deploy:build` and
+serve `dist/site/` to check the combined site.

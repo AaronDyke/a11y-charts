@@ -1,6 +1,18 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "npm ci --prefix packages/line-chart && npm ci --prefix packages/bar-chart && npm ci --prefix packages/segmented-bar-chart",
-  "buildCommand": "npm run site:build",
-  "outputDirectory": "dist/gallery"
+  "installCommand": "npm ci --prefix packages/line-chart && npm ci --prefix packages/bar-chart && npm ci --prefix packages/segmented-bar-chart && npm ci --prefix docs",
+  "buildCommand": "npm run deploy:build",
+  "outputDirectory": "dist/site",
+  "redirects": [
+    {
+      "source": "/:page(spp-apr|dispute-resolution|segmented)",
+      "destination": "/gallery/:page/",
+      "permanent": false
+    },
+    {
+      "source": "/:page(spp-apr|dispute-resolution|segmented|demo)/:path*",
+      "destination": "/gallery/:page/:path*",
+      "permanent": false
+    }
+  ]
 }

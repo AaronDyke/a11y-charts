@@ -17,3 +17,5 @@ packages/line-chart/playwright-report/
 .playwright-mcp/
 audit-evidence/
 packages/line-chart/demo.zip
+docs/dist/
+docs/.astro/
