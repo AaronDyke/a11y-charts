@@ -393,3 +393,7 @@ Section-specific labels, definitions, and explanatory sentences live in
 `single-value-content.ts`; source counts remain in `data.ts`. Meeting counts
 are compared with complaint totals as in the supplied data; the unfilled track
 does not represent an additional reported meeting outcome.
+
+## License
+
+MIT, copyright (c) 2026 Weiss Center. See [LICENSE](./LICENSE). The line chart bundles ECharts, ZRender, and tslib; their licenses ship in its `dist/` folder.

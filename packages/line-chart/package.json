@@ -2,6 +2,7 @@
   "name": "@mzebley-aem/line-chart",
   "version": "0.1.0",
   "description": "Framework-free, accessible actual-versus-target line chart custom element",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mzebley-aem/a11y-charts.git",

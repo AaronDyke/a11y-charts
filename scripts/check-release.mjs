@@ -17,6 +17,7 @@ if (tag && tag !== `v${version}`) problems.push(`Tag ${tag} does not match packa
 for (const manifest of manifests) {
   if (manifest.private) problems.push(`${manifest.name} is private.`);
   if (!manifest.name.startsWith('@mzebley-aem/')) problems.push(`${manifest.name} is not in the @mzebley-aem scope GitHub Packages requires.`);
+  if (manifest.license !== 'MIT') problems.push(`${manifest.name} must declare the MIT license.`);
   if (manifest.publishConfig?.registry !== 'https://npm.pkg.github.com') problems.push(`${manifest.name} does not publish to GitHub Packages.`);
 }
 if (problems.length) { console.error(problems.join('\n')); process.exit(1); }
