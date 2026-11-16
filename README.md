@@ -239,12 +239,12 @@ focus continuity, native dialog reconnection, and defensive event payloads.
 Package builds also smoke-test the built `./core` export in Node without DOM globals.
 CI runs package verification, demo builds, and browser regressions.
 
-Vercel runs `npm run site:build` and publishes `dist/gallery`. The chart gallery
-is served at `/`; standalone demos are at `/demo/line-chart.html` and
-`/demo/bar-chart.html`. The existing `/demo/report-demo.html` URL remains available.
-The site build includes the current line, bar, grouped-population, and theme examples.
-The independent segmented chart examples are at `/segmented/`; exercise them
-with `npm run browser:segmented`.
+Vercel runs `npm run deploy:build` and publishes `dist/site`: the
+[docs site](./docs) at `/`, including the chart examples under `/examples/` and
+the report prototypes under `/reports/`, plus the standalone demos at
+`/demo/line-chart.html` and `/demo/bar-chart.html`. The former gallery URLs
+(`/spp-apr/`, `/dispute-resolution/`, `/segmented/`, and
+`/demo/report-demo.html`) redirect to their new pages.
 
 Root `start`, `build`, `test`, and `typecheck` now target the active chart packages.
 `start:bar` opens the bar demo. The frozen Angular reference remains available only
@@ -276,19 +276,23 @@ Run `npm run artifacts:test` to build both packages and exercise their fresh npm
 archives in a browser. On a local machine using installed Chrome, prefix the
 command with `PLAYWRIGHT_CHROMIUM_CHANNEL=chrome`.
 
-## Unified review gallery
+## Examples and report prototypes
 
-Run `npm run gallery:dev` and open `http://127.0.0.1:5191/` for line/bar/grouped
-examples, a full-width Adapt-shaped report specimen, and a scoped theme comparison. The comparison shows component defaults,
-the Adapt report token adapter, and a substantially different theme on standalone
-and grouped charts. Its `--usa-data-rep-*` values are local fixtures; it does not
-load USWDS+. Grouped examples identify screenshot-derived values separately from
-illustrative data. The chart's built-in reader controls remain available where
-enabled by the example.
+The examples formerly in the chart gallery are pages of the docs site. Run
+`npm run docs:dev` and open `http://localhost:4321/examples/` for the line, bar,
+grouped, and segmented examples, each with a **Try other settings** panel, and a
+scoped theme comparison with a full-width Adapt-shaped report specimen. The
+comparison shows component defaults, the Adapt report token adapter, and a
+substantially different theme on standalone and grouped charts. Its
+`--usa-data-rep-*` values are local fixtures; it does not load USWDS+. Grouped
+examples identify screenshot-derived values separately from illustrative data.
 
-`npm run gallery:build` creates the static site in `dist/gallery/`.
-`npm run gallery:typecheck` checks the gallery source. The browser regression suite
-includes the gallery's settings, keyboard, and narrow-layout checks.
+The example sources live in [`docs/src/examples`](./docs/src/examples).
+`npm run docs:build` builds the packages and the site, and
+`npm run docs:typecheck` checks the example sources. `npm run browser:docs` runs
+the examples' settings, keyboard, narrow-layout, and automated accessibility
+checks against the built site in any browser engine. Build the docs before the
+browser suites below, which also run against the built site.
 `npm run browser:grouped` checks grouped selection, shared scales, state
 preservation, downloads, touch/reflow, and automated accessibility.
 `npm run browser:themes` checks token inheritance, nested chart surfaces, scoped
@@ -314,26 +318,24 @@ A clean automated scan does not certify spoken screen-reader behavior.
 
 ## SPP/APR interactive report mockup
 
-The separate `/spp-apr/` page uses the actual line and bar components to explore
-Hawaii Part B FFY 2023 Indicators 2, 5, and 6. The gallery at `/` and existing
-demo/report URLs remain unchanged.
+The full-page `/reports/spp-apr/` prototype in the docs site uses the actual line
+and bar components to explore Hawaii Part B FFY 2023 Indicators 2, 5, and 6.
 
 ```bash
-npm run gallery:dev
-# Open http://127.0.0.1:5191/spp-apr/
-npm run gallery:typecheck
+npm run docs:dev
+# Open http://localhost:4321/reports/spp-apr/
+npm run docs:typecheck
+npm run docs:build
 npm run browser:spp-apr
-npm run site:build
 ```
 
-`site:build` includes `/spp-apr/index.html` in the existing deployment output.
 Copy-link preserves the selected indicator, measure, chart view, and display
 settings. Links become externally shareable when this build is deployed to the
 existing host. Review notes are stored locally on explicit save and can be
 downloaded as a text file; no feedback service is connected.
 
 Report content and transcribed values live in
-[`demo-gallery/spp-apr/data.ts`](./demo-gallery/spp-apr/data.ts), with their source
+[`docs/src/examples/spp-apr/data.ts`](./docs/src/examples/spp-apr/data.ts), with their source
 page references and unresolved data issues. The supplied PDFs are reference
 examples, not independently validated official data. Missing history and baseline
 placeholders remain unavailable. Measure 6B uses the detailed comparison's
@@ -344,10 +346,9 @@ feedback resolves these issues.
 
 ## Dispute resolution interactive report demo
 
-Open `/dispute-resolution/` with `npm run gallery:dev` (default:
-http://127.0.0.1:5191/dispute-resolution/). The gallery links to this demo and
-`site:build` includes it in the existing deployment output. The source mockup
-and its original file are not modified.
+Open `/reports/dispute-resolution/` with `npm run docs:dev` (default:
+http://localhost:4321/reports/dispute-resolution/). The docs Examples page links
+to this demo. The source mockup and its original file are not modified.
 
 The overview and four section views use the actual `<a11y-bar-chart>` component
 for 15 charts. Counts are transcribed from the supplied “Part B Dispute
@@ -367,14 +368,14 @@ Print applies to the current view. The report interface has no demo notices,
 source-review panels, glossary appendix, or feedback collection. Provenance and
 audit limitations remain documented here and in the review report.
 
-- Content/data: `demo-gallery/dispute-resolution/data.ts`
+- Content/data: `docs/src/examples/dispute-resolution/data.ts`
 - Flow, content, and WCAG 2.2 AA review with AAA advice:
   `audit-evidence/2026-11-10/dispute-resolution/REVIEW.md`
-- Checks: `npm run browser:dispute-resolution`, `npm run gallery:typecheck`,
-  and `npm run site:build`
+- Checks: `npm run docs:build`, `npm run docs:typecheck`, and
+  `npm run browser:dispute-resolution`
 - Reproduce automated evidence:
   `node audit-evidence/2026-11-10/dispute-resolution/audit.cjs`
-  (requires a running gallery server and the supplied local source file).
+  (requires a running docs server and the supplied local source file).
   Set `SKIP_SOURCE=1` to check only the demo, or `AUDIT_BASE` for a built preview.
 
 Before replacing examples with live data, confirm the State, period, metric

@@ -1,0 +1,52 @@
+/* Theme comparison page. Each card scopes its own theme, so neighbors keep their values. */
+.theme-demo-grid {
+	display: grid;
+	/* Wraps by available width: the docs content column is narrower than the viewport. */
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+	gap: 1.25rem;
+	margin-block: 1rem 2rem;
+}
+
+.theme-demo-card {
+	color-scheme: light;
+	min-width: 0;
+	padding: 1rem;
+	border: 1px solid var(--a11y-charts-border, #bac9cf);
+	border-radius: 0.5rem;
+	background: var(--a11y-charts-surface, #fff);
+	color: var(--a11y-charts-text, #172b3a);
+}
+
+.theme-demo-card h3 {
+	margin: 0 0 0.375rem;
+	font-size: 1.05rem;
+}
+
+.theme-demo-card :is(a11y-bar-chart, a11y-bar-chart-group) {
+	display: block;
+	min-width: 0;
+}
+
+.theme-demo-caption {
+	min-height: 2.8em;
+	margin: 0 0 1rem;
+	font-size: 0.875rem;
+	line-height: 1.55;
+	color: #3e4b52;
+}
+
+@media (max-width: 620px) {
+	.theme-demo-caption {
+		min-height: 0;
+	}
+
+	.theme-demo-card {
+		padding: 0.75rem;
+	}
+}
+
+@media (forced-colors: active) {
+	.theme-demo-card {
+		border-color: CanvasText;
+	}
+}

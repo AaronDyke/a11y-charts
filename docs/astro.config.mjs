@@ -9,6 +9,10 @@ const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL;
 // https://astro.build/config
 export default defineConfig({
 	site: productionHost ? `https://${productionHost}` : undefined,
+	vite: {
+		// The segmented examples reuse the bar package demo's translations.
+		server: { fs: { allow: ['..'] } },
+	},
 	integrations: [
 		starlight({
 			title: 'A11y Charts',
@@ -55,9 +59,12 @@ export default defineConfig({
 				{
 					label: 'Examples',
 					items: [
-						// Served beside the docs in the deployed site (see scripts/assemble-deploy-site.mjs),
-						// not by the docs dev server.
-						{ label: 'Component gallery', link: '/gallery/' },
+						{ label: 'Overview', slug: 'examples' },
+						{ label: 'Line charts', slug: 'examples/line-charts' },
+						{ label: 'Bar charts', slug: 'examples/bar-charts' },
+						{ label: 'Grouped bar charts', slug: 'examples/grouped-bar-charts' },
+						{ label: 'Segmented bar charts', slug: 'examples/segmented-bar-charts' },
+						{ label: 'Theme comparison', slug: 'examples/theme-comparison' },
 					],
 				},
 			],

@@ -25,8 +25,6 @@ jobs:
       - run: npm run build
       - if: matrix.chart != 'segmented-bar-chart'
         run: npm run demo:build
-      - if: matrix.chart == 'line-chart'
-        run: npm run report:build
   docs:
     runs-on: ubuntu-latest
     steps:
@@ -45,14 +43,11 @@ jobs:
       - run: npm ci --prefix packages/segmented-bar-chart
       - run: npm ci --prefix docs
       # Builds each package's dist, then the docs site, which renders the live
-      # examples from those builds.
+      # examples from those builds. Browser checks of the site run in the
+      # browser job.
       - run: npm run docs:build
-      - run: npx playwright install --with-deps chromium
-        working-directory: packages/line-chart
-      # Loads every built page and fails on any chart error state.
-      - run: npm run browser:docs
-        env:
-          PLAYWRIGHT_CHROMIUM_CHANNEL: chromium
+      # Checks the example modules against the package types built above.
+      - run: npm run docs:typecheck
   browser:
     runs-on: ubuntu-latest
     strategy:
@@ -68,13 +63,16 @@ jobs:
       - run: npm ci --prefix packages/line-chart
       - run: npm ci --prefix packages/bar-chart
       - run: npm ci --prefix packages/segmented-bar-chart
+      - run: npm ci --prefix docs
       - run: npx playwright install --with-deps ${{ matrix.browser }}
         working-directory: packages/line-chart
       - run: npm run demo:build --prefix packages/line-chart
       - run: npm run demo:build --prefix packages/bar-chart
       - run: npm run browser:test
-      - run: npm run gallery:typecheck
-      - run: npm run site:build
+      # The examples and report prototypes live in the docs site; the suites
+      # below run against this build.
+      - run: npm run docs:build
+      - run: npm run browser:docs
       - if: matrix.browser == 'chromium'
         run: npm run browser:grouped && npm run browser:themes
         env:

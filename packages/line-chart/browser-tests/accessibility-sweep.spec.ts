@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
 import { createRequire } from 'node:module';
 const require = createRequire(import.meta.url);
+// The examples and report prototypes moved to the docs site; docs-accessibility.spec.ts sweeps them.
 const routes = [
-  '/demo-gallery/index.html', '/packages/line-chart/demo/dev.html',
-  '/packages/line-chart/demo/index.html', '/packages/line-chart/demo/report-demo.html',
+  '/packages/line-chart/demo/dev.html', '/packages/line-chart/demo/index.html',
   '/packages/bar-chart/demo/index.html'
 ];
 for (const route of routes) {

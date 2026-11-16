@@ -7,8 +7,8 @@ const axeCore = fileURLToPath(new URL('../node_modules/axe-core/axe.min.js', imp
 mkdirSync(evidence, { recursive: true });
 
 async function openGallery(page: Page): Promise<void> {
-  await page.goto('/#grouped-examples');
-  await expect(page.locator('#grouped-examples')).toBeVisible();
+  await page.goto('/examples/grouped-bar-charts/');
+  await expect(page.locator('#grouped-age')).toBeVisible();
   await expect(page.locator('#grouped-age a11y-bar-chart-group')).toBeVisible();
 }
 
@@ -30,7 +30,7 @@ test('desktop keyboard selection, All reset, shared scale, and screenshot fixtur
   await age.getByRole('radio', { name: 'All Ages' }).check();
   await expect(age.getByRole('radio', { name: 'All Ages' })).toBeChecked();
 
-  const settings = page.locator('#grouped-age details.example-settings');
+  const settings = page.locator('#grouped-age details.chart-example__settings');
   await settings.locator('summary').click();
   await settings.getByLabel('External report filter').selectOption('on');
   await age.getByRole('radio', { name: 'Birth to 1' }).check();
@@ -129,6 +129,8 @@ test('320px and 375px reflow, long labels, touch hit areas, and no horizontal ov
     expect(await horizontalOverflow(page)).toBeLessThanOrEqual(0);
     if (width === 320) await group.screenshot({ path: `${evidence}grouped-mobile-320.png` });
     if (width === 375) await group.screenshot({ path: `${evidence}grouped-mobile-375.png` });
+    // Touch taps use viewport coordinates, so bring the label on screen first.
+    await radioLabel.scrollIntoViewIfNeeded();
     const box = await radioLabel.boundingBox();
     await page.touchscreen.tap(box!.x + box!.width / 2, box!.y + box!.height / 2);
     await expect(group.getByRole('radio', { name: 'Native Hawaiian or Other Pacific Islander' })).toBeChecked();

@@ -17,5 +17,8 @@
     "astro": "^7.3.6",
     "sharp": "^0.35.3"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
 }

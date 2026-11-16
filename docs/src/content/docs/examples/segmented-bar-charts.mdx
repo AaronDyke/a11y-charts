@@ -1,0 +1,66 @@
+---
+title: Segmented bar chart examples
+description: Interactive segmented bar charts in full and compact presentations, with language, theme, and grouping controls.
+---
+
+import SegmentedDemoScript from '../../../components/SegmentedDemoScript.astro';
+import '../../../examples/segmented/style.css';
+
+Explore complete breakdowns and independent comparisons in full and compact presentations. All values on this page are fictional. See [Segmented bar chart](/charts/segmented-bar-chart/) for the API.
+
+<div class="segmented-demo not-content">
+	<div class="controls" role="group" aria-label="Display options">
+		<label>Language <select id="locale"><option value="en-US">English</option><option value="fr-FR">Français</option><option value="es-MX">Español</option></select></label>
+		<label><input id="details-toggle" type="checkbox" checked /> Category details</label>
+		<label>Theme <select id="theme"><option value="default">Default</option><option value="alternate">Alternate</option></select></label>
+		<label>Values <select id="values"><option value="both">Counts and percentages</option><option value="counts">Counts only</option><option value="shares">Percentages only</option></select></label>
+	</div>
+</div>
+
+These display options change the full breakdown and the grouping example.
+
+## Full breakdown
+
+Categories are parts of a reported total. Focus or select a category to explore its definition.
+
+<div class="segmented-demo not-content"><div id="breakdown"></div></div>
+
+## Grouping categories
+
+A breakdown shows at most four segments. Explore how a larger breakdown keeps selected categories separate and combines the rest. The complete data stays available in the data view.
+
+<div class="segmented-demo not-content">
+	<div class="controls" role="group" aria-label="Grouping options">
+		<label>Dataset <select id="group-dataset"><option value="many">Six categories</option><option value="few">Three categories</option><option value="incomplete">Missing and suppressed values</option></select></label>
+		<label>Grouping <select id="group-mode"><option value="automatic">Automatic</option><option value="explicit">Choose categories</option></select></label>
+		<label>Automatic order <select id="group-order"><option value="value">Largest first</option><option value="source">Original order</option><option value="label">Alphabetical</option></select></label>
+		<fieldset id="group-picks" hidden><legend>Keep separate (up to three)</legend><p>Categories appear in the order chosen. Choose none to combine every category; clear a choice to select another.</p><div id="group-pick-options"></div></fieldset>
+		<label><input type="checkbox" id="group-highlight" /> Highlight a category that may be grouped</label>
+		<button type="button" id="group-update">Update values</button>
+	</div>
+	<div id="grouping"></div>
+</div>
+
+## Independent comparison
+
+These measures are independent; the unfilled portion of the bar is not another reported outcome.
+
+<div class="segmented-demo not-content"><div id="comparison"></div></div>
+
+## Compact presentations
+
+A compact card can link to another page, or provide separate category controls.
+
+<div class="segmented-demo not-content"><div class="cards"><div id="linked"></div><div id="interactive"></div></div></div>
+
+## Data availability and reference values
+
+These examples show zero, missing, suppressed, and above-reference values without inventing categories.
+
+<div class="segmented-demo not-content"><div class="cards"><div id="availability"></div><div id="above"></div></div></div>
+
+## Example link destination
+
+<div id="details">The compact cards above link here to demonstrate a whole-card link.</div>
+
+<SegmentedDemoScript />

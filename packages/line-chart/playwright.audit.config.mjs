@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: './browser-tests',
   outputDir: `test-results/${process.env.PLAYWRIGHT_BROWSER || 'chromium'}`,
   // These specs need other servers and run through their own configs.
-  testIgnore: ['artifacts.spec.ts', 'grouped-parity.spec.ts', 'theme-tokens.spec.ts', 'segmented.spec.ts', 'dispute-resolution.spec.ts', 'spp-apr.spec.ts', 'docs-examples.spec.ts'],
+  testIgnore: ['artifacts.spec.ts', 'grouped-parity.spec.ts', 'theme-tokens.spec.ts', 'segmented.spec.ts', 'dispute-resolution.spec.ts', 'spp-apr.spec.ts', 'docs-examples.spec.ts', 'examples.spec.ts', 'docs-accessibility.spec.ts'],
   fullyParallel: false,
   workers: 1,
   reporter: 'list',

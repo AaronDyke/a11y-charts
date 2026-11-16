@@ -6,7 +6,7 @@ Existing `--a11y-bar-chart-*` and `--a11y-line-chart-*` properties remain the in
 
 ## Project adapter example
 
-The chart gallery includes a project-owned adapter at [`demo-gallery/adapt-report-theme.css`](demo-gallery/adapt-report-theme.css). Its selectors map the reference report's actual `--usa-data-rep-*` token names to chart properties, and its demo compares defaults, the adapter, and a substantially different theme in standalone and grouped charts. The adapter can be copied and narrowed for a consuming project.
+The docs site's theme comparison example includes a project-owned adapter at [`docs/src/examples/adapt-report-theme.css`](docs/src/examples/adapt-report-theme.css). Its selectors map the reference report's actual `--usa-data-rep-*` token names to chart properties, and its demo compares defaults, the adapter, and a substantially different theme in standalone and grouped charts. The adapter can be copied and narrowed for a consuming project.
 
 ```css
 .adapt-report-theme {
