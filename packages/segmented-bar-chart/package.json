@@ -1,8 +1,19 @@
 {
   "name": "@mzebley-aem/segmented-bar-chart",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Framework-free, accessible segmented bar chart custom element",
-  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mzebley-aem/a11y-charts.git",
+    "directory": "packages/segmented-bar-chart"
+  },
+  "homepage": "https://github.com/mzebley-aem/a11y-charts/tree/main/packages/segmented-bar-chart#readme",
+  "bugs": {
+    "url": "https://github.com/mzebley-aem/a11y-charts/issues"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "type": "module",
   "engines": {
     "node": ">=24.0.0 <27"

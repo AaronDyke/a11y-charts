@@ -110,6 +110,10 @@ chart together.
 
 ## Direct consumption
 
+The packages are published to GitHub Packages as `@mzebley-aem/*`; see
+[RELEASING.md](./RELEASING.md) for installing (an `.npmrc` and a `read:packages`
+token) and for cutting a release.
+
 ```ts
 import '@mzebley-aem/line-chart/define';
 import '@mzebley-aem/line-chart/styles.css';

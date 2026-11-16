@@ -139,7 +139,8 @@ sign-off** above.
 
 Still open: visual (USWDS) token mapping.
 
-Done since: `exportActions` (the ADAPT wrapper adds “Download Excel” with its existing `xlsx`
+Done since: GitHub Packages publishing (version `0.1.0`, tag-triggered workflow, install steps
+in `RELEASING.md`), `exportActions` (the ADAPT wrapper adds “Download Excel” with its existing `xlsx`
 dependency, from `context.rows` or numeric `context.model`), `disclosureStorageKey` (stores `{ explanationExpanded, glossaryExpanded }`; ADAPT's
 existing `adapt-data-rep-settings` record uses `showPlainLanguage`/`showGlossary`, so the adapter
 should use a new key or copy those two values over once), `showZeroValues: false` (the ADAPT adapter should set it), the SSR-safe `/loader` entry (with pre-upgrade property handling) and the

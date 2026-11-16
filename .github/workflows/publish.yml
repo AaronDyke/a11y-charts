@@ -1,0 +1,42 @@
+name: Publish packages
+# Pushing a tag such as v0.1.0 publishes every chart package at that version to GitHub Packages.
+# Set the version first with `npm run release:version -- 0.1.0` and commit it.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://npm.pkg.github.com
+          scope: '@mzebley-aem'
+      - name: Check versions match the tag
+        run: npm run release:check -- "$GITHUB_REF_NAME"
+      - name: Install
+        run: |
+          for chart in line-chart bar-chart segmented-bar-chart; do
+            npm ci --prefix "packages/$chart"
+          done
+      # verify runs every package's tests, typecheck, build, and packed-tarball smoke check.
+      - name: Verify
+        run: npm run verify
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for chart in line-chart bar-chart segmented-bar-chart; do
+            npm publish "./packages/$chart"
+          done
