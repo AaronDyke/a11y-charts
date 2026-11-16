@@ -167,7 +167,9 @@ a11y-bar-chart {
 .a11y-bar-chart__glossary-toggle:disabled { cursor: not-allowed; opacity: 0.6; }
 .a11y-bar-chart__root :focus-visible,
 .a11y-bar-chart__dialog :focus-visible { outline: 3px solid var(--a11y-bar-chart-focus); outline-offset: 2px; }
-.a11y-bar-chart__bar-line { display: grid; grid-template-columns: minmax(2.5rem, 1fr) minmax(6rem, var(--a11y-bar-chart-value-width)); align-items: center; gap: var(--a11y-bar-chart-gap); }
+/* The value column's minimum yields to half the row in very narrow charts, so
+   enlarged text never forces horizontal scrolling (WCAG 1.4.10). */
+.a11y-bar-chart__bar-line { display: grid; grid-template-columns: minmax(2.5rem, 1fr) minmax(min(6rem, 50%), var(--a11y-bar-chart-value-width)); align-items: center; gap: var(--a11y-bar-chart-gap); }
 .a11y-bar-chart__track { position: relative; display: block; width: 100%; height: var(--a11y-bar-chart-bar-height); border-radius: var(--a11y-bar-chart-track-radius); background: var(--a11y-bar-chart-track); }
 .a11y-bar-chart__track--target { margin-block: var(--a11y-bar-chart-target-offset); }
 .a11y-bar-chart__target { position: absolute; inset-block: calc(0px - var(--a11y-bar-chart-target-offset)); inset-inline-start: var(--a11y-bar-chart-target-start); width: var(--a11y-bar-chart-target-width); min-width: 0; border: 2px dashed var(--a11y-bar-chart-target-color); box-shadow: 0 0 0 2px var(--a11y-bar-chart-surface), inset 0 0 0 2px var(--a11y-bar-chart-surface); pointer-events: none; }
@@ -240,8 +242,8 @@ a11y-bar-chart {
   }
   .a11y-bar-chart__details { position: static; width: 100%; margin-block-start: 0.75rem; box-shadow: none; }
   .a11y-bar-chart__details::before { display: none; }
-  .a11y-bar-chart__bar-line { grid-template-columns: minmax(1rem, 1fr) minmax(5rem, 6.25rem); gap: 0.5rem; }
-  .a11y-bar-chart__value { min-width: 0; }
+  .a11y-bar-chart__bar-line { grid-template-columns: minmax(1rem, 1fr) minmax(min(5rem, 50%), 6.25rem); gap: 0.5rem; }
+  .a11y-bar-chart__value { min-width: 0; overflow-wrap: anywhere; }
   .a11y-bar-chart--endpoint-values .a11y-bar-chart__track-wrap { display: contents; }
   .a11y-bar-chart--endpoint-values .a11y-bar-chart__value { position: static; grid-column: 2; grid-row: 1; width: auto; max-width: none; min-height: var(--a11y-bar-chart-bar-height); padding-inline-start: 0; transform: none; align-items: center; justify-content: center; text-align: end; }
 }

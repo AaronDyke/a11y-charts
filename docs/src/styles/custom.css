@@ -150,6 +150,8 @@
 }
 
 .chart-example__reset {
+	max-width: 100%;
+	overflow-wrap: anywhere;
 	min-height: 44px;
 	padding: 0.5rem 1rem;
 	border: 1px solid var(--sl-color-accent);
@@ -237,4 +239,15 @@ mobile-starlight-toc .toggle {
 .sl-link-card .icon {
 	flex-shrink: 0;
 	min-width: 1.333em;
+}
+
+/* Long single words in large text (card titles, settings group names) wrap
+   rather than overflow narrow screens with enlarged text. */
+.card .title,
+.card .title > span,
+.example-setting-group legend,
+.sl-link-button {
+	min-width: 0;
+	max-width: 100%;
+	overflow-wrap: anywhere;
 }

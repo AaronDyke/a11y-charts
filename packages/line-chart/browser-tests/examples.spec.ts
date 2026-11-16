@@ -146,8 +146,8 @@ test('report prototype states its status, uses landmarks, and reflows', async ({
 });
 
 // WCAG 1.4.10 and 1.4.12 together: 320px wide, 200% text, and the maximum text
-// spacing. Covers what the docs site owns, including open settings panels; chart
-// internals are covered by each chart's own tests.
+// spacing. Covers the docs site and its live charts, with settings panels open.
+// Content inside a scrolling region, such as the line chart's plot, is allowed.
 const TEXT_SPACING = '* { line-height: 1.5 !important; letter-spacing: .12em !important; word-spacing: .16em !important; }';
 
 test('docs pages reflow at 320px with enlarged text and spacing', async ({ page }) => {
@@ -161,7 +161,6 @@ test('docs pages reflow at 320px with enlarged text and spacing', async ({ page 
     await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
     const overflowing = await page.evaluate(() => {
       const viewport = document.documentElement.clientWidth;
-      const charts = 'a11y-line-chart, a11y-bar-chart, a11y-bar-chart-group, a11y-segmented-bar-chart';
       const clipped = (element: Element) => {
         for (let node: Element | null = element; node; node = node.parentElement) {
           const style = getComputedStyle(node);
@@ -171,11 +170,11 @@ test('docs pages reflow at 320px with enlarged text and spacing', async ({ page 
         return false;
       };
       return [...document.querySelectorAll('body *')]
-        .filter(element => !element.closest(charts) && element.getBoundingClientRect().width > 0)
+        .filter(element => element.getBoundingClientRect().width > 0)
         .filter(element => element.getBoundingClientRect().right > viewport + 0.5 && !clipped(element))
         .filter((element, _, all) => ![...element.children].some(child => all.includes(child)))
         .slice(0, 3)
-        .map(element => `${element.tagName.toLowerCase()}.${String(element.className).split(' ')[0]} "${(element.textContent ?? '').trim().slice(0, 30)}"`);
+        .map(element => `${element.tagName.toLowerCase()}.${String(element.getAttribute('class') ?? '').split(' ')[0]} "${(element.textContent ?? '').trim().slice(0, 30)}"`);
     });
     if (overflowing.length) failures.push(`${route}: ${overflowing.join(', ')}`);
   }
