@@ -139,7 +139,9 @@ sign-off** above.
 
 Still open: visual (USWDS) token mapping.
 
-Done since: `showZeroValues: false` (the ADAPT adapter should set it), the SSR-safe `/loader` entry (with pre-upgrade property handling) and the
+Done since: `disclosureStorageKey` (stores `{ explanationExpanded, glossaryExpanded }`; ADAPT's
+existing `adapt-data-rep-settings` record uses `showPlainLanguage`/`showGlossary`, so the adapter
+should use a new key or copy those two values over once), `showZeroValues: false` (the ADAPT adapter should set it), the SSR-safe `/loader` entry (with pre-upgrade property handling) and the
 container-query compact layout for the single bar chart. Note for the ADAPT wrappers:
 `grid-view.component.html` places `countBreakdown` and `barChartGrouped` data reps in a
 `display-flex` section without `width-full`. Size-contained charts don't grow to fit

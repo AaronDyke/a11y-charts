@@ -41,6 +41,13 @@ export interface A11yBarChartConfig {
   showExport?: boolean;
   explanationExpanded?: boolean;
   glossaryExpanded?: boolean;
+  /**
+   * Opt-in localStorage key for remembering whether Explain and Glossary are open. Charts sharing a
+   * key restore the saved state when they load (it wins over `explanationExpanded`/`glossaryExpanded`
+   * at that point) and save each user toggle. Nothing is stored unless a key is set; unavailable or
+   * malformed storage falls back to the defaults.
+   */
+  disclosureStorageKey?: string;
   showCounts?: boolean;
   showPercentages?: boolean;
   showTotal?: boolean;
@@ -77,6 +84,7 @@ export interface ResolvedA11yBarChartConfig {
   showExport: boolean;
   explanationExpanded: boolean;
   glossaryExpanded: boolean;
+  disclosureStorageKey?: string;
   showCounts: boolean;
   showPercentages: boolean;
   showTotal: boolean;

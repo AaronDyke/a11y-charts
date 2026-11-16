@@ -216,6 +216,16 @@ The
 when their input values change. Otherwise, user-opened state survives data and
 unrelated configuration updates.
 
+To remember Explain and Glossary across charts and page loads, set
+`config.disclosureStorageKey` to a `localStorage` key. Each chart with that key
+restores the saved state when it loads (the saved choice wins over
+`explanationExpanded`/`glossaryExpanded` at that moment) and saves only the
+disclosure the user toggles, keeping other fields in the stored record. Charts
+already on the page do not change when another chart is toggled. Nothing is
+stored without a key, and blocked, missing, or malformed storage falls back to
+the defaults. The `a11y-bar-chart-disclosure-change` event still fires, and the
+option passes through `<a11y-bar-chart-group>` config.
+
 `context` and `dataNote` accept plain text or supported sanitized rich HTML.
 Both appear in dialog and inline full-data views; authored content is converted
 to plain text in CSV metadata rows. `theme` accepts typed token overrides that

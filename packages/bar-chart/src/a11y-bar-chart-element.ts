@@ -20,6 +20,7 @@ import { createCardContent } from '../../chart-core/src/ui/card-content.js';
 import { ModalController, type ModalOpenResult } from '../../chart-core/src/ui/modal-controller.js';
 import { setDisclosure } from '../../chart-core/src/ui/disclosure.js';
 import { CSV_BYTE_ORDER_MARK } from '../../chart-core/src/csv.js';
+import { readDisclosurePreference, validStorageKey, writeDisclosurePreference } from '../../chart-core/src/ui/disclosure-preference.js';
 import { upgradeOwnProperties } from '../../chart-core/src/ui/upgrade-properties.js';
 
 export interface A11yBarChartErrorDetail {
@@ -138,6 +139,7 @@ export class A11yBarChartElement extends HTMLElement {
   #model: A11yBarChartSemanticModel | undefined;
   #lastDataSignature = '';
   #wasDialogOpen = false;
+  #disclosureStorageKey: string | undefined;
   #lastExpansionInput: { explanationExpanded: boolean | null; glossaryExpanded: boolean | null } = { explanationExpanded: null, glossaryExpanded: null };
   #dataViewState = { open: false, dataView: 'dialog' as 'dialog' | 'inline' };
   #dialogFailureKey: 'dialogUnsupported' | 'dialogUnavailable' | '' = '';
@@ -197,6 +199,14 @@ export class A11yBarChartElement extends HTMLElement {
         else this.#glossaryOpen = next[key] === true;
         this.#lastExpansionInput[key] = nextValue;
       }
+    }
+    const storageKey = validStorageKey(next.disclosureStorageKey);
+    if (storageKey !== this.#disclosureStorageKey) {
+      this.#disclosureStorageKey = storageKey;
+      // A saved user choice outranks the author's default when the chart (or its key) first loads.
+      const saved = storageKey ? readDisclosurePreference(storageKey) : {};
+      if (saved.explanationExpanded !== undefined) this.#explanationOpen = saved.explanationExpanded;
+      if (saved.glossaryExpanded !== undefined) this.#glossaryOpen = saved.glossaryExpanded;
     }
     this.#config = next;
     this.#queueRender();
@@ -1025,6 +1035,10 @@ export class A11yBarChartElement extends HTMLElement {
     }));
   }
   #dispatchDisclosureChange(disclosure: 'explanation' | 'glossary', expanded: boolean): void {
+    // Only the toggled disclosure is saved, so a chart without a glossary never overwrites that choice.
+    if (this.#disclosureStorageKey) {
+      writeDisclosurePreference(this.#disclosureStorageKey, disclosure === 'explanation' ? { explanationExpanded: expanded } : { glossaryExpanded: expanded });
+    }
     this.dispatchEvent(new CustomEvent<A11yBarChartDisclosureChangeDetail>('a11y-bar-chart-disclosure-change', {
       bubbles: true, detail: { disclosure, expanded }
     }));

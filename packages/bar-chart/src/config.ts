@@ -1,6 +1,7 @@
 import type { A11yBarChartConfig, ResolvedA11yBarChartConfig } from './model.js';
 import { canonicalLocaleOrDefault } from '../../chart-core/src/validation.js';
 import { resolvePercentScale } from '../../chart-core/src/csv.js';
+import { validStorageKey } from '../../chart-core/src/ui/disclosure-preference.js';
 
 const defaults: ResolvedA11yBarChartConfig = {
   scaleMode: 'largest',
@@ -55,6 +56,7 @@ export function resolveConfig(config: A11yBarChartConfig | null | undefined = un
     showExplanation: typeof config.showExplanation === 'boolean' ? config.showExplanation : defaults.showExplanation,
     showGlossary: typeof config.showGlossary === 'boolean' ? config.showGlossary : defaults.showGlossary,
     showExport: typeof config.showExport === 'boolean' ? config.showExport : defaults.showExport,
+    ...(validStorageKey(config.disclosureStorageKey) ? { disclosureStorageKey: validStorageKey(config.disclosureStorageKey)! } : {}),
     explanationExpanded: typeof config.explanationExpanded === 'boolean' ? config.explanationExpanded : defaults.explanationExpanded,
     glossaryExpanded: typeof config.glossaryExpanded === 'boolean' ? config.glossaryExpanded : defaults.glossaryExpanded,
     showCounts: typeof config.showCounts === 'boolean' ? config.showCounts : defaults.showCounts,
