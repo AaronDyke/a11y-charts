@@ -47,6 +47,12 @@ jobs:
       # Builds each package's dist, then the docs site, which renders the live
       # examples from those builds.
       - run: npm run docs:build
+      - run: npx playwright install --with-deps chromium
+        working-directory: packages/line-chart
+      # Loads every built page and fails on any chart error state.
+      - run: npm run browser:docs
+        env:
+          PLAYWRIGHT_CHROMIUM_CHANNEL: chromium
   browser:
     runs-on: ubuntu-latest
     strategy:

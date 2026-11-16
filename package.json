@@ -30,7 +30,8 @@
     "docs:dev": "npm run dev --prefix docs",
     "docs:build": "npm run packages:dist && npm run build --prefix docs",
     "packages:dist": "node packages/line-chart/scripts/build.mjs && node packages/bar-chart/scripts/build.mjs && node packages/segmented-bar-chart/scripts/build.mjs",
-    "deploy:build": "npm run site:build && npm run packages:dist && npm run build --prefix docs && node scripts/assemble-deploy-site.mjs"
+    "deploy:build": "npm run site:build && npm run packages:dist && npm run build --prefix docs && node scripts/assemble-deploy-site.mjs",
+    "browser:docs": "npm exec --prefix packages/line-chart -- playwright test --config packages/line-chart/playwright.docs.config.mjs"
   },
   "private": true,
   "dependencies": {
