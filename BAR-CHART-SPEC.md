@@ -28,7 +28,7 @@ preparation and filtering policy. Its APIs extend the original scope below.
 
 ## Boundaries and preservation
 
-- New package: `packages/bar-chart`, with `@a11y-charts/bar-chart` exports for
+- New package: `packages/bar-chart`, with `@mzebley-aem/bar-chart` exports for
   the element, registration, public types, semantic model, messages, and CSS.
 - Existing active line implementation: `packages/line-chart`. Preserve current
   target-range, baseline, formatting, navigation, and ECharts behavior.

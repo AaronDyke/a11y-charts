@@ -23,7 +23,9 @@
     "browser:spp-apr": "npm exec --prefix packages/line-chart -- playwright test --config packages/line-chart/playwright.spp-apr.config.mjs",
     "browser:themes": "npm run browser:themes --prefix packages/line-chart",
     "browser:dispute-resolution": "npm exec --prefix packages/line-chart -- playwright test --config packages/line-chart/playwright.dispute-resolution.config.mjs",
-    "browser:segmented": "npm exec --prefix packages/line-chart -- playwright test --config packages/line-chart/playwright.segmented.config.mjs"
+    "browser:segmented": "npm exec --prefix packages/line-chart -- playwright test --config packages/line-chart/playwright.segmented.config.mjs",
+    "release:version": "node scripts/set-version.mjs",
+    "release:check": "node scripts/check-release.mjs"
   },
   "private": true,
   "dependencies": {

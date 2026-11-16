@@ -41,9 +41,22 @@ export interface A11yBarChartConfig {
   showExport?: boolean;
   explanationExpanded?: boolean;
   glossaryExpanded?: boolean;
+  /**
+   * Opt-in localStorage key for remembering whether Explain and Glossary are open. Charts sharing a
+   * key restore the saved state when they load (it wins over `explanationExpanded`/`glossaryExpanded`
+   * at that point) and save each user toggle. Nothing is stored unless a key is set; unavailable or
+   * malformed storage falls back to the defaults.
+   */
+  disclosureStorageKey?: string;
   showCounts?: boolean;
   showPercentages?: boolean;
   showTotal?: boolean;
+  /**
+   * Show bars for categories whose reported value is zero. Default true. When false, unsuppressed
+   * zero categories leave the bar list and are named in a sentence after the total instead; the
+   * data table, CSV, explanation, and events still include every row. Suppressed rows always show.
+   */
+  showZeroValues?: boolean;
   /** Experimental category cards on hover, focus, or activation. Default false. */
   showDetails?: boolean;
   /** Optional outcome encoding for comparable bars with targets. Default none. */
@@ -71,9 +84,11 @@ export interface ResolvedA11yBarChartConfig {
   showExport: boolean;
   explanationExpanded: boolean;
   glossaryExpanded: boolean;
+  disclosureStorageKey?: string;
   showCounts: boolean;
   showPercentages: boolean;
   showTotal: boolean;
+  showZeroValues: boolean;
   showDetails: boolean;
   targetStyle: A11yBarChartTargetStyle;
   positiveDirection: 'above' | 'below';
@@ -168,6 +183,10 @@ export interface A11yBarChartSemanticModel {
   indicators: string[];
   warnings: string[];
   hasMissingValues: boolean;
+  /** Ids of rows left out of the bar list because `showZeroValues` is false. */
+  hiddenRowIds: string[];
+  /** Sentence naming the hidden zero-value categories, or '' when none are hidden. */
+  zeroValuesNote: string;
 }
 
 export interface BarModelOptions {
@@ -195,3 +214,25 @@ export interface ValidationSuccess<T> {
 export type BarValidationResult = ValidationSuccess<A11yBarChartDatum[]> | ValidationFailure;
 
 import type { MessageDictionary } from './messages.js';
+
+/** What a host export action receives when its button is activated. */
+export interface A11yBarChartExportContext {
+  chartTitle: string;
+  /** File-name-safe version of the title, without an extension. */
+  fileName: string;
+  /** Same cells as the CSV download (metadata, header, categories, total) as plain text. */
+  rows: string[][];
+  /** The CSV text the built-in download uses, without the byte-order mark. */
+  csv: string;
+  /** A copy of the semantic model, with suppressed values already redacted. */
+  model: A11yBarChartSemanticModel;
+}
+
+/** A host-provided download, such as an Excel workbook, shown next to Download CSV. */
+export interface A11yBarChartExportAction {
+  /** Unique per chart; also used as the button's focus key. */
+  id: string;
+  /** Visible button text. */
+  label: string;
+  run: (context: A11yBarChartExportContext) => void | Promise<void>;
+}

@@ -1,4 +1,4 @@
-# `@a11y-charts/bar-chart`
+# `@mzebley-aem/bar-chart`
 
 Framework-free horizontal bar chart package for accessible reporting. The
 consumer supplies the current dataset; filtering and selection stay in the
@@ -8,9 +8,9 @@ the component contract.
 ## Use the component
 
 ```ts
-import '@a11y-charts/bar-chart/define';
-import '@a11y-charts/bar-chart/styles.css';
-import type { A11yBarChartElement } from '@a11y-charts/bar-chart';
+import '@mzebley-aem/bar-chart/define';
+import '@mzebley-aem/bar-chart/styles.css';
+import type { A11yBarChartElement } from '@mzebley-aem/bar-chart';
 
 const chart = document.querySelector<A11yBarChartElement>('a11y-bar-chart')!;
 chart.chartTitle = 'By Sex';
@@ -70,8 +70,9 @@ experiment and includes an **Explore hover and focus cards** switch.
   Close buttons or other keyboard stops, matching the line chart cards.
   Leaving a pinned category with the keyboard closes its card. Escape on the
   bar retains focus and does not reopen the preview.
-- Cards float near their category on wide screens and join the reading flow
-  at 36rem and below. When a wide-screen card cannot fit above or below its
+- Cards float near their category on wide charts and join the reading flow
+  when the chart itself is 36rem wide or less, so a chart in a narrow grid
+  column on a wide screen also uses the compact layout. When a wide card cannot fit above or below its
   category in the viewport, it also joins the reading flow.
 
 These are nonmodal disclosure regions, with native toggle buttons exposing
@@ -164,7 +165,8 @@ npm run demo:build --prefix packages/bar-chart
 `exportCsv`, `scaleLargest`, `scalePopulationShare`, `missingValue`,
 `suppressedValue`, `suppressionNote`, `noDefinitions`, `glossary`, `hideGlossary`, `noContext`, `summaryNoData`,
 `summaryAllZero.zero`, `summaryAllZero.one`, `summaryAllZero.two`,
-`summaryAllZero.few`, `summaryAllZero.many`, `summaryAllZero.other`, `summaryTotal`,
+`summaryAllZero.few`, `summaryAllZero.many`, `summaryAllZero.other`,
+`zeroValuesNote.one`, `zeroValuesNote.other` (and the other plural forms), `summaryTotal`,
 `summaryCategoryShare`, `summaryCategoryValue`, `summaryLargestCategory`,
 `summaryLargestCategoryShare`, `summaryTiedLargestCategories`,
 `summaryTiedLargestCategoriesShare`, `summaryReportedCategory`,
@@ -198,10 +200,31 @@ create invisible keyboard stops.
 
 `showSummary`, `showContext`, `showActions`, `showExplanation`,
 `showGlossary`, and `showExport` default to `true`; `showCounts`,
-`showPercentages`, and `showTotal` also default to `true`. The
+`showPercentages`, and `showTotal` also default to `true`.
+
+`showZeroValues` defaults to `true`. Set it to `false` for long category lists
+where many values are zero: categories with a reported value of zero leave the
+bar list, and a sentence after the total names them ("Categories with values
+of zero: Beta and Delta."; message `zeroValuesNote`, `{labels}` and `{count}`).
+The data table, CSV, explanation, getters, and events still include every
+row, and the semantic model lists the hidden ids in `hiddenRowIds`. Zeros that
+read as Suppressed (chart-level `suppressed`) are never hidden. The option
+passes through `<a11y-bar-chart-group>` config to its chart.
+
+The
 `explanationExpanded` and `glossaryExpanded` options set disclosure preferences
 when their input values change. Otherwise, user-opened state survives data and
 unrelated configuration updates.
+
+To remember Explain and Glossary across charts and page loads, set
+`config.disclosureStorageKey` to a `localStorage` key. Each chart with that key
+restores the saved state when it loads (the saved choice wins over
+`explanationExpanded`/`glossaryExpanded` at that moment) and saves only the
+disclosure the user toggles, keeping other fields in the stored record. Charts
+already on the page do not change when another chart is toggled. Nothing is
+stored without a key, and blocked, missing, or malformed storage falls back to
+the defaults. The `a11y-bar-chart-disclosure-change` event still fires, and the
+option passes through `<a11y-bar-chart-group>` config.
 
 `context` and `dataNote` accept plain text or supported sanitized rich HTML.
 Both appear in dialog and inline full-data views; authored content is converted
@@ -380,9 +403,59 @@ Additional message keys: `targetHeader`, `csvTargetHeader`, `targetUnavailable`,
 The French and Spanish demo catalogs include these keys. The Reporting status
 example demonstrates range, numeric, and missing-value comparisons.
 
+## Layout and sizing
+
+`<a11y-bar-chart>` and `<a11y-bar-chart-group>` are CSS size containers, so
+their compact layout follows the chart's own width (36rem for the chart, 42rem
+for the group) rather than the viewport. The data dialog still follows the
+viewport because it covers the screen.
+
+Size containment means a chart does not grow to fit its content. In normal
+block flow and in grid or `flex: 1` cells it fills the space it is given. In a
+shrink-to-fit parent (a plain `display: flex` row with default item sizing,
+`inline-block`, or an absolutely positioned box) it falls back to 20rem, the
+320 px reflow width. Give the chart, or the wrapper element around it, a width
+there, for example `width: 100%` or `flex: 1 1 0%; min-width: 0`.
+
+## Server rendering (SSR) and prerendering
+
+The package root and `/define` evaluate classes that extend `HTMLElement`, so
+importing them in Node throws `ReferenceError: HTMLElement is not defined`. Use
+the `/loader` entry from code that also runs on the server:
+
+```ts
+import { loadA11yBarChart } from '@mzebley-aem/bar-chart/loader';
+
+await loadA11yBarChart(); // true in a browser once `<a11y-bar-chart>` and `<a11y-bar-chart-group>` are registered; false on the server
+```
+
+`/loader` has no static imports. In a browser it lazily imports `/define`, so it
+registers the same constructors the package root exports; repeated calls share
+one load. Outside a browser it resolves to `false` and loads nothing. The build
+checks this in a DOM-free Node process. Type-only imports from the package root
+(`import type`) are erased and stay safe.
+
+In Angular (including SSR and prerendering), call it after the first browser render:
+
+```ts
+import { Component, afterNextRender } from '@angular/core';
+import { loadA11yBarChart } from '@mzebley-aem/bar-chart/loader';
+
+@Component({ /* ... */ })
+export class ReportChartComponent {
+  constructor() {
+    afterNextRender(() => { void loadA11yBarChart(); });
+  }
+}
+```
+
+Keep `CUSTOM_ELEMENTS_SCHEMA` on the module or component. The tag renders as an
+empty element on the server and upgrades once the loader runs. Properties Angular sets
+before then (such as `[data]` bindings) are applied when the element upgrades.
+
 ## Server helpers and CSV metadata
 
-Import pure helpers from `@a11y-charts/bar-chart/core` in Node or SSR code. The
+Import pure helpers from `@mzebley-aem/bar-chart/core` in Node or SSR code. The
 normal package entry exports the browser element and requires DOM globals.
 The build checks the `./core` entry in a separate Node process.
 
@@ -429,9 +502,9 @@ flags together. Existing Explain/Glossary preferences and an open Data view
 survive selection updates. At narrow widths the selector appears above the chart.
 
 ```ts
-import '@a11y-charts/bar-chart/define';
-import '@a11y-charts/bar-chart/styles.css';
-import type { A11yBarChartGroupElement } from '@a11y-charts/bar-chart';
+import '@mzebley-aem/bar-chart/define';
+import '@mzebley-aem/bar-chart/styles.css';
+import type { A11yBarChartGroupElement } from '@mzebley-aem/bar-chart';
 
 const group = document.querySelector<A11yBarChartGroupElement>('a11y-bar-chart-group')!;
 group.config = { scaleMode: 'largest', scaleMaximum: 322 };
@@ -546,5 +619,39 @@ consistent with their supplied numeric data.
 
 Data views offer Download CSV when `showExport` is enabled. The download exports
 the formatted display values, carries selected context, authored explanation,
-notes, and totals, and begins with a UTF-8 byte-order mark. The package offers
-no workbook export; applications that need one can build it from the semantic model.
+notes, and totals, and begins with a UTF-8 byte-order mark. The package has no
+workbook dependency; hosts add their own downloads with `exportActions`.
+
+## Host export actions (for example Excel)
+
+Set the `exportActions` property to add buttons after Download CSV in the data
+dialog or inline data view. They follow `showExport`, and the group forwards
+them to its chart.
+
+```ts
+import * as XLSX from 'xlsx';
+
+chart.exportActions = [{
+  id: 'xlsx',
+  label: 'Download Excel',
+  run: ({ rows, fileName }) => {
+    const book = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(book, XLSX.utils.aoa_to_sheet(rows), 'Data');
+    XLSX.writeFile(book, `${fileName}.xlsx`);
+  }
+}];
+```
+
+`run` receives `chartTitle`, a file-name-safe `fileName` (no extension),
+`rows` (the CSV's cells as plain text: metadata, header, one row per category,
+total), `csv` (the CSV text without the byte-order mark), and a copy of the
+semantic `model`. Suppressed values are already redacted in all of them.
+`rows` holds display text such as `"1,234"`; use `model.rows[].value` and
+`percentage` for numeric cells. Cells are not formula-escaped, so writers that
+evaluate formulas must escape them (SheetJS `aoa_to_sheet` keeps strings as
+text). `buildBarExportRows(model, options)` builds the same rows in Node from
+`/core`.
+
+Actions need a unique non-empty `id` and `label` and a `run` function; others
+are dropped. If `run` throws or rejects, the chart announces the localized
+`exportFailed` message and fires `a11y-bar-chart-error` with code `exportFailed`.

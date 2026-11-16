@@ -23,12 +23,17 @@ try {
     if (typeof globalThis.HTMLElement !== 'undefined') throw new Error('Expected DOM-free Node.');
     const model = core.buildSegmentedBarModel([{ id: 'smoke', label: 'Smoke', value: 1 }]);
     if (model.total !== 1 || !core.buildSegmentedBarCsv(model).includes('Smoke')) throw new Error('Packed core failed.');
+    const loader = await import('${manifest.name}/loader');
+    if (await loader.loadA11ySegmentedBarChart() !== false) throw new Error('Packed loader should resolve false without a DOM.');
   `;
   execFileSync(process.execPath, ['--input-type=module', '-e', runtimeSmoke], { cwd: consumer, stdio: 'inherit' });
   await writeFile(join(consumer, 'smoke.mts'), `
     import { buildSegmentedBarModel, buildSegmentedBarCsv, type A11ySegmentedBarChartDatum } from '${manifest.name}/core';
     import { A11ySegmentedBarChartElement } from '${manifest.name}';
     import { defineA11ySegmentedBarChart } from '${manifest.name}/define';
+    import { loadA11ySegmentedBarChart } from '${manifest.name}/loader';
+    const loaded: Promise<boolean> = loadA11ySegmentedBarChart();
+    void loaded;
     const rows: A11ySegmentedBarChartDatum[] = [{ id: 'x', label: 'X', value: 2 }];
     buildSegmentedBarCsv(buildSegmentedBarModel(rows));
     void A11ySegmentedBarChartElement; void defineA11ySegmentedBarChart;
@@ -36,10 +41,10 @@ try {
   execFileSync(process.execPath, [resolve(root, 'node_modules/typescript/bin/tsc'), '--strict', '--noEmit', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--target', 'ES2022', 'smoke.mts'], { cwd: consumer, stdio: 'inherit' });
 
   const dist = join(consumer, 'node_modules', ...manifest.name.split('/'), 'dist');
-  for (const name of ['index.js', 'core.js', 'define.js', 'chart.js', 'styles.css']) {
+  for (const name of ['index.js', 'core.js', 'define.js', 'loader.js', 'chart.js', 'styles.css']) {
     await readFile(join(dist, name));
   }
-  const javascript = await Promise.all(['index.js', 'core.js', 'define.js', 'chart.js'].map((name) => readFile(join(dist, name), 'utf8')));
+  const javascript = await Promise.all(['index.js', 'core.js', 'define.js', 'loader.js', 'chart.js'].map((name) => readFile(join(dist, name), 'utf8')));
   await init;
   for (const source of javascript) {
     const [imports] = parse(source);
@@ -47,6 +52,9 @@ try {
       if (!item.n.startsWith('.') && !item.n.startsWith('/')) throw new Error(`Packed artifact has a bare runtime import: ${item.n}`);
     }
   }
+  const [loaderImports] = parse(await readFile(join(dist, 'loader.js'), 'utf8'));
+  if (loaderImports.some((item) => item.d === -1)) throw new Error('loader.js must not have static imports.');
+  if (!loaderImports.some((item) => item.n === './define.js')) throw new Error('loader.js must lazily import ./define.js.');
   console.log(`Packed ${manifest.name}: core runtime, declarations, standalone JS, and CSS verified.`);
 } finally {
   await rm(temp, { recursive: true, force: true });

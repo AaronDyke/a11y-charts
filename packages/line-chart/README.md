@@ -1,4 +1,4 @@
-# `@a11y-charts/line-chart`
+# `@mzebley-aem/line-chart`
 
 Framework-free `a11y-line-chart` autonomous custom element.
 
@@ -378,9 +378,27 @@ the target-suppression and suppression-validation messages. The derived
 `actualSuppressed` boolean remains only on semantic points and the point-change
 event.
 
+## Server rendering (SSR) and prerendering
+
+The package root and `/define` evaluate classes that extend `HTMLElement`, so
+importing them in Node throws `ReferenceError: HTMLElement is not defined`. Use
+the `/loader` entry from code that also runs on the server:
+
+```ts
+import { loadA11yLineChart } from '@mzebley-aem/line-chart/loader';
+
+await loadA11yLineChart(); // true in a browser once `<a11y-line-chart>` are registered; false on the server
+```
+
+`/loader` has no static imports. In a browser it lazily imports `/define`, so it
+registers the same constructors the package root exports; repeated calls share
+one load. Outside a browser it resolves to `false` and loads nothing. The build
+checks this in a DOM-free Node process. Type-only imports from the package root
+(`import type`) are erased and stay safe.
+
 ## Server helpers and CSV metadata
 
-Import pure helpers from `@a11y-charts/line-chart/core` in Node or SSR code. The
+Import pure helpers from `@mzebley-aem/line-chart/core` in Node or SSR code. The
 normal package entry exports the browser element and requires DOM globals.
 The build checks the `./core` entry in a separate Node process.
 

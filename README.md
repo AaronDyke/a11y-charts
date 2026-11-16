@@ -110,10 +110,14 @@ chart together.
 
 ## Direct consumption
 
+The packages are published to GitHub Packages as `@mzebley-aem/*`; see
+[RELEASING.md](./RELEASING.md) for installing (an `.npmrc` and a `read:packages`
+token) and for cutting a release.
+
 ```ts
-import '@a11y-charts/line-chart/define';
-import '@a11y-charts/line-chart/styles.css';
-import type { A11yLineChartElement } from '@a11y-charts/line-chart';
+import '@mzebley-aem/line-chart/define';
+import '@mzebley-aem/line-chart/styles.css';
+import type { A11yLineChartElement } from '@mzebley-aem/line-chart';
 
 const chart = document.querySelector<A11yLineChartElement>('a11y-line-chart');
 
@@ -248,13 +252,15 @@ through explicitly named `reference:start`, `reference:build`, and `reference:te
 commands (or `ng`). Its old dependency tree still has audit findings; this work
 does not upgrade or claim to secure that reference application.
 
-Both packages expose `@a11y-charts/{line-chart|bar-chart}/core` for DOM-free
+Both packages expose `@mzebley-aem/{line-chart|bar-chart}/core` for DOM-free
 semantic/validation/message helpers and CSV generation. Pass plain-text metadata
 as `contextText` and `dataNoteText` for server exports. These fields take
 precedence even when empty. HTML `context`/`dataNote` conversion requires a browser
 DOM; server callers receive an explicit error rather than different parsing.
 Browser elements and registration continue to use the normal package and
-`/define` entries.
+`/define` entries. Code that also runs on the server (Angular SSR, prerendering)
+should register through each package's `/loader` entry instead, which has no
+static imports and does nothing outside a browser.
 
 
 ## Shared source, standalone outputs
@@ -387,3 +393,7 @@ Section-specific labels, definitions, and explanatory sentences live in
 `single-value-content.ts`; source counts remain in `data.ts`. Meeting counts
 are compared with complaint totals as in the supplied data; the unfilled track
 does not represent an additional reported meeting outcome.
+
+## License
+
+MIT, copyright (c) 2026 Weiss Center. See [LICENSE](./LICENSE). The line chart bundles ECharts, ZRender, and tslib; their licenses ship in its `dist/` folder.

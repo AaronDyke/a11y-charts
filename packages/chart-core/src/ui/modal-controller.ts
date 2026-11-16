@@ -8,7 +8,7 @@ export interface ModalControllerOptions {
 }
 
 // Symbol.for shares opening order across separately bundled chart packages.
-const modalStackKey = Symbol.for('@a11y-charts/modal-stack');
+const modalStackKey = Symbol.for('@mzebley-aem/modal-stack');
 type ModalDocument = Document & { [modalStackKey]?: HTMLDialogElement[] };
 function modalStack(document: ModalDocument): HTMLDialogElement[] {
   return document[modalStackKey] ??= [];

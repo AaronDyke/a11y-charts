@@ -24,5 +24,13 @@ import { defineA11yBarChart, defineA11yBarChartGroup } from './index.js';
 defineA11yBarChart();
 defineA11yBarChartGroup();
 `);
+// SSR-safe loader: no static imports, so Node can import it without a DOM.
+await writeFile(resolve(dist, 'loader.js'), `let pending;
+export function loadA11yBarChart() {
+  if (typeof customElements === 'undefined' || typeof HTMLElement === 'undefined') return Promise.resolve(false);
+  pending ??= import('./define.js').then(() => true, (error) => { pending = undefined; throw error; });
+  return pending;
+}
+`);
 await build(createStylesConfig({ root }));
 console.log('Built shared-identity bar ESM entries, standalone browser bundle, declarations, and stylesheet.');

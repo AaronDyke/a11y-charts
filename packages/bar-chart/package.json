@@ -1,8 +1,20 @@
 {
-  "name": "@a11y-charts/bar-chart",
-  "version": "0.0.0",
+  "name": "@mzebley-aem/bar-chart",
+  "version": "0.1.0",
   "description": "Framework-free, accessible horizontal bar chart custom element",
-  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mzebley-aem/a11y-charts.git",
+    "directory": "packages/bar-chart"
+  },
+  "homepage": "https://github.com/mzebley-aem/a11y-charts/tree/main/packages/bar-chart#readme",
+  "bugs": {
+    "url": "https://github.com/mzebley-aem/a11y-charts/issues"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "type": "module",
   "engines": {
     "node": ">=24.0.0 <27"
@@ -22,6 +34,10 @@
     "./define": {
       "types": "./dist/types/bar-chart/src/define.d.ts",
       "import": "./dist/define.js"
+    },
+    "./loader": {
+      "types": "./dist/types/bar-chart/src/loader.d.ts",
+      "import": "./dist/loader.js"
     },
     "./chart.js": "./dist/chart.js",
     "./styles.css": "./dist/styles.css"

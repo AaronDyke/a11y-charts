@@ -26,7 +26,13 @@ export interface BarCsvOptions {
   suppressed?: boolean;
 }
 
-export function buildBarCsv(model: A11yBarChartSemanticModel, options: BarCsvOptions = {}): string {
+/**
+ * The rows the CSV download contains (metadata, header, one row per category, total) as plain,
+ * unescaped text cells. Host exports such as a workbook use this so they match the CSV exactly,
+ * including suppression redaction. Spreadsheet writers that evaluate formulas must escape cells
+ * themselves; `buildBarCsv` does that for CSV.
+ */
+export function buildBarExportRows(model: A11yBarChartSemanticModel, options: BarCsvOptions = {}): string[][] {
   const locale = options.locale ?? 'en-US';
   const metadata: string[][] = [];
   if (options.chartTitle?.trim()) metadata.push([message('title', options.messages, {}, locale), options.chartTitle.trim()]);
@@ -54,5 +60,9 @@ export function buildBarCsv(model: A11yBarChartSemanticModel, options: BarCsvOpt
     ...model.rows.map((row) => [row.label, row.valueText, row.percentageText, ...(hasTargets ? [row.targetText] : [])]),
     [options.totalHeader ?? message('csvTotalHeader', options.messages, {}, locale), model.totalText, '', ...(hasTargets ? [''] : [])]
   ];
-  return rows.map((row) => row.map((cell) => encodeCsvCell(String(cell))).join(',')).join('\r\n');
+  return rows.map((row) => row.map(String));
+}
+
+export function buildBarCsv(model: A11yBarChartSemanticModel, options: BarCsvOptions = {}): string {
+  return buildBarExportRows(model, options).map((row) => row.map((cell) => encodeCsvCell(cell)).join(',')).join('\r\n');
 }

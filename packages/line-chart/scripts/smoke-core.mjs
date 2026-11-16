@@ -1,4 +1,4 @@
-const core = await import('@a11y-charts/line-chart/core');
+const core = await import('@mzebley-aem/line-chart/core');
 if (typeof globalThis.HTMLElement !== 'undefined') throw new Error('Smoke must run without a DOM global.');
 if (typeof core.resolveConfig !== 'function' || typeof core.buildSemanticModel !== 'function' || typeof core.validateData !== 'function') {
   throw new Error('The built line core entry is missing expected helpers.');

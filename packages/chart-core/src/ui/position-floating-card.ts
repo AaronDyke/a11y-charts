@@ -4,7 +4,8 @@
 export function positionFloatingCard(card: HTMLElement, anchor: DOMRect, preferredSide: 'above' | 'below' = 'below', inFlowClass = 'in-flow'): void {
   card.classList.remove('above', inFlowClass);
   for (const property of ['left', 'right', 'top', 'bottom', 'inset-inline-start', 'inset-inline-end', 'inset-block-start', 'inset-block-end']) card.style.removeProperty(property);
-  if (window.matchMedia('(max-width: 36rem)').matches) return;
+  // The stylesheet decides the compact layout (viewport or container query); a static card stays in flow.
+  if (getComputedStyle(card).position === 'static') return;
 
   const gap = 8;
   const size = card.getBoundingClientRect();

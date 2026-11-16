@@ -30,7 +30,7 @@ describe('bar chart validation and configuration', () => {
     expect(resolveConfig({ locale: 'no_such_locale', countDecimals: -1, headingLevel: 9 } as unknown as A11yBarChartConfig)).toEqual({
       scaleMode: 'largest', inferTotal: true, dataView: 'dialog', percentScale: 'whole', showSummary: true, showContext: true,
       showActions: true, showExplanation: true, showGlossary: true, showExport: true, explanationExpanded: false,
-      glossaryExpanded: false, showCounts: true, showPercentages: true, showTotal: true, showDetails: false, locale: 'en-US', countDecimals: 0,
+      glossaryExpanded: false, showCounts: true, showPercentages: true, showTotal: true, showZeroValues: true, showDetails: false, locale: 'en-US', countDecimals: 0,
       percentageDecimals: 2, headingLevel: 2, announceChanges: true,
       targetStyle: 'none', positiveDirection: 'above'
     });

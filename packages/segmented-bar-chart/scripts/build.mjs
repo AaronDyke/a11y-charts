@@ -23,5 +23,13 @@ await writeFile(resolve(dist, 'define.js'), `export { A11Y_SEGMENTED_BAR_CHART_T
 import { defineA11ySegmentedBarChart } from './index.js';
 defineA11ySegmentedBarChart();
 `);
+// SSR-safe loader: no static imports, so Node can import it without a DOM.
+await writeFile(resolve(dist, 'loader.js'), `let pending;
+export function loadA11ySegmentedBarChart() {
+  if (typeof customElements === 'undefined' || typeof HTMLElement === 'undefined') return Promise.resolve(false);
+  pending ??= import('./define.js').then(() => true, (error) => { pending = undefined; throw error; });
+  return pending;
+}
+`);
 await build(createStylesConfig({ root }));
 console.log('Built shared-identity segmented-bar ESM entries, standalone browser bundle, declarations, and stylesheet.');
