@@ -1,0 +1,57 @@
+---
+title: Segmented bar chart
+description: The breakdown of a total, or a single value compared with a reference total.
+---
+
+import ChartExample from '../../../components/ChartExample.astro';
+
+`<a11y-segmented-bar-chart>` draws one bar divided into proportional segments. It has two modes, set with `config.mode`.
+
+## Breakdown
+
+The default mode shows how a total divides into categories. The chart infers the total only from complete, valid rows, and an explicit `total` must match the breakdown. It never invents a remainder, so supply the remainder as its own named category.
+
+<ChartExample
+	type="segmented"
+	properties={{
+		chartTitle: 'Pending complaints',
+		data: [
+			{ id: 'hearing', label: 'Pending a hearing', value: 43 },
+			{ id: 'other', label: 'Other pending complaints', value: 208 },
+		],
+		total: 251,
+		config: { highlightedId: 'hearing', showDetails: true },
+	}}
+/>
+
+A breakdown displays at most four segments. With more categories, the three largest stay separate and the rest combine into **Other categories**. `segmentOrder` and `separateCategoryIds` control which ones stay separate. The data table and CSV always keep every original category.
+
+## Comparison
+
+`mode: 'comparison'` compares exactly one value with an explicit reference total. The unfilled part of the track isn't a category: it has no legend entry or exported row.
+
+<ChartExample
+	type="segmented"
+	properties={{
+		chartTitle: 'Resolution meetings',
+		config: { mode: 'comparison', showDetails: true, percentageDecimals: 1 },
+		data: [{ id: 'meetings', label: 'Meetings held', value: 251 }],
+		total: 614,
+		valueLabel: 'Meetings',
+		totalLabel: 'complaints filed',
+	}}
+/>
+
+When the value and the total are in different units, explain it in the chart's `context`. The chart doesn't infer a one-to-one relationship between them.
+
+## Details and keyboard
+
+With `showDetails: true`, hovering or focusing a category previews its card, and click, tap, Enter, or Space keeps it open. Escape dismisses it. The arrow keys, Home, and End move between categories and stop at the ends.
+
+## Presentation
+
+`config.presentation` is `full` (the default) or `compact`. `href` turns the title into a link, and a compact chart with no action or detail controls makes the whole card the link. Use `theme.segments[id]` to give a category a stable `color` and `pattern` (`none`, `diagonal`, `dots`, or `horizontal`).
+
+## Full reference
+
+Until the complete API is ported here, the [segmented bar chart README](https://github.com/mzebley-aem/a11y-charts/blob/main/packages/segmented-bar-chart/README.md) is the full reference, including the suppression table and grouping rules.

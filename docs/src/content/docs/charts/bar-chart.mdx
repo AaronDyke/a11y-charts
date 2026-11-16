@@ -1,0 +1,56 @@
+---
+title: Bar chart
+description: Horizontal category counts and population shares, with definitions, suppression, and CSV.
+---
+
+import ChartExample from '../../../components/ChartExample.astro';
+
+`<a11y-bar-chart>` shows counts and population shares for a set of categories. Each category gets a horizontal bar labeled with its count and percentage, and the chart states the total.
+
+<ChartExample
+	type="bar"
+	headingLevel={2}
+	properties={{
+		chartTitle: 'By race and ethnicity',
+		data: [
+			{ id: 'aian', label: 'American Indian or Alaska Native', value: 3 },
+			{ id: 'asian', label: 'Asian', value: 9 },
+			{ id: 'black', label: 'Black or African American', value: 31 },
+			{ id: 'hispanic', label: 'Hispanic or Latino', value: 42 },
+			{ id: 'multi', label: 'Two or more races', value: 11 },
+			{ id: 'white', label: 'White', value: 58 },
+		],
+		total: 154,
+		config: { scaleMode: 'largest' },
+		context: 'Children served by race and ethnicity (fictional data).',
+	}}
+/>
+
+## Data
+
+Each record has a stable, non-empty `id`, a `label`, and a nonnegative `value` or `null` for missing. Add an optional `definition` (sanitized rich text) to put the category in the glossary.
+
+Supply an authoritative `total` when you have one, especially when values are suppressed. Without one, the chart can't report percentages for an incomplete set.
+
+## Suppression and missing values
+
+The application decides which values to protect, before they reach the chart. Replace each protected value with `0` and set `suppressed` once for the whole chart; zeros then read as **Suppressed** everywhere, including the table and CSV. `null` always means **Not reported**, whatever the flag.
+
+```ts
+chart.data = rowsWithProtectedValuesZeroed;
+chart.suppressed = true;
+```
+
+`filtered` adds an indicator that the data reflects a filter and keeps numeric zeros visible.
+
+## Grouped population views
+
+`<a11y-bar-chart-group>` lets a reader switch between related breakdowns (for example by sex, by age, by race) with shared scales. See the [bar chart README](https://github.com/mzebley-aem/a11y-charts/blob/main/packages/bar-chart/README.md#grouped-population-views) for its contract.
+
+## Events
+
+`a11y-bar-chart-ready`, `a11y-bar-chart-error`, `a11y-bar-chart-data-change`, `a11y-bar-chart-data-view-change`, and `a11y-bar-chart-disclosure-change`. The bar chart has no reader-changeable settings, so it has no settings-change event.
+
+## Full reference
+
+Until the complete API is ported here, the [bar chart README](https://github.com/mzebley-aem/a11y-charts/blob/main/packages/bar-chart/README.md) is the full reference for visibility options, targets and target ranges, category cards, messages, and host export actions.

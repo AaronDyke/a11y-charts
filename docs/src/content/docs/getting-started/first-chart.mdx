@@ -1,0 +1,68 @@
+---
+title: Your first chart
+description: Place a chart element, give it data through properties, and listen for its events.
+---
+
+import ChartExample from '../../../components/ChartExample.astro';
+
+Every chart follows the same pattern: put the element in the page, then assign its data and options as JavaScript properties. The chart renders its title, summary, visual, data table, and actions itself.
+
+<ChartExample
+	type="bar"
+	headingLevel={2}
+	properties={{
+		chartTitle: 'By sex',
+		data: [
+			{ id: 'male', label: 'Male', value: 14 },
+			{ id: 'female', label: 'Female', value: 13 },
+		],
+		total: 27,
+	}}
+/>
+
+## Properties and attributes
+
+Structured inputs like `data`, `config`, `theme`, and `messages` are **properties**. Simple, string-shaped options can also be written as **attributes** in markup:
+
+```html
+<a11y-bar-chart chart-title="By sex" heading-level="3" data-view="inline"></a11y-bar-chart>
+```
+
+- Shared attributes include `chart-title`, `subtitle`, `locale`, `heading-level`, `data-view`, `percent-scale`, `filtered`, and `suppressed`.
+- A valid attribute takes precedence over the matching `config` value. An invalid attribute is ignored and the config value applies.
+- Boolean attributes such as `suppressed` follow HTML presence rules: remove the attribute for false.
+- `messages` can also be an attribute holding a JSON object of text overrides.
+
+Set `heading-level` so the chart title fits the page outline. It defaults to `2`.
+
+## Update the data
+
+Assign a new array to replace the data. The chart re-renders, keeps an open data view usable, and announces the change. It never filters or sorts what you give it: filtering and selection belong to the application.
+
+```ts
+chart.data = nextRows;
+chart.filtered = true; // adds a "Filtered" indicator
+```
+
+## Listen for events
+
+Events bubble and are prefixed with the element name, for example on the bar chart:
+
+| Event | When |
+| --- | --- |
+| `a11y-bar-chart-ready` | The first usable render. |
+| `a11y-bar-chart-data-change` | Data, total, or error state was replaced. `detail` carries copied `data` and the semantic `model`. |
+| `a11y-bar-chart-error` | Validation or configuration failed. `detail.code` is machine-readable. |
+
+```ts
+chart.addEventListener('a11y-bar-chart-error', (event) => {
+	console.warn(event.detail.code, event.detail.message);
+});
+```
+
+Invalid data shows a useful error state in the chart instead of throwing, so check for the error event during integration.
+
+## Next steps
+
+- Pick the chart for your data: [line](/charts/line-chart/), [bar](/charts/bar-chart/), or [segmented bar](/charts/segmented-bar-chart/).
+- Decide how readers reach the full numbers with [data views](/guides/data-views/).

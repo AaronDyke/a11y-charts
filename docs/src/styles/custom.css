@@ -1,0 +1,53 @@
+/*
+ * Live chart examples. The charts render into Light DOM, so the `not-content`
+ * class on the wrapper keeps Starlight's prose styles (tables, headings, lists)
+ * from leaking into them.
+ *
+ * The charts do not have a dark theme yet, so the stage stays a light surface
+ * in both site themes.
+ */
+.chart-example {
+	color-scheme: light;
+	background: #ffffff;
+	color: #1b1b1b;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 0.5rem;
+	padding: 1.25rem;
+	margin-block: 1.5rem 1rem;
+}
+
+/* The bar chart draws its own white, bordered card, so it needs no frame. */
+.chart-example:has(> a11y-bar-chart) {
+	padding: 0;
+	border: 0;
+	background: transparent;
+}
+
+/*
+ * The line chart's root carries page-level margins meant for a standalone
+ * report. Inside the frame they only add empty space. This is a docs-only
+ * adjustment and doesn't change what consumers render.
+ */
+.chart-example > a11y-line-chart > .a11y-line-chart__root {
+	margin-block: 0;
+	padding-block-end: 0;
+}
+
+/* The line chart root already pads its sides by 1rem. */
+.chart-example:has(> a11y-line-chart) {
+	padding-inline: 0.25rem;
+}
+
+@media (max-width: 30rem) {
+	.chart-example {
+		padding: 0.75rem;
+	}
+
+	.chart-example:has(> a11y-line-chart) {
+		padding-inline: 0;
+	}
+}
+
+.chart-example + .expressive-code {
+	margin-block-start: 0;
+}

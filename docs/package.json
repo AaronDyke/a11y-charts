@@ -1,0 +1,21 @@
+{
+  "name": "a11y-charts-docs",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.43.1",
+    "@mzebley-aem/bar-chart": "file:../packages/bar-chart",
+    "@mzebley-aem/line-chart": "file:../packages/line-chart",
+    "@mzebley-aem/segmented-bar-chart": "file:../packages/segmented-bar-chart",
+    "astro": "^7.3.6",
+    "sharp": "^0.35.3"
+  },
+  "private": true
+}

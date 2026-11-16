@@ -1,0 +1,43 @@
+---
+title: Data views
+description: How readers reach a chart's complete data, and the dialog, inline, and none options.
+---
+
+import ChartExample from '../../../components/ChartExample.astro';
+
+Every chart can present its complete data as a table, with CSV export. `dataView` picks how readers reach it. It works the same way on all three charts, and the `data-view` attribute overrides `config.dataView` when its value is valid.
+
+| Value | What readers get |
+| --- | --- |
+| `dialog` (default) | A visible **Data** action that opens a native modal dialog with the table and CSV export. Escape closes it and focus returns to the action. |
+| `inline` | The same table in a native disclosure directly under the chart. |
+| `none` | No table, no data action, and no CSV. Use only when the same data is available elsewhere on the page. |
+
+With `dialog` and `inline`, a visually hidden copy of the table is always present for screen readers, so the numbers are reachable without opening anything. `none` is the only way to remove it.
+
+## Inline example
+
+<ChartExample
+	type="bar"
+	attributes={{ 'data-view': 'inline' }}
+	properties={{
+		chartTitle: 'By age',
+		data: [
+			{ id: 'under-3', label: 'Under 3', value: 21 },
+			{ id: '3-5', label: '3 to 5', value: 48 },
+			{ id: '6-12', label: '6 to 12', value: 63 },
+			{ id: '13-plus', label: '13 and older', value: 22 },
+		],
+		total: 154,
+	}}
+/>
+
+## Behavior with live data
+
+An open view stays usable when the data changes: a dialog keeps the same modal and the focused control, and an inline disclosure stays open. Switching to `none` while a view is open closes it and fires the chart's `-data-view-change` event with `open: false`.
+
+## Related options
+
+- `showActions: false` hides the action strip, including the dialog's **Data** action. It doesn't hide an inline disclosure.
+- `showExport: false` removes the CSV action from either view.
+- `context` and `dataNote` appear with the table, so readers who open the data see the same caveats as the chart.

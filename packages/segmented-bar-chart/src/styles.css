@@ -110,7 +110,7 @@ a11y-segmented-bar-chart caption { text-align: start; font-weight: 700; margin-b
 a11y-segmented-bar-chart th,
 a11y-segmented-bar-chart td { border: 1px solid var(--segmented-border); padding: .5rem; text-align: start; overflow-wrap: anywhere; }
 a11y-segmented-bar-chart .a11y-segmented-bar-chart__visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; border: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap; }
-a11y-segmented-bar-chart dialog { width: min(50rem, calc(100vw - 2rem)); max-width: calc(100vw - 2rem); max-height: calc(100dvh - 2rem); box-sizing: border-box; padding: 1.5rem; border: 2px solid var(--segmented-border); background: var(--segmented-surface); color: inherit; overflow: auto; }
+a11y-segmented-bar-chart dialog { width: min(50rem, calc(100vw - 2rem)); margin: auto; max-width: calc(100vw - 2rem); max-height: calc(100dvh - 2rem); box-sizing: border-box; padding: 1.5rem; border: 2px solid var(--segmented-border); background: var(--segmented-surface); color: inherit; overflow: auto; }
 a11y-segmented-bar-chart dialog::backdrop { background: rgb(0 0 0 / .5); }
 a11y-segmented-bar-chart details > summary { min-height: 44px; cursor: pointer; }
 a11y-segmented-bar-chart .a11y-segmented-bar-chart__compact .a11y-segmented-bar-chart__visual { display: block; }

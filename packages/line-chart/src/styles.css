@@ -242,6 +242,7 @@ a11y-line-chart :is(.a11y-line-chart__data-action, .a11y-line-chart__dialog-clos
 a11y-line-chart :is(.a11y-line-chart__data-action, .a11y-line-chart__dialog-close, .a11y-line-chart__inline-data > summary):focus-visible { outline: 3px solid var(--a11y-line-chart-focus-color, #005fcc); outline-offset: 2px; }
 a11y-line-chart .a11y-line-chart__data-dialog {
   box-sizing: border-box; width: min(60rem, calc(100vw - 2rem)); max-width: calc(100vw - 2rem);
+  margin: auto;
   max-height: min(85vh, 56rem); overflow: auto; padding: 1.5rem; border: 1px solid currentColor;
   color: CanvasText; background: Canvas;
 }

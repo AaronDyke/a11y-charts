@@ -1,0 +1,71 @@
+---
+/**
+ * Renders a live chart from the installed package build and, below it, the code
+ * that produces it. The snippet is generated from the same `properties` object
+ * the live chart receives, so the example and its code cannot drift apart.
+ */
+import { Code } from '@astrojs/starlight/components';
+
+type ChartType = 'line' | 'bar' | 'segmented';
+
+interface Props {
+	type: ChartType;
+	/** Element properties, assigned in order after the element is defined. */
+	properties: Record<string, unknown>;
+	/** Heading level for the chart title; 3 fits under a page's `##` sections. */
+	headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
+	/** Plain HTML attributes for the element (for example `data-view`). */
+	attributes?: Record<string, string>;
+	showCode?: boolean;
+}
+
+const CHARTS = {
+	line: { tag: 'a11y-line-chart', pkg: '@mzebley-aem/line-chart' },
+	bar: { tag: 'a11y-bar-chart', pkg: '@mzebley-aem/bar-chart' },
+	segmented: { tag: 'a11y-segmented-bar-chart', pkg: '@mzebley-aem/segmented-bar-chart' },
+} as const;
+
+const { type, properties, headingLevel = 3, attributes = {}, showCode = true } = Astro.props;
+const { tag: Tag, pkg } = CHARTS[type];
+
+/** JSON with bare identifier keys, closer to how the code is written by hand. */
+const literal = (value: unknown) =>
+	JSON.stringify(value, null, 2).replace(/"([A-Za-z_$][\w$]*)":/g, '$1:');
+
+const attributeText = Object.entries({ 'heading-level': String(headingLevel), ...attributes })
+	.map(([name, value]) => ` ${name}="${value}"`)
+	.join('');
+
+const snippet = [
+	`import '${pkg}/define';`,
+	`import '${pkg}/styles.css';`,
+	'',
+	`// <${Tag}${attributeText}></${Tag}>`,
+	`const chart = document.querySelector('${Tag}');`,
+	...Object.entries(properties).map(([key, value]) => `chart.${key} = ${literal(value)};`),
+].join('\n');
+---
+
+<div class="chart-example not-content">
+	<Tag
+		heading-level={headingLevel}
+		{...attributes}
+		data-example-properties={JSON.stringify(properties)}
+	/>
+</div>
+{showCode && <Code code={snippet} lang="ts" title="Example" />}
+
+<script>
+	import '@mzebley-aem/line-chart/define';
+	import '@mzebley-aem/bar-chart/define';
+	import '@mzebley-aem/segmented-bar-chart/define';
+	import '@mzebley-aem/line-chart/styles.css';
+	import '@mzebley-aem/bar-chart/styles.css';
+	import '@mzebley-aem/segmented-bar-chart/styles.css';
+
+	// The define imports above have upgraded every chart element on the page,
+	// so assigning here goes through each element's property setters.
+	for (const element of document.querySelectorAll<HTMLElement>('[data-example-properties]')) {
+		Object.assign(element, JSON.parse(element.dataset.exampleProperties ?? '{}'));
+	}
+</script>

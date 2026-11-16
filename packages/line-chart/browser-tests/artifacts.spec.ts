@@ -152,3 +152,30 @@ test('touch activation and forced-colors cards remain usable', async ({ page }) 
   await trigger.click();
   await expect(card).not.toBeVisible();
 });
+
+// Host pages often reset `* { margin: 0 }` (Starlight, Tailwind preflight),
+// which removes the browser default `margin: auto` that centers a modal dialog.
+const resetFixtures = {
+  line: { tag: 'a11y-line-chart', properties: { data: [{ x: '2024', actual: 35, target: 40 }, { x: '2025', actual: 45, target: 40 }] } },
+  bar: { tag: 'a11y-bar-chart', properties: { data: [{ id: 'a', label: 'Alpha', value: 35 }, { id: 'b', label: 'Beta', value: 45 }], total: 80 } },
+  segmented: { tag: 'a11y-segmented-bar-chart', properties: { data: [{ id: 'a', label: 'Alpha', value: 35 }, { id: 'b', label: 'Beta', value: 45 }], total: 80 } }
+} as const;
+
+for (const [kind, fixture] of Object.entries(resetFixtures)) {
+  test(`${kind} data dialog stays centered under a host margin reset`, async ({ page }) => {
+    await page.goto(`/${kind}?reset=1`);
+    await page.waitForFunction(tag => customElements.get(tag), fixture.tag);
+    await page.evaluate(({ tag, properties }) => { Object.assign(document.querySelector(tag)!, properties); }, fixture);
+    const chart = page.locator(fixture.tag);
+    await chart.getByRole('button', { name: 'View complete data', exact: true }).click();
+    const dialog = chart.locator('dialog');
+    await expect(dialog).toBeVisible();
+    const gaps = await dialog.evaluate(element => {
+      const box = element.getBoundingClientRect();
+      return { left: box.left, right: innerWidth - box.right, top: box.top, bottom: innerHeight - box.bottom };
+    });
+    expect(Math.abs(gaps.left - gaps.right)).toBeLessThanOrEqual(1);
+    expect(Math.abs(gaps.top - gaps.bottom)).toBeLessThanOrEqual(1);
+    expect(gaps.left).toBeGreaterThan(8);
+  });
+}
