@@ -9,7 +9,7 @@
     "watch": "npm run dev --prefix packages/line-chart",
     "test": "npm test --prefix packages/line-chart && npm test --prefix packages/bar-chart && npm test --prefix packages/segmented-bar-chart",
     "typecheck": "npm run typecheck --prefix packages/line-chart && npm run typecheck --prefix packages/bar-chart && npm run typecheck --prefix packages/segmented-bar-chart",
-    "verify": "npm test && npm run typecheck && npm run build",
+    "verify": "npm run test:scripts && npm test && npm run typecheck && npm run build",
     "browser:test": "npm run browser:test --prefix packages/line-chart",
     "reference:start": "ng serve",
     "reference:build": "ng build",
@@ -25,7 +25,8 @@
     "browser:dispute-resolution": "npm exec --prefix packages/line-chart -- playwright test --config packages/line-chart/playwright.dispute-resolution.config.mjs",
     "browser:segmented": "npm exec --prefix packages/line-chart -- playwright test --config packages/line-chart/playwright.segmented.config.mjs",
     "release:version": "node scripts/set-version.mjs",
-    "release:check": "node scripts/check-release.mjs"
+    "release:check": "node scripts/check-release.mjs",
+    "test:scripts": "node --test scripts/release-scripts.test.mjs"
   },
   "private": true,
   "dependencies": {

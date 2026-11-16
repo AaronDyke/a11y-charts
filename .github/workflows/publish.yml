@@ -33,10 +33,8 @@ jobs:
       # verify runs every package's tests, typecheck, build, and packed-tarball smoke check.
       - name: Verify
         run: npm run verify
+      # Skips versions already in the registry, so a partly failed release can be rerun.
       - name: Publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          for chart in line-chart bar-chart segmented-bar-chart; do
-            npm publish "./packages/$chart"
-          done
+        run: node scripts/publish-packages.mjs

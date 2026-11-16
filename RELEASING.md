@@ -34,10 +34,17 @@ The `Publish packages` workflow (`.github/workflows/publish.yml`) then:
 
 - confirms the tag matches every package version;
 - runs `npm run verify` (unit tests, typecheck, build, packed-tarball smoke checks);
-- publishes the three packages with the repository's `GITHUB_TOKEN`.
+- publishes the three packages with the repository's `GITHUB_TOKEN`
+  (`scripts/publish-packages.mjs`).
+
+If a release fails partway, rerun the workflow: versions already in the registry
+are skipped and the rest are published. Registry errors other than "not found"
+(for example an expired token) stop the release rather than being skipped.
 
 A version can be published only once. To fix a bad release, publish a new patch
-version. Use a prerelease version (for example `0.2.0-rc.1`) for pilot builds
+version. `release:version` and `release:check` accept only valid SemVer
+(`major.minor.patch` with an optional prerelease such as `-rc.1`, no build
+metadata). Use a prerelease version (for example `0.2.0-rc.1`) for pilot builds
 you may replace.
 
 To preview what will be published without publishing:
