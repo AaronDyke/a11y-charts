@@ -1,0 +1,103 @@
+---
+title: Text and localization
+description: Override the charts' built-in text, translate it, and control number formatting.
+---
+
+import ChartExample from '../../../components/ChartExample.astro';
+
+A chart's text comes from two places, and each is localized differently:
+
+- **Component text** is everything the chart writes itself: button labels, status words like _Suppressed_, table headings, summaries, announcements, validation errors, and CSV headings. Change it with the `messages` dictionary.
+- **Application content** is everything you supply: chart titles, subtitles, category labels, definitions, context, and data notes. The chart never translates these. Supply them in the reader's language.
+
+`locale` is separate from both. It controls number, percentage, and date formatting and plural rules, but it doesn't translate anything.
+
+## Locale formats, it doesn't translate
+
+This chart has `locale: 'fr-FR'` and no French messages. The numbers use French formatting, but the component text stays English:
+
+<ChartExample
+	type="bar"
+	properties={{
+		chartTitle: 'By sex',
+		config: { locale: 'fr-FR' },
+		data: [
+			{ id: 'male', label: 'Male', value: 1414 },
+			{ id: 'female', label: 'Female', value: 1302 },
+		],
+		total: 2716,
+	}}
+/>
+
+Set it with `config.locale` or the `locale` attribute; the attribute wins. An invalid locale falls back to `en-US`.
+
+## Override messages
+
+Assign a partial dictionary to `messages`. Any key you leave out uses the English default:
+
+```ts
+chart.messages = {
+	showData: 'View data',
+	total: 'Population total',
+};
+```
+
+The same object works as a JSON attribute:
+
+```html
+<a11y-bar-chart messages='{"showData":"View data"}'></a11y-bar-chart>
+```
+
+If the attribute isn't valid JSON, the chart shows a configuration error and emits its `-error` event with code `invalid-messages`. It keeps using the last valid dictionary. Setting a valid attribute or the property recovers it.
+
+Each package exports its complete English catalog and key type, which is the authoritative key list:
+
+| Package | Catalog | Key type |
+| --- | --- | --- |
+| `@mzebley-aem/line-chart` | `ENGLISH_LINE_CHART_MESSAGES` | `A11yLineChartMessageKey` |
+| `@mzebley-aem/bar-chart` | `ENGLISH_BAR_CHART_MESSAGES` | `MessageKey` |
+| `@mzebley-aem/segmented-bar-chart` | `ENGLISH_SEGMENTED_BAR_CHART_MESSAGES` | `MessageKey` |
+
+Many keys share names across charts, such as `showData`, `close`, `exportCsv`, `suppressedValue`, and `suppressionNote`.
+
+## Placeholders and plurals
+
+Templates use named placeholders in braces, such as `{series}`, `{period}`, or `{label}`. Keep every placeholder from the English template in your translation.
+
+A key with plural forms is a family of keys with suffixes: `.zero`, `.one`, `.two`, `.few`, `.many`, and `.other`. The chart picks a form with `Intl.PluralRules` for the configured locale, and a missing form falls back to `.other`:
+
+```ts
+barChart.messages = {
+	'zeroValuesNote.one': 'Category with no reported children: {labels}.',
+	'zeroValuesNote.other': 'Categories with no reported children: {labels}.',
+};
+```
+
+Languages differ in which forms they need. French uses `one` and `other` (and `many` for some large numbers); Arabic uses all six.
+
+## Switching languages
+
+For a language switch, change all of these together:
+
+1. Assign the **complete** translated `messages` dictionary, including every plural form. A partial dictionary leaves English text mixed in.
+2. Set `locale` to match.
+3. Replace the application content: titles, labels, definitions, context, and data notes.
+4. Set `lang` on the chart or the page so screen readers use the right pronunciation.
+
+Keep category `id` values the same in every language. Selection, theming, and focus restoration all use IDs, so stable IDs keep them working across a switch.
+
+The standalone demos include complete French and Spanish catalogs for the [line chart](https://github.com/mzebley-aem/a11y-charts/blob/main/packages/line-chart/demo/locales.ts) and [bar chart](https://github.com/mzebley-aem/a11y-charts/blob/main/packages/bar-chart/demo/locales.ts). Start a translation from those.
+
+## Formatting values yourself
+
+When the locale's formatting isn't enough, such as for currency or a fixed unit, supply `formatValue`. It's a function, so set it as a property:
+
+```ts
+barChart.formatValue = ({ value, series, locale }) => {
+	if (series === 'count') return `${value.toLocaleString(locale)} children`;
+	if (series === 'percentage') return `${value.toLocaleString(locale, { maximumFractionDigits: 1 })}%`;
+	return value.toLocaleString(locale);
+};
+```
+
+The function receives every displayed number, with a `series` such as `count`, `percentage`, or `total`, and returns a string. Output that isn't a usable string falls back to the default formatting. The chart never passes a missing or suppressed value to `formatValue`. It writes the status text instead. Check each package's types for the exact context fields.

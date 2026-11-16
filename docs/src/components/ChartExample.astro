@@ -6,13 +6,17 @@
  */
 import { Code } from '@astrojs/starlight/components';
 
-type ChartType = 'line' | 'bar' | 'segmented';
+type ChartType = 'line' | 'bar' | 'group' | 'segmented';
 
 interface Props {
 	type: ChartType;
 	/** Element properties, assigned in order after the element is defined. */
 	properties: Record<string, unknown>;
-	/** Heading level for the chart title; 3 fits under a page's `##` sections. */
+	/**
+	 * Heading level for the chart title; 3 fits under a page's `##` sections.
+	 * The grouped element has no `heading-level` attribute: set
+	 * `config.headingLevel` in `properties` instead.
+	 */
 	headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
 	/** Plain HTML attributes for the element (for example `data-view`). */
 	attributes?: Record<string, string>;
@@ -22,6 +26,7 @@ interface Props {
 const CHARTS = {
 	line: { tag: 'a11y-line-chart', pkg: '@mzebley-aem/line-chart' },
 	bar: { tag: 'a11y-bar-chart', pkg: '@mzebley-aem/bar-chart' },
+	group: { tag: 'a11y-bar-chart-group', pkg: '@mzebley-aem/bar-chart' },
 	segmented: { tag: 'a11y-segmented-bar-chart', pkg: '@mzebley-aem/segmented-bar-chart' },
 } as const;
 
@@ -32,7 +37,9 @@ const { tag: Tag, pkg } = CHARTS[type];
 const literal = (value: unknown) =>
 	JSON.stringify(value, null, 2).replace(/"([A-Za-z_$][\w$]*)":/g, '$1:');
 
-const attributeText = Object.entries({ 'heading-level': String(headingLevel), ...attributes })
+const allAttributes: Record<string, string> =
+	type === 'group' ? { ...attributes } : { 'heading-level': String(headingLevel), ...attributes };
+const attributeText = Object.entries(allAttributes)
 	.map(([name, value]) => ` ${name}="${value}"`)
 	.join('');
 
@@ -48,8 +55,7 @@ const snippet = [
 
 <div class="chart-example not-content">
 	<Tag
-		heading-level={headingLevel}
-		{...attributes}
+		{...allAttributes}
 		data-example-properties={JSON.stringify(properties)}
 	/>
 </div>

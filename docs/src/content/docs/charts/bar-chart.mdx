@@ -34,7 +34,7 @@ Supply an authoritative `total` when you have one, especially when values are su
 
 ## Suppression and missing values
 
-The application decides which values to protect, before they reach the chart. Replace each protected value with `0` and set `suppressed` once for the whole chart; zeros then read as **Suppressed** everywhere, including the table and CSV. `null` always means **Not reported**, whatever the flag.
+The application decides which values to protect, before they reach the chart. [Suppression and missing data](/guides/suppression-and-missing-data/) covers the full rules. Replace each protected value with `0` and set `suppressed` once for the whole chart; zeros then read as **Suppressed** everywhere, including the table and CSV. `null` always means **Not reported**, whatever the flag.
 
 ```ts
 chart.data = rowsWithProtectedValuesZeroed;
@@ -45,11 +45,11 @@ chart.suppressed = true;
 
 ## Grouped population views
 
-`<a11y-bar-chart-group>` lets a reader switch between related breakdowns (for example by sex, by age, by race) with shared scales. See the [bar chart README](https://github.com/mzebley-aem/a11y-charts/blob/main/packages/bar-chart/README.md#grouped-population-views) for its contract.
+`<a11y-bar-chart-group>` lets a reader switch between related breakdowns (for example by sex, by age, by race) with shared scales. See [Grouped bar chart](/charts/grouped-bar-chart/).
 
 ## Events
 
-`a11y-bar-chart-ready`, `a11y-bar-chart-error`, `a11y-bar-chart-data-change`, `a11y-bar-chart-data-view-change`, and `a11y-bar-chart-disclosure-change`. The bar chart has no reader-changeable settings, so it has no settings-change event.
+`a11y-bar-chart-ready`, `a11y-bar-chart-error`, `a11y-bar-chart-data-change`, `a11y-bar-chart-data-view-change`, and `a11y-bar-chart-disclosure-change`. The bar chart has no reader-changeable settings, so it has no settings-change event. See [Events](/reference/events/) for every payload.
 
 ## Full reference
 

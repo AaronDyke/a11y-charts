@@ -1,0 +1,71 @@
+---
+title: Suppression and missing data
+description: How the charts show protected values and values that weren't reported.
+---
+
+import ChartExample from '../../../components/ChartExample.astro';
+
+Two different things can stop a value from appearing, and the charts keep them apart:
+
+- **Suppressed:** the value exists but is withheld, usually to protect privacy in small counts. It reads _Suppressed_.
+- **Missing:** the value wasn't reported. It reads _Not reported_.
+
+## Your application decides what to protect
+
+The chart never decides what is suppressed. Your application applies its suppression rules before the data reaches the chart:
+
+1. Replace each protected value with `0`.
+2. Set the chart-level `suppressed` flag, either the property or the `suppressed` attribute.
+
+With the flag on, every `0` reads as _Suppressed_. Use `null` for a value that wasn't reported. `null` always means _Not reported_, with or without the flag.
+
+<ChartExample
+	type="bar"
+	properties={{
+		chartTitle: 'By setting',
+		suppressed: true,
+		data: [
+			{ id: 'home', label: 'Home', value: 322 },
+			{ id: 'community', label: 'Community-based setting', value: 0 },
+			{ id: 'hospital', label: 'Hospital', value: null },
+		],
+		total: 510,
+	}}
+/>
+
+There's no per-value suppression flag, so a real zero and a protected value can't both appear in one chart while the flag is on. If a dataset needs both, show the real zero another way, for example by noting it in the chart's `context`.
+
+## What the flag changes
+
+| | Flag off | Flag on |
+| --- | --- | --- |
+| Value `0` | A real zero, shown as `0`. | _Suppressed_: no bar, marker, or segment, and no percentage or target comparison. |
+| Value `null` | _Not reported_. | _Not reported_. |
+| Targets | Shown as supplied. | Shown as supplied. Targets are never suppressed. |
+| Title area | Nothing extra. | A _Suppressed_ indicator, even if no value is zero. |
+| Data table | Nothing extra. | A suppression note (message key `suppressionNote`) above the table, and as a CSV metadata row on the bar chart. |
+
+A suppressed value never reaches `formatValue`, tooltips, the data table, or the CSV as a number.
+
+## Totals
+
+Totals matter most with suppression. Without an authoritative total, adding up the visible values would understate it.
+
+- **Bar and segmented charts:** supply `total` from your source data. With the flag on, a suppressed row, and no total, neither chart adds up the rows. The bar chart's total reads _Suppressed_, and the segmented chart reports the breakdown as incomplete. A provided total of `0` reads _Suppressed_.
+- Percentages for the values that aren't suppressed are still computed from the supplied total.
+- **Segmented breakdowns:** an incomplete breakdown (with suppressed or missing rows) doesn't draw proportions, because the segments wouldn't add up.
+
+## Differences between the charts
+
+| | Line | Bar | Segmented |
+| --- | --- | --- | --- |
+| What is suppressed | `actual: 0` | `value: 0` | `value: 0` |
+| `data` getter while suppressed | Returns your data unchanged, including the zeros | Returns `null` for suppressed zeros | Returns `null` for suppressed zeros |
+| Data-change event | Your data | Suppressed zeros as `null` | Suppressed zeros as `null` |
+| Point or detail status | Point-change event has `actual: null` and `actualSuppressed: true` | Row status `suppressed` | Row status `suppressed` |
+
+To restore protected values, supply the unsuppressed data again and turn the flag off.
+
+## Filtered data
+
+The `filtered` flag is a separate indicator for data narrowed by a report filter. It adds a _Filtered_ label and keeps numeric zeros visible. Like suppression, filtering happens in your application: the chart shows the data you give it.

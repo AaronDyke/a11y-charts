@@ -1,0 +1,121 @@
+---
+title: Grouped bar chart
+description: Let readers switch one bar chart between related populations, with a shared scale.
+---
+
+import ChartExample from '../../../components/ChartExample.astro';
+
+`<a11y-bar-chart-group>` wraps one bar chart with a population selector. Readers choose a section, such as race or sex, and then a population within it. The chart updates its title, context, data, total, and status flags together, and keeps an open data view and the reader's Explain and Glossary state.
+
+It's registered by the bar chart's `/define` and styled by the same stylesheet. At narrow widths the selector moves above the chart.
+
+<ChartExample
+	type="group"
+	properties={{
+		config: { scaleMode: 'largest', scaleMaximum: 322, headingLevel: 2 },
+		sections: [
+			{
+				id: 'race',
+				label: 'Race and ethnicity',
+				allViewId: 'all',
+				description: 'Choose a population to see its data.',
+				views: [
+					{
+						id: 'all',
+						label: 'All races and ethnicities',
+						chartTitle: 'All races and ethnicities',
+						total: 510,
+						filtered: false,
+						suppressed: false,
+						data: [
+							{ id: 'home', label: 'Home', value: 322 },
+							{ id: 'community', label: 'Community-based setting', value: 121 },
+							{ id: 'other', label: 'Other setting', value: 67 },
+						],
+					},
+					{
+						id: 'black',
+						label: 'Black or African American',
+						chartTitle: 'Black or African American',
+						total: 102,
+						filtered: true,
+						suppressed: false,
+						context: '102 children: 20% of the overall population of 510.',
+						data: [
+							{ id: 'home', label: 'Home', value: 70 },
+							{ id: 'community', label: 'Community-based setting', value: 22 },
+							{ id: 'other', label: 'Other setting', value: 10 },
+						],
+					},
+				],
+			},
+			{
+				id: 'sex',
+				label: 'Sex',
+				allViewId: 'all',
+				views: [
+					{
+						id: 'all',
+						label: 'All children',
+						chartTitle: 'All children',
+						total: 510,
+						filtered: false,
+						suppressed: false,
+						data: [
+							{ id: 'home', label: 'Home', value: 322 },
+							{ id: 'community', label: 'Community-based setting', value: 121 },
+							{ id: 'other', label: 'Other setting', value: 67 },
+						],
+					},
+					{
+						id: 'male',
+						label: 'Male',
+						chartTitle: 'Male',
+						total: 270,
+						filtered: true,
+						suppressed: false,
+						data: [
+							{ id: 'home', label: 'Home', value: 170 },
+							{ id: 'community', label: 'Community-based setting', value: 68 },
+							{ id: 'other', label: 'Other setting', value: 32 },
+						],
+					},
+				],
+			},
+		],
+	}}
+/>
+
+## Sections and views
+
+`sections` is an array of sections, each with an ordered list of `views`. A view is a prepared bar chart. It requires `id`, `label`, `chartTitle`, `data`, `total`, and the `filtered` and `suppressed` booleans, even when they're `false`. Optional fields include `context`, `explanation`, `dataNote`, and `emptyMessage`. If any view is invalid, the group shows an error instead of the chart.
+
+- Section and view `id` values must be stable. Don't derive them from translated labels.
+- View IDs must be unique within their section.
+- `allViewId` names the section's overall view. Selecting a new section selects that view.
+- A view's `total: null` means the total is unknown, and the chart won't infer one.
+- If a report-wide filter applies, set `filtered` on every affected view, including the overall one.
+
+## Selection
+
+Read or set the selection with `selectedSectionId` and `selectedViewId`. Changes fire `a11y-bar-chart-group-selection-change` with `{ sectionId, viewId, origin }`, where `origin` is `user`, `property`, or `fallback`. Use it to sync the selection with the page URL.
+
+When you replace `sections`, a selection that still exists is kept. If the view disappears, the selection falls back to its section's overall view; if the whole section disappears, to the first section.
+
+The group doesn't fetch data. It takes views you've already prepared. If you load views asynchronously, ignore stale responses and show your own loading and error states.
+
+## Shared scale
+
+In `scaleMode: 'largest'`, set a common `config.scaleMaximum` so bar lengths stay comparable as readers switch populations. Percentages still use each view's own `total`. A view can override `scaleMaximum`, but a shared maximum is usually what readers expect.
+
+## Shared options
+
+`config`, `messages`, `theme`, and `formatValue` pass through to the inner chart. `groupMessages` holds the selector's own text: section labels, expand and collapse messages, empty and error text, and the selected-view status. Labels, definitions, and descriptions in your sections are your content to localize.
+
+## Preparing views from raw records
+
+`prepareBarViewSection` (from `@mzebley-aem/bar-chart/core`) turns raw records into a section of views. It doesn't use the DOM, so it also runs on the server. It aggregates repeated categories, keeps missing values, protects any total that includes a suppressed zero, and supports source or descending value order. Supply your own category IDs, labels, definitions, and authoritative totals. Add targets after aggregation, because population targets usually can't be summed.
+
+## Full reference
+
+The [bar chart README](https://github.com/mzebley-aem/a11y-charts/blob/main/packages/bar-chart/README.md#grouped-population-views) has the complete contract, including the `groupMessages` keys.

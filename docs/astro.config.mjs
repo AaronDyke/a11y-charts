@@ -29,6 +29,7 @@ export default defineConfig({
 					items: [
 						{ label: 'Line chart', slug: 'charts/line-chart' },
 						{ label: 'Bar chart', slug: 'charts/bar-chart' },
+						{ label: 'Grouped bar chart', slug: 'charts/grouped-bar-chart' },
 						{ label: 'Segmented bar chart', slug: 'charts/segmented-bar-chart' },
 					],
 				},
@@ -36,8 +37,15 @@ export default defineConfig({
 					label: 'Guides',
 					items: [
 						{ label: 'Data views', slug: 'guides/data-views' },
+						{ label: 'Suppression and missing data', slug: 'guides/suppression-and-missing-data' },
+						{ label: 'Text and localization', slug: 'guides/text-and-localization' },
+						{ label: 'Theming', slug: 'guides/theming' },
 						{ label: 'Server rendering', slug: 'guides/server-rendering' },
 					],
+				},
+				{
+					label: 'Reference',
+					items: [{ label: 'Events', slug: 'reference/events' }],
 				},
 			],
 		}),
