@@ -1,32 +1,12 @@
-import { existsSync, readdirSync, statSync } from 'node:fs';
-import { join, relative, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { expect, test } from '@playwright/test';
+import { builtPages } from './docs-pages.js';
 
 // Every live example in the docs must render a usable chart. A page passes when
 // each chart element has rendered content, no chart raised its `-error` event,
 // no chart shows an alert, and the page threw no errors.
 
-const docsDist = fileURLToPath(new URL('../../../docs/dist/', import.meta.url));
 const CHART_SELECTOR = 'a11y-line-chart, a11y-bar-chart, a11y-bar-chart-group, a11y-segmented-bar-chart';
 
-/** Every built page, as a site path such as `/charts/line-chart/`. */
-function builtPages(dir = docsDist): string[] {
-  const pages: string[] = [];
-  for (const name of readdirSync(dir)) {
-    const path = join(dir, name);
-    if (statSync(path).isDirectory()) {
-      // Static assets and the search index have no pages.
-      if (!['_astro', 'pagefind'].includes(name)) pages.push(...builtPages(path));
-    } else if (name === 'index.html') {
-      const route = relative(docsDist, dir).split(sep).filter(Boolean).join('/');
-      pages.push(route ? `/${route}/` : '/');
-    }
-  }
-  return pages.sort();
-}
-
-if (!existsSync(docsDist)) throw new Error(`No docs build at ${docsDist}. Run \`npm run docs:build\` first.`);
 const pages = builtPages();
 
 test('the docs build contains pages with live examples', () => {

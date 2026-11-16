@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { builtPages } from './docs-pages.js';
 
 // The docs Examples pages (formerly the chart gallery) and the report prototype
 // shells, against the built docs site. Runs in Chromium, Firefox, and WebKit.
@@ -142,4 +143,41 @@ test('report prototype states its status, uses landmarks, and reflows', async ({
   await expect(skipLink).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.locator('#report-content')).toBeFocused();
+});
+
+// WCAG 1.4.10 and 1.4.12 together: 320px wide, 200% text, and the maximum text
+// spacing. Covers what the docs site owns, including open settings panels; chart
+// internals are covered by each chart's own tests.
+const TEXT_SPACING = '* { line-height: 1.5 !important; letter-spacing: .12em !important; word-spacing: .16em !important; }';
+
+test('docs pages reflow at 320px with enlarged text and spacing', async ({ page }) => {
+  test.setTimeout(180_000);
+  await page.setViewportSize({ width: 320, height: 900 });
+  const failures: string[] = [];
+  for (const route of builtPages(['reports'])) {
+    await page.goto(route);
+    await page.evaluate(() => document.querySelectorAll('details.chart-example__settings').forEach(details => { (details as HTMLDetailsElement).open = true; }));
+    await page.addStyleTag({ content: TEXT_SPACING });
+    await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+    const overflowing = await page.evaluate(() => {
+      const viewport = document.documentElement.clientWidth;
+      const charts = 'a11y-line-chart, a11y-bar-chart, a11y-bar-chart-group, a11y-segmented-bar-chart';
+      const clipped = (element: Element) => {
+        for (let node: Element | null = element; node; node = node.parentElement) {
+          const style = getComputedStyle(node);
+          if (style.clip === 'rect(0px, 0px, 0px, 0px)' || style.clipPath.startsWith('inset(50%')) return true;
+          if (node !== element && style.overflowX !== 'visible' && node.getBoundingClientRect().right <= viewport + 0.5) return true;
+        }
+        return false;
+      };
+      return [...document.querySelectorAll('body *')]
+        .filter(element => !element.closest(charts) && element.getBoundingClientRect().width > 0)
+        .filter(element => element.getBoundingClientRect().right > viewport + 0.5 && !clipped(element))
+        .filter((element, _, all) => ![...element.children].some(child => all.includes(child)))
+        .slice(0, 3)
+        .map(element => `${element.tagName.toLowerCase()}.${String(element.className).split(' ')[0]} "${(element.textContent ?? '').trim().slice(0, 30)}"`);
+    });
+    if (overflowing.length) failures.push(`${route}: ${overflowing.join(', ')}`);
+  }
+  expect(failures).toEqual([]);
 });
