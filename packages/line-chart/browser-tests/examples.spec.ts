@@ -10,6 +10,13 @@ const initialLinkNavigationKey = (page: Page) =>
 
 const pageErrors = new WeakMap<Page, string[]>();
 
+/**
+ * Waits for a page's network activity to finish before the test moves on. Starlight
+ * loads its search UI after the page loads; leaving mid-load cancels that import,
+ * which Firefox reports as a console error.
+ */
+const settled = (page: Page) => page.waitForLoadState('networkidle');
+
 test.beforeEach(async ({ page }) => {
   const errors: string[] = [];
   pageErrors.set(page, errors);
@@ -92,6 +99,7 @@ test('settings work by keyboard and chart data opens a labelled modal dialog', a
 test('example settings controls meet the 44px enhanced target size', async ({ page }) => {
   for (const route of Object.values(examplePages)) {
     await page.goto(route);
+    await settled(page);
     for (const details of await page.locator('details.chart-example__settings').all()) {
       await details.evaluate((element: HTMLDetailsElement) => { element.open = true; });
     }
@@ -121,6 +129,7 @@ test('examples and report prototypes reflow across the requested viewport widths
   for (const route of reflowRoutes) {
     const response = await page.goto(route);
     expect(response?.status(), route).toBe(200);
+    await settled(page);
     await expect(page.locator('main')).toHaveCount(1);
     await expect(page.locator('h1')).toHaveCount(1);
     for (const width of widths) {
@@ -156,6 +165,7 @@ test('docs pages reflow at 320px with enlarged text and spacing', async ({ page 
   const failures: string[] = [];
   for (const route of builtPages(['reports'])) {
     await page.goto(route);
+    await settled(page);
     await page.evaluate(() => document.querySelectorAll('details.chart-example__settings').forEach(details => { (details as HTMLDetailsElement).open = true; }));
     await page.addStyleTag({ content: TEXT_SPACING });
     await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
