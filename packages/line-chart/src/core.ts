@@ -3,11 +3,11 @@ export { resolveConfig } from './config.js';
 export { ENGLISH_LINE_CHART_MESSAGES, formatLineMessage, isLineChartMessageKey, pluralLineMessage } from './messages.js';
 export type { A11yLineChartMessageKey, A11yLineChartMessages } from './messages.js';
 export { validateBaseline, validateData } from './validation.js';
-export type { BaselineValidationResult, DataValidationResult } from './validation.js';
+export type { A11yLineChartBaselineValidationResult, A11yLineChartDataValidationResult } from './validation.js';
 export { buildSemanticModel, normalizeLineData } from './semantic-model.js';
 export type { A11yLineChartSemanticContext } from './semantic-model.js';
 export { buildLineCsv } from './csv.js';
-export type { BuildLineCsvOptions } from './csv.js';
+export type { A11yLineChartCsvOptions } from './csv.js';
 export { copyTarget, formatTarget, isTargetRange } from './target.js';
 export type {
   A11yLineChartBaseline,
@@ -19,3 +19,4 @@ export type {
   A11yLineChartTheme,
   A11yLineChartXValue
 } from './model.js';
+export type { BuildLineCsvOptions, BaselineValidationResult, DataValidationResult } from './deprecated.js';

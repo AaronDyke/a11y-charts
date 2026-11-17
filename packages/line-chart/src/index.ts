@@ -1,9 +1,10 @@
 export { A11yLineChartElement } from './a11y-line-chart-element.js';
+export type { A11yLineChartEventMap } from './a11y-line-chart-element.js';
 export { buildChartOptions } from './chart-options.js';
 export { buildSemanticModel } from './semantic-model.js';
 export { normalizeLineData } from './semantic-model.js';
 export { buildLineCsv } from './csv.js';
-export type { BuildLineCsvOptions } from './csv.js';
+export type { A11yLineChartCsvOptions } from './csv.js';
 export { ENGLISH_LINE_CHART_MESSAGES } from './messages.js';
 export type { A11yLineChartMessageKey, A11yLineChartMessages } from './messages.js';
 export {
@@ -25,6 +26,7 @@ export type {
   A11yLineChartDifferenceFormatter,
   A11yLineChartErrorDetail,
   A11yLineChartFormatContext,
+  A11yLineChartHeadingLevel,
   A11yLineChartLegacyDatum,
   A11yLineChartTheme,
   A11yLineChartTooltipAriaLabelBuilder,
@@ -37,6 +39,7 @@ export type {
   A11yLineChartPointChangeDetail,
   A11yLineChartPointInterpretation,
   A11yLineChartPositiveDirection,
+  A11yLineChartReadyDetail,
   A11yLineChartRelation,
   A11yLineChartSemanticDifference,
   A11yLineChartSemanticModel,
@@ -50,3 +53,4 @@ export type {
   A11yLineChartXFormatter,
   A11yLineChartXValue
 } from './model.js';
+export type { BuildLineCsvOptions } from './deprecated.js';

@@ -1,17 +1,17 @@
 import { resolveConfig } from './config.js';
-import type { A11yBarChartDatum, A11yBarChartRow, A11yBarChartSemanticModel, A11yBarChartValueFormatContext, BarModelOptions, ResolvedA11yBarChartConfig } from './model.js';
-import { createMessageResolver, type MessageDictionary } from './messages.js';
+import type { A11yBarChartDatum, A11yBarChartRow, A11yBarChartSemanticModel, A11yBarChartValueFormatContext, A11yBarChartModelOptions, ResolvedA11yBarChartConfig } from './model.js';
+import { createMessageResolver, type A11yBarChartMessageDictionary } from './messages.js';
 import { copyTarget, isTargetRange } from './target.js';
 import { compareToNumericOrRange } from '../../chart-core/src/target.js';
 import { createFixedDecimalFormatter } from '../../chart-core/src/format.js';
 import { fractionToWholePercent } from '../../chart-core/src/csv.js';
 
-export function buildBarModel(data: readonly A11yBarChartDatum[], options: BarModelOptions = {}): A11yBarChartSemanticModel {
+export function buildBarModel(data: readonly A11yBarChartDatum[], options: A11yBarChartModelOptions = {}): A11yBarChartSemanticModel {
   const config: ResolvedA11yBarChartConfig = resolveConfig(options.config);
   const numberFormat = createFixedDecimalFormatter(config.locale);
   const percentFormat = createFixedDecimalFormatter(config.locale, 'percent');
   const listFormatter = new Intl.ListFormat(config.locale, { style: 'long', type: 'conjunction' });
-  const messages = options.messages as MessageDictionary | undefined;
+  const messages = options.messages as A11yBarChartMessageDictionary | undefined;
   const msg = createMessageResolver(messages, config.locale);
   const formatValue = (context: A11yBarChartValueFormatContext, fallback: () => string): string => {
     try {

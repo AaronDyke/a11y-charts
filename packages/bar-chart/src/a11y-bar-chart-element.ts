@@ -1,16 +1,19 @@
 import type {
   A11yBarChartConfig,
+  A11yBarChartDataView,
   A11yBarChartDatum,
   A11yBarChartExportAction,
   A11yBarChartExportContext,
+  A11yBarChartHeadingLevel,
+  A11yBarChartPercentScale,
   A11yBarChartRow,
   A11yBarChartSemanticModel,
   A11yBarChartTheme,
   A11yBarChartValueFormatter,
   ResolvedA11yBarChartConfig
 } from './model.js';
-import { buildBarCsv, buildBarExportRows, type BarCsvOptions } from './csv.js';
-import { ENGLISH_MESSAGES, isPluralVariantKey, message, type MessageDictionary, type MessageKey } from './messages.js';
+import { buildBarCsv, buildBarExportRows, type A11yBarChartCsvOptions } from './csv.js';
+import { ENGLISH_MESSAGES, isPluralVariantKey, message, type A11yBarChartMessageDictionary, type A11yBarChartMessageKey } from './messages.js';
 import { resolveConfig } from './config.js';
 import { buildBarModel } from './semantic-model.js';
 import { validateBarData } from './validation.js';
@@ -24,6 +27,7 @@ import { setDisclosure } from '../../chart-core/src/ui/disclosure.js';
 import { CSV_BYTE_ORDER_MARK } from '../../chart-core/src/csv.js';
 import { readDisclosurePreference, validStorageKey, writeDisclosurePreference } from '../../chart-core/src/ui/disclosure-preference.js';
 import { upgradeOwnProperties } from '../../chart-core/src/ui/upgrade-properties.js';
+import { reflectAttribute } from '../../chart-core/src/ui/reflect-attribute.js';
 
 export interface A11yBarChartErrorDetail {
   code: string;
@@ -44,6 +48,20 @@ export interface A11yBarChartDataViewChangeDetail {
 export interface A11yBarChartDisclosureChangeDetail {
   disclosure: 'explanation' | 'glossary';
   expanded: boolean;
+}
+
+/** Emitted once, after the first render. */
+export interface A11yBarChartReadyDetail {
+  instanceId: string;
+}
+
+/** Every event `<a11y-bar-chart>` dispatches. All of them bubble. */
+export interface A11yBarChartEventMap {
+  'a11y-bar-chart-ready': CustomEvent<A11yBarChartReadyDetail>;
+  'a11y-bar-chart-error': CustomEvent<A11yBarChartErrorDetail>;
+  'a11y-bar-chart-data-change': CustomEvent<A11yBarChartDataChangeDetail>;
+  'a11y-bar-chart-data-view-change': CustomEvent<A11yBarChartDataViewChangeDetail>;
+  'a11y-bar-chart-disclosure-change': CustomEvent<A11yBarChartDisclosureChangeDetail>;
 }
 
 const OWNED_ROOT_ATTRIBUTE = 'data-a11y-bar-chart-owned';
@@ -105,7 +123,7 @@ function booleanAttribute(host: Element, name: string): boolean {
   return host.hasAttribute(name);
 }
 
-function validHeading(value: number): value is 1 | 2 | 3 | 4 | 5 | 6 {
+function validHeading(value: number): value is A11yBarChartHeadingLevel {
   return Number.isInteger(value) && value >= 1 && value <= 6;
 }
 
@@ -116,7 +134,7 @@ export class A11yBarChartElement extends HTMLElement {
   #data: A11yBarChartDatum[] = [];
   #total: number | null | undefined;
   #config: A11yBarChartConfig = {};
-  #messages: Partial<Record<MessageKey, string>> = {};
+  #messages: Partial<Record<A11yBarChartMessageKey, string>> = {};
   #messageError = false;
   #dataErrorCode = '';
   #dataErrorParams: Record<string, string | number> | undefined;
@@ -159,6 +177,15 @@ export class A11yBarChartElement extends HTMLElement {
   set chartTitle(value: string) { this.setAttribute('chart-title', value); }
   get subtitle(): string { return this.getAttribute('subtitle')?.trim() || ''; }
   set subtitle(value: string) { value ? this.setAttribute('subtitle', value) : this.removeAttribute('subtitle'); }
+  /** Effective heading level: a valid `heading-level` attribute, else `config.headingLevel`, else 2. Setting it writes the attribute; null removes it. */
+  get headingLevel(): A11yBarChartHeadingLevel { return this.#resolvedConfig().headingLevel; }
+  set headingLevel(value: A11yBarChartHeadingLevel | null) { reflectAttribute(this, 'heading-level', value); }
+  /** Effective data view: a valid `data-view` attribute, else `config.dataView`, else 'dialog'. Setting it writes the attribute; null removes it. */
+  get dataView(): A11yBarChartDataView { return this.#resolvedConfig().dataView; }
+  set dataView(value: A11yBarChartDataView | null) { reflectAttribute(this, 'data-view', value); }
+  /** Effective percent scale: a valid `percent-scale` attribute, else `config.percentScale`, else 'whole'. Setting it writes the attribute; null removes it. */
+  get percentScale(): A11yBarChartPercentScale { return this.#resolvedConfig().percentScale; }
+  set percentScale(value: A11yBarChartPercentScale | null) { reflectAttribute(this, 'percent-scale', value); }
   get locale(): string { return this.getAttribute('locale')?.trim() || this.#config.locale || 'en-US'; }
   set locale(value: string) { value ? this.setAttribute('locale', value) : this.removeAttribute('locale'); }
   get filtered(): boolean { return booleanAttribute(this, 'filtered'); }
@@ -215,8 +242,8 @@ export class A11yBarChartElement extends HTMLElement {
     this.#config = next;
     this.#queueRender();
   }
-  get messages(): Partial<Record<MessageKey, string>> { return { ...this.#messages }; }
-  set messages(value: Partial<Record<MessageKey, string>>) {
+  get messages(): Partial<Record<A11yBarChartMessageKey, string>> { return { ...this.#messages }; }
+  set messages(value: Partial<Record<A11yBarChartMessageKey, string>>) {
     this.#messages = this.#validMessages(value);
     this.#messageError = false;
     this.#queueRender();
@@ -267,13 +294,13 @@ export class A11yBarChartElement extends HTMLElement {
     this.#queueRender();
   }
 
-  #validMessages(input: unknown): Partial<Record<MessageKey, string>> {
+  #validMessages(input: unknown): Partial<Record<A11yBarChartMessageKey, string>> {
     if (!input || typeof input !== 'object' || Array.isArray(input)) return {};
-    const valid: Partial<Record<MessageKey, string>> = {};
+    const valid: Partial<Record<A11yBarChartMessageKey, string>> = {};
     for (const [key, value] of Object.entries(input)) {
       const isCatalogKey = Object.prototype.hasOwnProperty.call(ENGLISH_MESSAGES, key);
       const isPluralVariant = isPluralVariantKey(key);
-      if ((isCatalogKey || isPluralVariant) && typeof value === 'string' && value.trim()) valid[key as MessageKey] = value;
+      if ((isCatalogKey || isPluralVariant) && typeof value === 'string' && value.trim()) valid[key as A11yBarChartMessageKey] = value;
     }
     return valid;
   }
@@ -304,12 +331,12 @@ export class A11yBarChartElement extends HTMLElement {
     });
   }
 
-  #text(key: MessageKey, params: Record<string, string | number> = {}): string {
+  #text(key: A11yBarChartMessageKey, params: Record<string, string | number> = {}): string {
     return message(key, this.#messages, params, this.locale);
   }
 
   #localizedValidation(code: string, fallback: string, params?: Record<string, string | number>): string {
-    const keys: Record<string, MessageKey> = {
+    const keys: Record<string, A11yBarChartMessageKey> = {
       validationInvalidData: 'validationInvalidData',
       validationInvalidRecord: 'validationInvalidRecord',
       validationDuplicateId: 'validationDuplicateId',
@@ -591,7 +618,7 @@ export class A11yBarChartElement extends HTMLElement {
       }));
     }
     this.#lastDataSignature = dataSignature;
-    if (!this.#hasRendered) this.dispatchEvent(new CustomEvent('a11y-bar-chart-ready', { bubbles: true, detail: { instanceId: this.instanceId } }));
+    if (!this.#hasRendered) this.dispatchEvent(new CustomEvent<A11yBarChartReadyDetail>('a11y-bar-chart-ready', { bubbles: true, detail: { instanceId: this.instanceId } }));
     this.#hasRendered = true;
     if (activeKey) this.#focusKey(activeKey);
   }
@@ -930,7 +957,7 @@ export class A11yBarChartElement extends HTMLElement {
     const head = document.createElement('thead');
     const headerRow = document.createElement('tr');
     const hasTargets = model.rows.some((row) => row.target !== null);
-    for (const key of ['categoryHeader', 'countHeader', 'percentageHeader', ...(hasTargets ? ['targetHeader'] : [])] as MessageKey[]) {
+    for (const key of ['categoryHeader', 'countHeader', 'percentageHeader', ...(hasTargets ? ['targetHeader'] : [])] as A11yBarChartMessageKey[]) {
       const th = document.createElement('th');
       th.scope = 'col';
       th.textContent = this.#text(key);
@@ -1019,7 +1046,7 @@ export class A11yBarChartElement extends HTMLElement {
     return buttons;
   }
 
-  #exportOptions(): BarCsvOptions {
+  #exportOptions(): A11yBarChartCsvOptions {
     return {
       messages: { ...ENGLISH_MESSAGES, ...this.#messages },
       locale: this.#resolvedConfig().locale,
@@ -1151,4 +1178,12 @@ export class A11yBarChartElement extends HTMLElement {
       detail: { code, message, data: copyData(this.#data, this.suppressed) }
     }));
   }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'a11y-bar-chart': A11yBarChartElement;
+  }
+  // Every chart event bubbles, so ancestors, document and window can listen too.
+  interface GlobalEventHandlersEventMap extends A11yBarChartEventMap {}
 }

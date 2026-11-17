@@ -10,11 +10,11 @@ import { isFiniteNumber, isFiniteRange, sameScalarOrDate } from '../../chart-cor
 type Translate = (key: keyof typeof ENGLISH_LINE_CHART_MESSAGES, values?: Record<string, unknown>) => string;
 const english: Translate = (key, values = {}) => formatLineMessage(ENGLISH_LINE_CHART_MESSAGES[key], values);
 
-export type DataValidationResult =
+export type A11yLineChartDataValidationResult =
   | { data: A11yLineChartDatum[]; valid: true }
   | { message: string; valid: false };
 
-export type BaselineValidationResult =
+export type A11yLineChartBaselineValidationResult =
   | { baseline: A11yLineChartBaseline | undefined; valid: true }
   | { message: string; valid: false };
 
@@ -36,7 +36,7 @@ export function validateBaseline(
   value: unknown,
   data: A11yLineChartDatum[],
   translate: Translate = english
-): BaselineValidationResult {
+): A11yLineChartBaselineValidationResult {
   if (value === undefined || value === null) {
     return { baseline: undefined, valid: true };
   }
@@ -72,7 +72,7 @@ export function validateBaseline(
   return { baseline, valid: true };
 }
 
-export function validateData(value: unknown, translate: Translate = english): DataValidationResult {
+export function validateData(value: unknown, translate: Translate = english): A11yLineChartDataValidationResult {
   if (!Array.isArray(value)) {
     return { valid: false, message: translate('validationDataArray') };
   }

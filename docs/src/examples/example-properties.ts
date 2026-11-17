@@ -1,6 +1,6 @@
 // Turns the example data into the element properties that ChartExample assigns.
 // Runs at build time in Node, so it must only import DOM-free modules.
-import type { A11yBarChartConfig, BarViewSection } from '@mzebley-aem/bar-chart';
+import type { A11yBarChartConfig, A11yBarChartViewSection } from '@mzebley-aem/bar-chart';
 import { chartGalleryExamples, type ChartGalleryExample } from './examples.js';
 import { ageSection, availabilitySection, raceSection, targetSection } from './grouped-examples.js';
 
@@ -60,7 +60,7 @@ function groupExample(
 	id: string,
 	title: string,
 	description: string,
-	sections: BarViewSection[],
+	sections: A11yBarChartViewSection[],
 	scaleMaximum: number,
 	overrides: A11yBarChartConfig = {},
 ): DocsExample {

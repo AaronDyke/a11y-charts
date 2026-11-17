@@ -5,14 +5,22 @@ import {
   buildSegmentedBarCsv,
   formatMessage,
   validateSegmentedBarData,
-  type MessageKey,
-  type SegmentedValidationFailure,
+  type A11ySegmentedBarChartMessageKey,
+  type A11ySegmentedBarChartValidationFailure,
   resolveConfig,
   type A11ySegmentedBarChartDatum,
   type A11ySegmentedBarChartConfig,
+  type A11ySegmentedBarChartDataChangeDetail,
+  type A11ySegmentedBarChartDataView,
+  type A11ySegmentedBarChartDataViewChangeDetail,
+  type A11ySegmentedBarChartDisclosureChangeDetail,
+  type A11ySegmentedBarChartErrorDetail,
+  type A11ySegmentedBarChartHeadingLevel,
+  type A11ySegmentedBarChartPercentScale,
+  type A11ySegmentedBarChartReadyDetail,
   type A11ySegmentedBarChartTheme,
   type A11ySegmentedBarChartValueFormatter,
-  type MessageDictionary,
+  type A11ySegmentedBarChartMessageDictionary,
 } from './core.js';
 import { FloatingCardController } from '../../chart-core/src/ui/floating-card-controller.js';
 import { ModalController } from '../../chart-core/src/ui/modal-controller.js';
@@ -25,9 +33,10 @@ import {
   safeHtmlToText,
 } from '../../chart-core/src/content.js';
 import { upgradeOwnProperties } from '../../chart-core/src/ui/upgrade-properties.js';
+import { reflectAttribute } from '../../chart-core/src/ui/reflect-attribute.js';
 let serial = 0;
-const DATA_VIEW_VALUES = ['dialog', 'inline', 'none'];
-const PERCENT_SCALE_VALUES = ['whole', 'fraction'];
+const DATA_VIEW_VALUES: readonly string[] = ['dialog', 'inline', 'none'] satisfies A11ySegmentedBarChartDataView[];
+const PERCENT_SCALE_VALUES: readonly string[] = ['whole', 'fraction'] satisfies A11ySegmentedBarChartPercentScale[];
 export class A11ySegmentedBarChartElement extends HTMLElement {
   static readonly observedAttributes = [
     'chart-title',
@@ -42,10 +51,10 @@ export class A11ySegmentedBarChartElement extends HTMLElement {
     'href',
   ];
   #data: A11ySegmentedBarChartDatum[] = [];
-  #dataError: SegmentedValidationFailure | null = null;
+  #dataError: A11ySegmentedBarChartValidationFailure | null = null;
   #total: number | null = null;
   #config: A11ySegmentedBarChartConfig = {};
-  #messages: MessageDictionary = {};
+  #messages: A11ySegmentedBarChartMessageDictionary = {};
   #theme: A11ySegmentedBarChartTheme = {};
   #formatValue: A11ySegmentedBarChartValueFormatter | undefined;
   #context = '';
@@ -98,6 +107,47 @@ export class A11ySegmentedBarChartElement extends HTMLElement {
     if (value) this.setAttribute('locale', value);
     else this.removeAttribute('locale');
   }
+  /** Effective heading level: `heading-level` (invalid values read as 2), else `config.headingLevel`, else 2. Setting it writes the attribute; null removes it. */
+  get headingLevel(): A11ySegmentedBarChartHeadingLevel {
+    return this.#resolvedConfig().headingLevel;
+  }
+  set headingLevel(value: A11ySegmentedBarChartHeadingLevel | null) {
+    reflectAttribute(this, 'heading-level', value);
+  }
+  /** Effective data view: a valid `data-view` attribute, else `config.dataView`, else 'dialog'. Setting it writes the attribute; null removes it. */
+  get dataView(): A11ySegmentedBarChartDataView {
+    return this.#resolvedConfig().dataView;
+  }
+  set dataView(value: A11ySegmentedBarChartDataView | null) {
+    reflectAttribute(this, 'data-view', value);
+  }
+  /** Effective percent scale: a valid `percent-scale` attribute, else `config.percentScale`, else 'whole'. Setting it writes the attribute; null removes it. */
+  get percentScale(): A11ySegmentedBarChartPercentScale {
+    return this.#resolvedConfig().percentScale;
+  }
+  set percentScale(value: A11ySegmentedBarChartPercentScale | null) {
+    reflectAttribute(this, 'percent-scale', value);
+  }
+  #resolvedConfig() {
+    return resolveConfig({
+      ...this.#config,
+      ...(this.hasAttribute('locale')
+        ? { locale: this.getAttribute('locale')! }
+        : {}),
+      ...(this.hasAttribute('heading-level')
+        ? {
+            headingLevel: Number(this.getAttribute('heading-level')) as A11ySegmentedBarChartHeadingLevel,
+          }
+        : {}),
+      // A valid attribute takes precedence over config; invalid values fall through to config.
+      ...(DATA_VIEW_VALUES.includes(this.getAttribute('data-view') ?? '')
+        ? { dataView: this.getAttribute('data-view') as A11ySegmentedBarChartDataView }
+        : {}),
+      ...(PERCENT_SCALE_VALUES.includes(this.getAttribute('percent-scale') ?? '')
+        ? { percentScale: this.getAttribute('percent-scale') as A11ySegmentedBarChartPercentScale }
+        : {}),
+    });
+  }
   get filtered() {
     return this.hasAttribute('filtered');
   }
@@ -137,7 +187,7 @@ export class A11ySegmentedBarChartElement extends HTMLElement {
   }
   #dispatchError(code: string, message: string) {
     this.dispatchEvent(
-      new CustomEvent('a11y-segmented-bar-chart-error', {
+      new CustomEvent<A11ySegmentedBarChartErrorDetail>('a11y-segmented-bar-chart-error', {
         bubbles: true,
         detail: { code, message },
       }),
@@ -165,7 +215,7 @@ export class A11ySegmentedBarChartElement extends HTMLElement {
   get messages() {
     return { ...this.#messages };
   }
-  set messages(v: MessageDictionary) {
+  set messages(v: A11ySegmentedBarChartMessageDictionary) {
     this.#messagesInvalid = false;
     this.#messages = v && typeof v === 'object' ? { ...v } : {};
     this.#queue();
@@ -254,7 +304,7 @@ export class A11ySegmentedBarChartElement extends HTMLElement {
           Object.values(parsed).some((v) => typeof v !== 'string')
         )
           throw new Error('Invalid messages');
-        this.#messages = parsed as MessageDictionary;
+        this.#messages = parsed as A11ySegmentedBarChartMessageDictionary;
         this.#messagesInvalid = false;
       } catch {
         this.#messages = {};
@@ -306,26 +356,8 @@ export class A11ySegmentedBarChartElement extends HTMLElement {
       this.#dialogLayer.replaceChildren();
     }
     root.replaceChildren();
-    const c = resolveConfig({
-      ...this.#config,
-      ...(this.hasAttribute('locale')
-        ? { locale: this.getAttribute('locale')! }
-        : {}),
-      ...(this.hasAttribute('heading-level')
-        ? {
-            headingLevel: Number(this.getAttribute('heading-level')) as
-              1 | 2 | 3 | 4 | 5 | 6,
-          }
-        : {}),
-      // A valid attribute takes precedence over config; invalid values fall through to config.
-      ...(DATA_VIEW_VALUES.includes(this.getAttribute('data-view') ?? '')
-        ? { dataView: this.getAttribute('data-view') as 'dialog' | 'inline' | 'none' }
-        : {}),
-      ...(PERCENT_SCALE_VALUES.includes(this.getAttribute('percent-scale') ?? '')
-        ? { percentScale: this.getAttribute('percent-scale') as 'whole' | 'fraction' }
-        : {}),
-    });
-    const t = (key: MessageKey) => formatMessage(key, this.#messages);
+    const c = this.#resolvedConfig();
+    const t = (key: A11ySegmentedBarChartMessageKey) => formatMessage(key, this.#messages);
     const opts = {
       total: this.#total,
       config: { ...c, ...(this.#config.separateCategoryIds !== undefined ? { separateCategoryIds: this.#config.separateCategoryIds } : {}) },
@@ -423,7 +455,7 @@ export class A11ySegmentedBarChartElement extends HTMLElement {
       error.tabIndex = -1;
       wrap.append(error);
       if (active) error.focus();
-      if (this.#hasRendered && this.#dirtyData) this.dispatchEvent(new CustomEvent('a11y-segmented-bar-chart-data-change', {
+      if (this.#hasRendered && this.#dirtyData) this.dispatchEvent(new CustomEvent<A11ySegmentedBarChartDataChangeDetail>('a11y-segmented-bar-chart-data-change', {
         bubbles: true, detail: { data: this.data, model: null }
       }));
       this.#dirtyData = false;
@@ -626,7 +658,7 @@ export class A11ySegmentedBarChartElement extends HTMLElement {
       button.addEventListener('click', () => {
         const expanded = toggleDisclosure(button, content);
         this.dispatchEvent(
-          new CustomEvent('a11y-segmented-bar-chart-disclosure-change', {
+          new CustomEvent<A11ySegmentedBarChartDisclosureChangeDetail>('a11y-segmented-bar-chart-disclosure-change', {
             bubbles: true,
             detail: { disclosure: 'explanation', expanded },
           }),
@@ -661,7 +693,7 @@ export class A11ySegmentedBarChartElement extends HTMLElement {
       button.addEventListener('click', () => {
         const expanded = toggleDisclosure(button, definitions);
         this.dispatchEvent(
-          new CustomEvent('a11y-segmented-bar-chart-disclosure-change', {
+          new CustomEvent<A11ySegmentedBarChartDisclosureChangeDetail>('a11y-segmented-bar-chart-disclosure-change', {
             bubbles: true,
             detail: { disclosure: 'glossary', expanded },
           }),
@@ -770,7 +802,7 @@ export class A11ySegmentedBarChartElement extends HTMLElement {
       wrap.append(hiddenTableContainer);
     }
     if (c.dataView !== 'inline') {
-      if (this.#inlineDataOpen) this.dispatchEvent(new CustomEvent('a11y-segmented-bar-chart-data-view-change', {
+      if (this.#inlineDataOpen) this.dispatchEvent(new CustomEvent<A11ySegmentedBarChartDataViewChangeDetail>('a11y-segmented-bar-chart-data-view-change', {
         bubbles: true, detail: { open: false, dataView: 'inline' }
       }));
       this.#inlineDataOpen = false;
@@ -787,7 +819,7 @@ export class A11ySegmentedBarChartElement extends HTMLElement {
           if (this.#inlineDataOpen === details.open) return;
           this.#inlineDataOpen = details.open;
           this.dispatchEvent(
-            new CustomEvent('a11y-segmented-bar-chart-data-view-change', {
+            new CustomEvent<A11ySegmentedBarChartDataViewChangeDetail>('a11y-segmented-bar-chart-data-view-change', {
               bubbles: true,
               detail: { open: details.open, dataView: 'inline' },
             }),
@@ -832,7 +864,7 @@ export class A11ySegmentedBarChartElement extends HTMLElement {
             getOpener: () => this.#opener,
             onStateChange: (open) =>
               this.dispatchEvent(
-                new CustomEvent('a11y-segmented-bar-chart-data-view-change', {
+                new CustomEvent<A11ySegmentedBarChartDataViewChangeDetail>('a11y-segmented-bar-chart-data-view-change', {
                   bubbles: true,
                   detail: { open, dataView: 'dialog' },
                 }),
@@ -879,7 +911,7 @@ export class A11ySegmentedBarChartElement extends HTMLElement {
     if (!this.#hasRendered) {
       this.#hasRendered = true;
       this.dispatchEvent(
-        new CustomEvent('a11y-segmented-bar-chart-ready', {
+        new CustomEvent<A11ySegmentedBarChartReadyDetail>('a11y-segmented-bar-chart-ready', {
           bubbles: true,
           detail: { instanceId: this.instanceId },
         }),
@@ -887,7 +919,7 @@ export class A11ySegmentedBarChartElement extends HTMLElement {
     } else {
       if (this.#dirtyData)
         this.dispatchEvent(
-          new CustomEvent('a11y-segmented-bar-chart-data-change', {
+          new CustomEvent<A11ySegmentedBarChartDataChangeDetail>('a11y-segmented-bar-chart-data-change', {
             bubbles: true,
             detail: { data: this.data, model: structuredClone(model) },
           }),
@@ -922,4 +954,21 @@ export class A11ySegmentedBarChartElement extends HTMLElement {
       }
     }
   }
+}
+
+/** Every event `<a11y-segmented-bar-chart>` dispatches. All of them bubble. */
+export interface A11ySegmentedBarChartEventMap {
+  'a11y-segmented-bar-chart-ready': CustomEvent<A11ySegmentedBarChartReadyDetail>;
+  'a11y-segmented-bar-chart-error': CustomEvent<A11ySegmentedBarChartErrorDetail>;
+  'a11y-segmented-bar-chart-data-change': CustomEvent<A11ySegmentedBarChartDataChangeDetail>;
+  'a11y-segmented-bar-chart-data-view-change': CustomEvent<A11ySegmentedBarChartDataViewChangeDetail>;
+  'a11y-segmented-bar-chart-disclosure-change': CustomEvent<A11ySegmentedBarChartDisclosureChangeDetail>;
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'a11y-segmented-bar-chart': A11ySegmentedBarChartElement;
+  }
+  // Every chart event bubbles, so ancestors, document and window can listen too.
+  interface GlobalEventHandlersEventMap extends A11ySegmentedBarChartEventMap {}
 }

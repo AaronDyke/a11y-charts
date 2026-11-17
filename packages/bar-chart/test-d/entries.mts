@@ -1,6 +1,6 @@
 // Every public entry point resolves and exposes its documented exports.
 import { buildBarModel, resolveConfig, validateBarData, type A11yBarChartDatum } from '@mzebley-aem/bar-chart/core';
-import { A11yBarChartElement, A11yBarChartGroupElement, buildBarCsv, type BarViewSection } from '@mzebley-aem/bar-chart';
+import { A11yBarChartElement, A11yBarChartGroupElement, buildBarCsv, type A11yBarChartViewSection } from '@mzebley-aem/bar-chart';
 import { defineA11yBarChart, defineA11yBarChartGroup } from '@mzebley-aem/bar-chart/define';
 import { loadA11yBarChart } from '@mzebley-aem/bar-chart/loader';
 
@@ -12,7 +12,7 @@ void config;
 buildBarModel(rows);
 validateBarData(rows);
 buildBarCsv(buildBarModel(rows));
-const sections: BarViewSection[] = [];
+const sections: A11yBarChartViewSection[] = [];
 void sections;
 
 const chart: HTMLElement = new A11yBarChartElement();

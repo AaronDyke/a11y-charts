@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { A11yBarChartElement } from '../src/a11y-bar-chart-element.js';
 import { A11yBarChartGroupElement } from '../src/a11y-bar-chart-group-element.js';
-import type { BarViewSection } from '../src/grouped-model.js';
+import type { A11yBarChartViewSection } from '../src/grouped-model.js';
 
 if (!customElements.get('a11y-bar-chart')) customElements.define('a11y-bar-chart', A11yBarChartElement);
 if (!customElements.get('a11y-bar-chart-group')) customElements.define('a11y-bar-chart-group', A11yBarChartGroupElement);
@@ -9,7 +9,7 @@ if (!customElements.get('a11y-bar-chart-group')) customElements.define('a11y-bar
 function view(id: string, label: string, count: number) {
   return { id, label, chartTitle: `${label} results`, data: [{ id: 'home', label: 'Home', value: count, target: { min: 1, max: 3 } }], total: count, filtered: false, suppressed: false };
 }
-function sections(): BarViewSection[] {
+function sections(): A11yBarChartViewSection[] {
   return [
     { id: 'age', label: 'Age group', allViewId: 'age-all', description: 'Choose an age group.', views: [view('age-all', 'All ages', 10), { ...view('adult', 'Adults', 6), definition: 'People age 18 and older.' }] },
     { id: 'race', label: 'Race and ethnicity', allViewId: 'race-all', views: [view('race-all', 'All groups', 20), view('home', 'Home', 12)] }

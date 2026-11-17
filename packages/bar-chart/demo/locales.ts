@@ -1,9 +1,9 @@
 import { ENGLISH_MESSAGES } from '../src/messages.js';
-import type { MessageDictionary } from '../src/messages.js';
-import type { A11yBarChartDatum } from '../src/index.js';
+import type { A11yBarChartMessageDictionary } from '../src/messages.js';
+import type { A11yBarChartDatum } from '../src/model.js';
 
 export type BarDemoLocale = 'en-US' | 'fr-FR' | 'es-ES';
-type Catalog = Record<keyof typeof ENGLISH_MESSAGES, string> & MessageDictionary;
+type Catalog = Record<keyof typeof ENGLISH_MESSAGES, string> & A11yBarChartMessageDictionary;
 
 export const BAR_DEMO_MESSAGES = {
   'en-US': { ...ENGLISH_MESSAGES },

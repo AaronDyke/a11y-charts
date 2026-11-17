@@ -31,6 +31,7 @@ Structured inputs like `data`, `config`, `theme`, and `messages` are **propertie
 - Shared attributes include `chart-title`, `subtitle`, `locale`, `heading-level`, `data-view`, `percent-scale`, `filtered`, and `suppressed`.
 - A valid attribute takes precedence over the matching `config` value. An invalid attribute is ignored and the config value applies.
 - Boolean attributes such as `suppressed` follow HTML presence rules: remove the attribute for false.
+- `heading-level`, `data-view`, and `percent-scale` (and `value-preset` on the line chart) also have matching properties: `headingLevel`, `dataView`, `percentScale`, and `valuePreset`. See [TypeScript](/reference/typescript/#properties-that-match-attributes).
 - `messages` can also be an attribute holding a JSON object of text overrides.
 
 Set `heading-level` so the chart title fits the page outline. It defaults to `2`.

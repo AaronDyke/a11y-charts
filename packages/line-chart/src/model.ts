@@ -24,6 +24,7 @@ export type A11yLineChartValuePreset = 'number' | 'percent';
 export type A11yLineChartPattern = 'diagonal' | 'dots' | 'horizontal' | 'none';
 export type A11yLineChartDataView = 'dialog' | 'inline' | 'none';
 export type A11yLineChartPercentScale = 'whole' | 'fraction';
+export type A11yLineChartHeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 export type A11yLineChartStepperVisibility = 'always' | 'auto' | 'never';
 export type A11yLineChartTrendMode = 'labels' | 'arrows';
 export type A11yLineChartPositiveDirection = 'above' | 'below';
@@ -153,7 +154,7 @@ export interface A11yLineChartConfig {
   dynamicMinWidth?: boolean;
   fillActual?: boolean;
   fillTarget?: boolean;
-  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
+  headingLevel?: A11yLineChartHeadingLevel;
   initialZoomY?: boolean;
   locale?: string;
   maxWidth?: number;
@@ -278,3 +279,5 @@ export interface A11yLineChartDataViewChangeDetail { open: boolean; dataView: 'd
 export interface A11yLineChartDisclosureChangeDetail { disclosure: 'explanation' | 'glossary'; expanded: boolean; }
 /** Emitted after initial render only when normalized data or its baseline changes. */
 export interface A11yLineChartDataChangeDetail { data: A11yLineChartDatum[]; model: A11yLineChartSemanticModel | null; }
+/** Emitted once, after the first render. */
+export interface A11yLineChartReadyDetail { instanceId: string; }

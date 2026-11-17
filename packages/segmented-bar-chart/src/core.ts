@@ -11,6 +11,10 @@ export interface A11ySegmentedBarChartDatum {
   definition?: string;
 }
 
+export type A11ySegmentedBarChartHeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+export type A11ySegmentedBarChartDataView = 'dialog' | 'inline' | 'none';
+/** 'whole' reads 45.5 as 45.5%; 'fraction' reads 0.455 as 45.5%. */
+export type A11ySegmentedBarChartPercentScale = 'whole' | 'fraction';
 export interface A11ySegmentedBarChartConfig {
   mode?: 'breakdown' | 'comparison';
   presentation?: 'full' | 'compact';
@@ -19,7 +23,7 @@ export interface A11ySegmentedBarChartConfig {
   separateCategoryIds?: string[];
   inferTotal?: boolean;
   /** 'dialog' opens the complete data in a modal, 'inline' expands it under the chart, 'none' removes data access and exports. */
-  dataView?: 'dialog' | 'inline' | 'none';
+  dataView?: A11ySegmentedBarChartDataView;
   showSummary?: boolean;
   showContext?: boolean;
   showActions?: boolean;
@@ -36,20 +40,20 @@ export interface A11ySegmentedBarChartConfig {
   countDecimals?: number;
   percentageDecimals?: number;
   /** Scale of the percentage passed to formatValue: 'whole' (45.5) or 'fraction' (0.455). */
-  percentScale?: 'whole' | 'fraction';
-  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
+  percentScale?: A11ySegmentedBarChartPercentScale;
+  headingLevel?: A11ySegmentedBarChartHeadingLevel;
   announceChanges?: boolean;
 }
 
-export type SegmentedPattern = 'none' | 'diagonal' | 'dots' | 'horizontal';
-export interface SegmentedThemeEntry {
+export type A11ySegmentedBarChartPattern = 'none' | 'diagonal' | 'dots' | 'horizontal';
+export interface A11ySegmentedBarChartThemeEntry {
   color?: string;
-  pattern?: SegmentedPattern;
+  pattern?: A11ySegmentedBarChartPattern;
   patternColor?: string;
 }
 export interface A11ySegmentedBarChartTheme {
-  segments?: Record<string, SegmentedThemeEntry>;
-  other?: SegmentedThemeEntry;
+  segments?: Record<string, A11ySegmentedBarChartThemeEntry>;
+  other?: A11ySegmentedBarChartThemeEntry;
   color?: string;
   track?: string;
   text?: string;
@@ -77,8 +81,8 @@ export interface A11ySegmentedBarChartValueFormatContext {
   label?: string;
 }
 export type A11ySegmentedBarChartValueFormatter = (context: A11ySegmentedBarChartValueFormatContext) => string;
-export type MessageDictionary = Record<string, string>;
-export interface SegmentedRow {
+export type A11ySegmentedBarChartMessageDictionary = Record<string, string>;
+export interface A11ySegmentedBarChartRow {
   id: string;
   label: string;
   definition: string;
@@ -89,14 +93,14 @@ export interface SegmentedRow {
   percentageText: string;
   ratio: number;
 }
-export type SegmentedDisplaySegment =
-  | { kind: 'category'; key: string; row: SegmentedRow; members: SegmentedRow[] }
+export type A11ySegmentedBarChartDisplaySegment =
+  | { kind: 'category'; key: string; row: A11ySegmentedBarChartRow; members: A11ySegmentedBarChartRow[] }
   | { kind: 'other'; key: string; label: string; value: number | null;
       status: 'reported' | 'incomplete' | 'suppressed'; valueText: string;
-      percentage: number | null; percentageText: string; ratio: number; members: SegmentedRow[] };
-export interface SegmentedModel {
-  rows: SegmentedRow[];
-  displaySegments: SegmentedDisplaySegment[];
+      percentage: number | null; percentageText: string; ratio: number; members: A11ySegmentedBarChartRow[] };
+export interface A11ySegmentedBarChartSemanticModel {
+  rows: A11ySegmentedBarChartRow[];
+  displaySegments: A11ySegmentedBarChartDisplaySegment[];
   total: number | null;
   totalText: string;
   error: string | null;
@@ -104,12 +108,12 @@ export interface SegmentedModel {
   warning: string | null;
   summary: string;
 }
-export interface SegmentedOptions {
+export interface A11ySegmentedBarChartModelOptions {
   total?: number | null;
   suppressed?: boolean;
   filtered?: boolean;
   config?: A11ySegmentedBarChartConfig;
-  messages?: MessageDictionary;
+  messages?: A11ySegmentedBarChartMessageDictionary;
   formatValue?: A11ySegmentedBarChartValueFormatter;
 }
 
@@ -157,8 +161,8 @@ export const ENGLISH_MESSAGES = {
 };
 /** Explicit catalog name for the English segmented-chart message dictionary. */
 export const ENGLISH_SEGMENTED_BAR_CHART_MESSAGES = ENGLISH_MESSAGES;
-export type MessageKey = keyof typeof ENGLISH_MESSAGES;
-export function formatMessage(key: MessageKey, messages?: MessageDictionary, values: Record<string, unknown> = {}): string {
+export type A11ySegmentedBarChartMessageKey = keyof typeof ENGLISH_MESSAGES;
+export function formatMessage(key: A11ySegmentedBarChartMessageKey, messages?: A11ySegmentedBarChartMessageDictionary, values: Record<string, unknown> = {}): string {
   const override = messages?.[key];
   return formatTemplate(typeof override === 'string' ? override : ENGLISH_MESSAGES[key], values);
 }
@@ -191,15 +195,23 @@ export function resolveConfig(input?: A11ySegmentedBarChartConfig | null) {
     countDecimals: decimals(c.countDecimals, 0),
     percentageDecimals: decimals(c.percentageDecimals, 2),
     percentScale: resolvePercentScale(c.percentScale, 'whole'),
-    headingLevel: (Number.isInteger(c.headingLevel) && c.headingLevel! >= 1 && c.headingLevel! <= 6 ? c.headingLevel! : 2) as 1 | 2 | 3 | 4 | 5 | 6
+    headingLevel: (Number.isInteger(c.headingLevel) && c.headingLevel! >= 1 && c.headingLevel! <= 6 ? c.headingLevel! : 2) as A11ySegmentedBarChartHeadingLevel
   };
 }
 export type ResolvedA11ySegmentedBarChartConfig = ReturnType<typeof resolveConfig>;
-export interface SegmentedValidationFailure { valid: false; code: MessageKey; message: string; params?: Record<string, string | number> }
-export type SegmentedValidationResult = { valid: true; data: A11ySegmentedBarChartDatum[] } | SegmentedValidationFailure;
 
-export function validateSegmentedBarData(input: unknown): SegmentedValidationResult {
-  const fail = (code: MessageKey, params?: Record<string, string | number>): SegmentedValidationFailure => ({
+/** Emitted once, after the first render. */
+export interface A11ySegmentedBarChartReadyDetail { instanceId: string; }
+export interface A11ySegmentedBarChartErrorDetail { code: string; message: string; }
+/** Emitted after the first render when the data changes. model is null when the data is invalid. */
+export interface A11ySegmentedBarChartDataChangeDetail { data: A11ySegmentedBarChartDatum[]; model: A11ySegmentedBarChartSemanticModel | null; }
+export interface A11ySegmentedBarChartDataViewChangeDetail { open: boolean; dataView: 'dialog' | 'inline'; }
+export interface A11ySegmentedBarChartDisclosureChangeDetail { disclosure: 'explanation' | 'glossary'; expanded: boolean; }
+export interface A11ySegmentedBarChartValidationFailure { valid: false; code: A11ySegmentedBarChartMessageKey; message: string; params?: Record<string, string | number> }
+export type A11ySegmentedBarChartValidationResult = { valid: true; data: A11ySegmentedBarChartDatum[] } | A11ySegmentedBarChartValidationFailure;
+
+export function validateSegmentedBarData(input: unknown): A11ySegmentedBarChartValidationResult {
+  const fail = (code: A11ySegmentedBarChartMessageKey, params?: Record<string, string | number>): A11ySegmentedBarChartValidationFailure => ({
     valid: false, code, message: formatMessage(code, undefined, params), ...(params ? { params } : {})
   });
   if (!Array.isArray(input)) return fail('validationInvalidData');
@@ -219,16 +231,16 @@ export function validateSegmentedBarData(input: unknown): SegmentedValidationRes
   }
   return { valid: true, data };
 }
-export function validateSegmentedBarTotal(value: unknown): { valid: true; total: number | null } | SegmentedValidationFailure {
+export function validateSegmentedBarTotal(value: unknown): { valid: true; total: number | null } | A11ySegmentedBarChartValidationFailure {
   if (value === undefined || value === null) return { valid: true, total: null };
   if (typeof value === 'number' && Number.isFinite(value) && value >= 0) return { valid: true, total: value };
   return { valid: false, code: 'validationInvalidTotal', message: ENGLISH_MESSAGES.validationInvalidTotal };
 }
 
-export function buildSegmentedBarModel(input: A11ySegmentedBarChartDatum[], options: SegmentedOptions = {}): SegmentedModel {
+export function buildSegmentedBarModel(input: A11ySegmentedBarChartDatum[], options: A11ySegmentedBarChartModelOptions = {}): A11ySegmentedBarChartSemanticModel {
   const c = resolveConfig(options.config);
-  const msg = (key: MessageKey, values: Record<string, unknown> = {}) => formatMessage(key, options.messages, values);
-  const failure = (code: MessageKey, params?: Record<string, string | number>): SegmentedModel => ({
+  const msg = (key: A11ySegmentedBarChartMessageKey, values: Record<string, unknown> = {}) => formatMessage(key, options.messages, values);
+  const failure = (code: A11ySegmentedBarChartMessageKey, params?: Record<string, string | number>): A11ySegmentedBarChartSemanticModel => ({
     rows: [], displaySegments: [], total: null, totalText: msg('totalUnavailable'), error: msg(code, params), errorCode: code, warning: null, summary: msg(code, params)
   });
   const validation = validateSegmentedBarData(input);
@@ -243,7 +255,7 @@ export function buildSegmentedBarModel(input: A11ySegmentedBarChartDatum[], opti
   const total = checkedTotal.total ?? (c.mode === 'breakdown' && c.inferTotal && complete && Number.isFinite(sum) ? sum : null);
   // A host-provided total of zero under suppression is itself protected: it reads as suppressed and is never exposed.
   const suppressedTotal = options.suppressed === true && checkedTotal.total === 0;
-  let errorCode: MessageKey | null = null;
+  let errorCode: A11ySegmentedBarChartMessageKey | null = null;
   if (data.length && c.mode === 'comparison' && (data.length !== 1 || checkedTotal.total === null)) errorCode = 'comparisonRequiresTotal';
   if (c.highlightedId && !data.some(d => d.id === c.highlightedId)) errorCode = 'validationInvalidHighlight';
   const selection = options.config?.separateCategoryIds;
@@ -269,7 +281,7 @@ export function buildSegmentedBarModel(input: A11ySegmentedBarChartDatum[], opti
     return series === 'percentage' ? percentageFormat(value, c.percentageDecimals) : countFormat(value, c.countDecimals);
   };
   let overflow = sum !== null && !Number.isFinite(sum);
-  const rows: SegmentedRow[] = data.map(d => {
+  const rows: A11ySegmentedBarChartRow[] = data.map(d => {
     const status = suppressedRow(d) ? 'suppressed' : d.value === null ? 'missing' : 'reported';
     const value = status === 'reported' ? d.value : null;
     const rawRatio = value !== null && total !== null && total > 0 ? value / total : null;
@@ -280,7 +292,7 @@ export function buildSegmentedBarModel(input: A11ySegmentedBarChartDatum[], opti
       percentage, percentageText: percentage === null ? msg(status === 'suppressed' ? 'suppressedValue' : 'unavailable') : fmt(percentage, 'percentage', d),
       ratio: percentage === null || errorCode || (c.mode === 'breakdown' && !complete) ? 0 : Math.min(1, percentage) };
   });
-  let selected: SegmentedRow[];
+  let selected: A11ySegmentedBarChartRow[];
   if (c.mode === 'comparison' || (selection === undefined && rows.length <= 4)) selected = rows;
   else if (Array.isArray(selection)) selected = [...new Set(selection)].slice(0, 3).flatMap(id => {
     const row = rows.find(candidate => candidate.id === id);
@@ -306,7 +318,7 @@ export function buildSegmentedBarModel(input: A11ySegmentedBarChartDatum[], opti
     errorCode = 'validationInvalidGroupingHighlight';
     for (const row of rows) row.ratio = 0;
   }
-  const displaySegments: SegmentedDisplaySegment[] = selected.map(row => ({ kind: 'category', key: `category:${row.id}`, row, members: [row] }));
+  const displaySegments: A11ySegmentedBarChartDisplaySegment[] = selected.map(row => ({ kind: 'category', key: `category:${row.id}`, row, members: [row] }));
   if (members.length) {
     const status = members.some(row => row.status === 'suppressed') ? 'suppressed' :
       members.some(row => row.status === 'missing') ? 'incomplete' : 'reported';
@@ -332,13 +344,13 @@ export function buildSegmentedBarModel(input: A11ySegmentedBarChartDatum[], opti
   return { rows, displaySegments, total: modelTotal, totalText, error, errorCode, warning, summary };
 }
 
-export interface SegmentedExportOptions {
+export interface A11ySegmentedBarChartCsvOptions {
   chartTitle?: string;
   categoryHeader?: string;
   countHeader?: string;
   percentageHeader?: string;
   totalHeader?: string;
-  messages?: MessageDictionary;
+  messages?: A11ySegmentedBarChartMessageDictionary;
   locale?: string;
   context?: string;
   dataNote?: string;
@@ -346,12 +358,12 @@ export interface SegmentedExportOptions {
   explanationText?: string;
   dataNoteText?: string;
 }
-function metadataText(options: SegmentedExportOptions, name: 'context' | 'dataNote'): string {
+function metadataText(options: A11ySegmentedBarChartCsvOptions, name: 'context' | 'dataNote'): string {
   const plain = options[`${name}Text`];
   return typeof plain === 'string' ? plain : options[name] ? safeHtmlToText(options[name]!) : '';
 }
-export function buildSegmentedBarCsv(model: SegmentedModel, options: SegmentedExportOptions = {}): string {
-  const msg = (key: MessageKey) => formatMessage(key, options.messages);
+export function buildSegmentedBarCsv(model: A11ySegmentedBarChartSemanticModel, options: A11ySegmentedBarChartCsvOptions = {}): string {
+  const msg = (key: A11ySegmentedBarChartMessageKey) => formatMessage(key, options.messages);
   const rows: string[][] = [];
   for (const [label, value] of [
     [msg('title'), options.chartTitle], [msg('csvContextLabel'), metadataText(options, 'context')],
@@ -362,3 +374,4 @@ export function buildSegmentedBarCsv(model: SegmentedModel, options: SegmentedEx
     [options.totalHeader ?? msg('csvTotalHeader'), model.totalText, '']);
   return rows.map(row => row.map(value => encodeCsvCell(value)).join(',')).join('\r\n');
 }
+export type { MessageDictionary, MessageKey, SegmentedDisplaySegment, SegmentedExportOptions, SegmentedModel, SegmentedOptions, SegmentedPattern, SegmentedRow, SegmentedThemeEntry, SegmentedValidationFailure, SegmentedValidationResult } from './deprecated.js';

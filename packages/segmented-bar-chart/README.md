@@ -65,7 +65,7 @@ With the flag on, the chart also shows the Suppressed indicator beside the title
 - Presentation attributes: `data-view` (`dialog`, `inline`, or `none`) and `percent-scale` (`whole` or `fraction`). A valid value overrides `config.dataView` or `config.percentScale`; an invalid value is ignored and the config applies.
 - Rich `context`, `explanation`, `dataNote`, and category `definition` use the shared sanitization allowlist. Labels and custom formatter output remain text. Author-supplied narratives must remain consistent with the data.
 - `formatValue` receives `{ value, series, locale, id?, label? }`, where `series` is `count`, `percentage`, or `total`. For `percentage`, `value` follows `percentScale`: `whole` (the default) passes 45.5 for 45.5%, and `fraction` passes 0.455. The built-in fallback formatting, model `percentage` fields, and segment geometry always remain fractions. Invalid formatter output falls back to locale formatting. Suppressed values never reach the formatter.
-- Default locale is `en-US`, with zero count decimals, two percentage decimals, heading level 2, dialog data view, whole percent scale for `formatValue`, and details disabled. `messages` uses shared names such as `showData`, `countHeader`, `percentageHeader`, `detailsPreview`, and `detailsPinned`; `ENGLISH_MESSAGES` (also exported as `ENGLISH_SEGMENTED_BAR_CHART_MESSAGES`) and `MessageKey` expose the complete catalog. Missing values read `Not reported` by default.
+- Default locale is `en-US`, with zero count decimals, two percentage decimals, heading level 2, dialog data view, whole percent scale for `formatValue`, and details disabled. `messages` uses shared names such as `showData`, `countHeader`, `percentageHeader`, `detailsPreview`, and `detailsPinned`; `ENGLISH_MESSAGES` (also exported as `ENGLISH_SEGMENTED_BAR_CHART_MESSAGES`) and `A11ySegmentedBarChartMessageKey` expose the complete catalog. Missing values read `Not reported` by default.
 - `showActions` controls the main action strip. An explicit inline data view retains its own data tools. `dataView: 'none'` removes data access and exports. Hiding numeric annotations never hides missing/suppressed status.
 - CSV exports formatted values with formula-safe text and CRLF records, and support authored metadata. The element's download begins with a UTF-8 byte-order mark (U+FEFF) so spreadsheet apps detect the encoding. `buildSegmentedBarCsv` returns plain text without the mark; server-side users who want Excel to detect UTF-8 should prepend `\uFEFF` themselves. DOM-free helpers accept `contextText`, `explanationText`, and `dataNoteText`; rich HTML metadata conversion requires a DOM.
 - Every class the chart renders uses the `a11y-segmented-bar-chart__` prefix (for example `a11y-segmented-bar-chart__legend` or `a11y-segmented-bar-chart__visually-hidden`), and the stylesheet scopes its rules under the element name. Host-page styles that target generic class names such as `.legend` or `.title` do not apply to the chart.
@@ -96,6 +96,29 @@ If a focused category becomes grouped during an update, keyboard focus moves to
 Other's detail button. If the group disappears, focus returns to a surviving
 member or the chart heading. Compact charts with navigation and details disabled
 keep the whole-card link; provide complete member data at the linked destination.
+
+## TypeScript
+
+Type declarations ship with the package and need TypeScript 5.5 or newer
+(`moduleResolution` `NodeNext`, `Node16`, or `Bundler`). Importing the package or
+its `/define` entry registers the tag, so no casts are needed:
+
+```ts
+import '@mzebley-aem/segmented-bar-chart/define';
+
+const chart = document.createElement('a11y-segmented-bar-chart'); // A11ySegmentedBarChartElement
+document.addEventListener('a11y-segmented-bar-chart-data-change', (event) => {
+  event.detail; // A11ySegmentedBarChartDataChangeDetail
+});
+```
+
+- Listeners on the chart, any ancestor, `document`, and `window` get a typed
+  `event.detail`. `A11ySegmentedBarChartEventMap` lists every event.
+- `headingLevel`, `dataView`, and `percentScale` read the value the chart is using (attribute, then `config`, then
+  the default) and write the matching attribute; `null` removes it.
+- `/core` has no DOM types, so it type-checks without the `DOM` library.
+- 0.2 renamed the `Segmented*` types, `MessageKey`, and `MessageDictionary` to carry the package prefix. The old names remain as
+  deprecated aliases until 1.0; see CHANGELOG.md.
 
 ## Server rendering (SSR) and prerendering
 

@@ -1,5 +1,5 @@
 import type { A11yBarChartConfig, A11yBarChartDatum, A11yBarChartExportAction, A11yBarChartTheme, A11yBarChartValueFormatter } from './model.js';
-import type { MessageDictionary } from './messages.js';
+import type { A11yBarChartMessageDictionary } from './messages.js';
 import { validateBarData, validateBarTotal } from './validation.js';
 import { renderRichContent } from './rich-content.js';
 import type { A11yBarChartElement } from './a11y-bar-chart-element.js';
@@ -30,7 +30,7 @@ export class A11yBarChartGroupElement extends HTMLElement {
   #selectedSectionId = '';
   #selectedViewId = '';
   #config: A11yBarChartConfig = {};
-  #messages: MessageDictionary = {};
+  #messages: A11yBarChartMessageDictionary = {};
   #groupMessages: A11yBarChartGroupMessages = {};
   #theme: A11yBarChartTheme = {};
   #formatValue: A11yBarChartValueFormatter | undefined;
@@ -77,8 +77,8 @@ export class A11yBarChartGroupElement extends HTMLElement {
   }
   get config(): A11yBarChartConfig { return { ...this.#config }; }
   set config(value: A11yBarChartConfig) { this.#config = value && typeof value === 'object' ? { ...value } : {}; this.#syncChart(); }
-  get messages(): MessageDictionary { return { ...this.#messages }; }
-  set messages(value: MessageDictionary) { this.#messages = value && typeof value === 'object' ? { ...value } : {}; this.#syncChart(); }
+  get messages(): A11yBarChartMessageDictionary { return { ...this.#messages }; }
+  set messages(value: A11yBarChartMessageDictionary) { this.#messages = value && typeof value === 'object' ? { ...value } : {}; this.#syncChart(); }
   get groupMessages(): A11yBarChartGroupMessages { return { ...this.#groupMessages }; }
   set groupMessages(value: A11yBarChartGroupMessages) { this.#groupMessages = this.#validGroupMessages(value); this.#render(); }
   get theme(): A11yBarChartTheme { return { ...this.#theme }; }
@@ -283,4 +283,16 @@ export class A11yBarChartGroupElement extends HTMLElement {
 
   #safeId(value: string): string { return Array.from(value, (char) => char.codePointAt(0)!.toString(16)).join('-') || 'id'; }
   #escape(value: unknown): string { return safeText(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;'); }
+}
+
+/** Every event `<a11y-bar-chart-group>` dispatches. It bubbles and crosses shadow roots. */
+export interface A11yBarChartGroupEventMap {
+  'a11y-bar-chart-group-selection-change': CustomEvent<A11yBarChartGroupSelectionChangeDetail>;
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'a11y-bar-chart-group': A11yBarChartGroupElement;
+  }
+  interface GlobalEventHandlersEventMap extends A11yBarChartGroupEventMap {}
 }

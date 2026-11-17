@@ -1,9 +1,8 @@
 import '@mzebley-aem/line-chart/define';
 import '@mzebley-aem/line-chart/styles.css';
-import type { A11yLineChartElement } from '@mzebley-aem/line-chart';
 import './report-demo.css';
 
-const chart = document.querySelector<A11yLineChartElement>('a11y-line-chart');
+const chart = document.querySelector('a11y-line-chart');
 
 function labelForControl(root: Element, control: string): HTMLLabelElement | undefined {
   return root.querySelector<HTMLInputElement>(`input[data-control="${control}"]`)?.closest('label') ?? undefined;

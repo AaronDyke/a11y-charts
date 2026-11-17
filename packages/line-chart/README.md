@@ -378,6 +378,29 @@ the target-suppression and suppression-validation messages. The derived
 `actualSuppressed` boolean remains only on semantic points and the point-change
 event.
 
+## TypeScript
+
+Type declarations ship with the package and need TypeScript 5.5 or newer
+(`moduleResolution` `NodeNext`, `Node16`, or `Bundler`). Importing the package or
+its `/define` entry registers the tag, so no casts are needed:
+
+```ts
+import '@mzebley-aem/line-chart/define';
+
+const chart = document.createElement('a11y-line-chart'); // A11yLineChartElement
+document.addEventListener('a11y-line-chart-point-change', (event) => {
+  event.detail; // A11yLineChartPointChangeDetail
+});
+```
+
+- Listeners on the chart, any ancestor, `document`, and `window` get a typed
+  `event.detail`. `A11yLineChartEventMap` lists every event.
+- `headingLevel`, `dataView`, `percentScale`, and `valuePreset` read the value the chart is using (attribute, then `config`, then
+  the default) and write the matching attribute; `null` removes it.
+- `/core` has no DOM types, so it type-checks without the `DOM` library.
+- 0.2 renamed `BuildLineCsvOptions`, `BaselineValidationResult`, and `DataValidationResult` to carry the package prefix. The old names remain as
+  deprecated aliases until 1.0; see CHANGELOG.md.
+
 ## Server rendering (SSR) and prerendering
 
 The package root and `/define` evaluate classes that extend `HTMLElement`, so

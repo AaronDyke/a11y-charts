@@ -11,10 +11,12 @@ import type {
   A11yLineChartDisclosureChangeDetail,
   A11yLineChartDifferenceFormatter,
   A11yLineChartErrorDetail,
+  A11yLineChartHeadingLevel,
   A11yLineChartLegacyDatum,
   A11yLineChartPattern,
   A11yLineChartPercentScale,
   A11yLineChartPointChangeDetail,
+  A11yLineChartReadyDetail,
   A11yLineChartSemanticModel,
   A11yLineChartSeries,
   A11yLineChartTarget,
@@ -40,6 +42,7 @@ import { renderLineRichContent, lineRichContentToText } from './rich-content.js'
 import { ModalController } from '../../chart-core/src/ui/modal-controller.js';
 import { setDisclosure, toggleDisclosure } from '../../chart-core/src/ui/disclosure.js';
 import { upgradeOwnProperties } from '../../chart-core/src/ui/upgrade-properties.js';
+import { reflectAttribute } from '../../chart-core/src/ui/reflect-attribute.js';
 
 const OWNED_ROOT_ATTRIBUTE = 'data-a11y-line-chart-owned';
 let nextInstanceId = 0;
@@ -49,7 +52,7 @@ function nextId(): string {
   return `a11y-line-chart-${nextInstanceId}`;
 }
 
-function isHeadingLevel(value: number): value is 1 | 2 | 3 | 4 | 5 | 6 {
+function isHeadingLevel(value: number): value is A11yLineChartHeadingLevel {
   return value >= 1 && value <= 6;
 }
 
@@ -165,6 +168,42 @@ export class A11yLineChartElement extends HTMLElement {
   set subtitle(value: string) {
     if (value) this.setAttribute('subtitle', value);
     else this.removeAttribute('subtitle');
+  }
+
+  /** Effective heading level: a valid `heading-level` attribute, else `config.headingLevel`, else 2. Setting it writes the attribute; null removes it. */
+  get headingLevel(): A11yLineChartHeadingLevel {
+    return this.#headingLevel();
+  }
+
+  set headingLevel(value: A11yLineChartHeadingLevel | null) {
+    reflectAttribute(this, 'heading-level', value);
+  }
+
+  /** Effective data view: a valid `data-view` attribute, else `config.dataView`, else 'dialog'. Setting it writes the attribute; null removes it. */
+  get dataView(): A11yLineChartDataView {
+    return this.#dataView();
+  }
+
+  set dataView(value: A11yLineChartDataView | null) {
+    reflectAttribute(this, 'data-view', value);
+  }
+
+  /** Effective percent scale: a valid `percent-scale` attribute, else `config.percentScale`, else 'whole'. Setting it writes the attribute; null removes it. */
+  get percentScale(): A11yLineChartPercentScale {
+    return this.#percentScale();
+  }
+
+  set percentScale(value: A11yLineChartPercentScale | null) {
+    reflectAttribute(this, 'percent-scale', value);
+  }
+
+  /** Effective value preset: a valid `value-preset` attribute, else `config.valuePreset`, else 'percent'. Setting it writes the attribute; null removes it. */
+  get valuePreset(): A11yLineChartValuePreset {
+    return this.#valuePreset();
+  }
+
+  set valuePreset(value: A11yLineChartValuePreset | null) {
+    reflectAttribute(this, 'value-preset', value);
   }
 
   get baseline(): A11yLineChartBaseline | undefined {
@@ -505,10 +544,10 @@ export class A11yLineChartElement extends HTMLElement {
     });
   }
 
-  #headingLevel(): 1 | 2 | 3 | 4 | 5 | 6 {
+  #headingLevel(): A11yLineChartHeadingLevel {
     const attributeValue = Number(this.getAttribute('heading-level'));
     if (isHeadingLevel(attributeValue)) return attributeValue;
-    return isHeadingLevel(Number(this.#config.headingLevel)) ? Number(this.#config.headingLevel) as 1 | 2 | 3 | 4 | 5 | 6 : 2;
+    return isHeadingLevel(Number(this.#config.headingLevel)) ? Number(this.#config.headingLevel) as A11yLineChartHeadingLevel : 2;
   }
 
   #periodKey(value: A11yLineChartXValue): string {
@@ -1629,7 +1668,7 @@ export class A11yLineChartElement extends HTMLElement {
   #dispatchReady(): void {
     if (this.#readyDispatched) return;
     this.#readyDispatched = true;
-    this.dispatchEvent(new CustomEvent('a11y-line-chart-ready', { bubbles: true, detail: { instanceId: this.instanceId } }));
+    this.dispatchEvent(new CustomEvent<A11yLineChartReadyDetail>('a11y-line-chart-ready', { bubbles: true, detail: { instanceId: this.instanceId } }));
   }
 
   #valuePreset(): A11yLineChartValuePreset {
@@ -1668,4 +1707,23 @@ export class A11yLineChartElement extends HTMLElement {
   #closeInlineViewIfOpen(): void {
     if (this.#dataViewOpen && this.#activeDataView === 'inline') this.#setDataViewState(false, 'inline');
   }
+}
+
+/** Every event `<a11y-line-chart>` dispatches. All of them bubble. */
+export interface A11yLineChartEventMap {
+  'a11y-line-chart-ready': CustomEvent<A11yLineChartReadyDetail>;
+  'a11y-line-chart-error': CustomEvent<A11yLineChartErrorDetail>;
+  'a11y-line-chart-data-change': CustomEvent<A11yLineChartDataChangeDetail>;
+  'a11y-line-chart-data-view-change': CustomEvent<A11yLineChartDataViewChangeDetail>;
+  'a11y-line-chart-disclosure-change': CustomEvent<A11yLineChartDisclosureChangeDetail>;
+  'a11y-line-chart-settings-change': CustomEvent<A11yLineChartSettingsChangeDetail>;
+  'a11y-line-chart-point-change': CustomEvent<A11yLineChartPointChangeDetail>;
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'a11y-line-chart': A11yLineChartElement;
+  }
+  // Every chart event bubbles, so ancestors, document and window can listen too.
+  interface GlobalEventHandlersEventMap extends A11yLineChartEventMap {}
 }

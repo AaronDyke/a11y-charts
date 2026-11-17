@@ -1,5 +1,10 @@
 import type { PercentScale } from '../../chart-core/src/csv.js';
 
+export type A11yBarChartHeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+export type A11yBarChartDataView = 'dialog' | 'inline' | 'none';
+/** 'whole' reads 45.5 as 45.5%; 'fraction' reads 0.455 as 45.5%. */
+export type A11yBarChartPercentScale = PercentScale;
+
 /** Inclusive target interval, expressed in the same units as value. */
 export interface A11yBarChartTargetRange {
   min: number;
@@ -30,9 +35,9 @@ export interface A11yBarChartConfig {
    * Full-data view: 'dialog' (modal), 'inline' (disclosure under the chart), or
    * 'none' (no data table, data action, or CSV export). Default 'dialog'.
    */
-  dataView?: 'dialog' | 'inline' | 'none';
+  dataView?: A11yBarChartDataView;
   /** Scale of the percent value passed to formatValue. Default 'whole' (45.5 for 45.5%). */
-  percentScale?: PercentScale;
+  percentScale?: A11yBarChartPercentScale;
   showSummary?: boolean;
   showContext?: boolean;
   showActions?: boolean;
@@ -66,7 +71,7 @@ export interface A11yBarChartConfig {
   locale?: string;
   countDecimals?: number;
   percentageDecimals?: number;
-  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
+  headingLevel?: A11yBarChartHeadingLevel;
   announceChanges?: boolean;
 }
 
@@ -74,8 +79,8 @@ export interface ResolvedA11yBarChartConfig {
   scaleMode: 'largest' | 'population-share';
   inferTotal: boolean;
   scaleMaximum?: number;
-  dataView: 'dialog' | 'inline' | 'none';
-  percentScale: PercentScale;
+  dataView: A11yBarChartDataView;
+  percentScale: A11yBarChartPercentScale;
   showSummary: boolean;
   showContext: boolean;
   showActions: boolean;
@@ -95,7 +100,7 @@ export interface ResolvedA11yBarChartConfig {
   locale: string;
   countDecimals: number;
   percentageDecimals: number;
-  headingLevel: 1 | 2 | 3 | 4 | 5 | 6;
+  headingLevel: A11yBarChartHeadingLevel;
   announceChanges: boolean;
 }
 
@@ -189,31 +194,31 @@ export interface A11yBarChartSemanticModel {
   zeroValuesNote: string;
 }
 
-export interface BarModelOptions {
+export interface A11yBarChartModelOptions {
   total?: number | null;
   /** Chart-wide flag: zero values read as Suppressed. Hosts suppress upstream and send 0. */
   suppressed?: boolean;
   filtered?: boolean;
   config?: A11yBarChartConfig | ResolvedA11yBarChartConfig;
-  messages?: MessageDictionary;
+  messages?: A11yBarChartMessageDictionary;
   formatValue?: A11yBarChartValueFormatter;
 }
 
-export interface ValidationFailure {
+export interface A11yBarChartValidationFailure {
   valid: false;
   code: string;
   message: string;
   params?: Record<string, string | number>;
 }
 
-export interface ValidationSuccess<T> {
+export interface A11yBarChartValidationSuccess<T> {
   valid: true;
   data: T;
 }
 
-export type BarValidationResult = ValidationSuccess<A11yBarChartDatum[]> | ValidationFailure;
+export type A11yBarChartValidationResult = A11yBarChartValidationSuccess<A11yBarChartDatum[]> | A11yBarChartValidationFailure;
 
-import type { MessageDictionary } from './messages.js';
+import type { A11yBarChartMessageDictionary } from './messages.js';
 
 /** What a host export action receives when its button is activated. */
 export interface A11yBarChartExportContext {

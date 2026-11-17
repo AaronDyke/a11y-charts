@@ -1,4 +1,4 @@
-import { defineA11ySegmentedBarChart, type A11ySegmentedBarChartElement } from '@mzebley-aem/segmented-bar-chart';
+import { defineA11ySegmentedBarChart } from '@mzebley-aem/segmented-bar-chart';
 import '@mzebley-aem/segmented-bar-chart/styles.css';
 import { catalogs, labels } from './locales.js';
 import './style.css';
@@ -10,7 +10,7 @@ const categories = [
   { id: 'withdrawn', label: 'Withdrawn', value: 12, definition: 'Requests withdrawn before resolution.' },
 ];
 const chart = (slot: string, properties: Record<string, unknown>) => {
-  const element = document.createElement('a11y-segmented-bar-chart') as A11ySegmentedBarChartElement;
+  const element = document.createElement('a11y-segmented-bar-chart');
   // Each chart sits under a `##` section heading on the docs page.
   element.setAttribute('heading-level', '3');
   Object.assign(element, properties); document.getElementById(slot)!.append(element); return element;

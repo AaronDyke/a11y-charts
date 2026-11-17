@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { prepareBarViewSection, type PrepareBarViewsOptions } from '../src/prepare-views.js';
-const fixture = (): PrepareBarViewsOptions => ({
+import { prepareBarViewSection, type A11yBarChartPrepareViewsOptions } from '../src/prepare-views.js';
+const fixture = (): A11yBarChartPrepareViewsOptions => ({
   id: 'ages', label: 'Age', all: { id: 'everyone', label: 'All ages', total: 510 },
   options: [{ id: 'young', label: 'Birth to 1', total: 102 }, { id: 'older', label: '1 to 2' }],
   records: [{ filterId: 'young', id: 'home', label: 'Home', value: 102 },

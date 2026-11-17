@@ -4,8 +4,10 @@
 // into a throwaway consumer. The files are compiled with every supported
 // TypeScript version and module-resolution mode, with skipLibCheck off so the
 // shipped declarations themselves are checked, not just the test files.
+// The /core entry is also compiled without the DOM lib, because it is
+// documented as safe for server code.
 import { execFileSync } from 'node:child_process';
-import { cp, readdir } from 'node:fs/promises';
+import { cp, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 
 // Oldest supported consumer TypeScript is 5.5 (documented in each README).
@@ -30,24 +32,25 @@ export async function checkPackedTypes({ root, consumer }) {
   if (files.length === 0) throw new Error(`${source} has no .mts type tests.`);
   await cp(source, join(consumer, 'test-d'), { recursive: true });
   const inputs = files.map((name) => join('test-d', name));
+  const { name } = JSON.parse(await readFile(resolve(root, 'package.json'), 'utf8'));
+  await writeFile(join(consumer, 'core-without-dom.mts'), `export type * as core from '${name}/core';\n`);
 
   for (const compiler of COMPILERS) {
     for (const resolution of RESOLUTIONS) {
-      try {
-        execFileSync(
-          process.execPath,
-          [
-            resolve(root, compiler.bin),
-            '--strict', '--noEmit', '--target', 'ES2022', '--lib', 'ES2022,DOM,DOM.Iterable',
-            '--skipLibCheck', 'false',
-            ...resolution.flags,
-            ...inputs
-          ],
-          { cwd: consumer, stdio: 'inherit' }
-        );
-      } catch {
-        throw new Error(`Packed type tests failed under ${compiler.label} with ${resolution.label} resolution.`);
-      }
+      compile(root, consumer, compiler, resolution, ['--lib', 'ES2022,DOM,DOM.Iterable', ...inputs], 'type tests');
+      compile(root, consumer, compiler, resolution, ['--lib', 'ES2022', 'core-without-dom.mts'], '/core without the DOM lib');
     }
+  }
+}
+
+function compile(root, consumer, compiler, resolution, args, label) {
+  try {
+    execFileSync(
+      process.execPath,
+      [resolve(root, compiler.bin), '--strict', '--noEmit', '--target', 'ES2022', '--skipLibCheck', 'false', ...resolution.flags, ...args],
+      { cwd: consumer, stdio: 'inherit' }
+    );
+  } catch {
+    throw new Error(`Packed ${label} failed under ${compiler.label} with ${resolution.label} resolution.`);
   }
 }
