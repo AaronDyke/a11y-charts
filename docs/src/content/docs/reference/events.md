@@ -3,13 +3,14 @@ title: Events
 description: Every event the chart elements dispatch, with its detail payload.
 ---
 
-Every event is a `CustomEvent` that bubbles, so you can listen on the chart or on any ancestor. Event names start with the element name: `a11y-line-chart-`, `a11y-bar-chart-`, or `a11y-segmented-bar-chart-`. The line and bar packages export a type for each event's detail, such as `A11yLineChartPointChangeDetail` or `A11yBarChartDataChangeDetail`. The segmented package doesn't export detail types, so type its payloads locally from the tables below.
+Every event is a `CustomEvent` that bubbles, so you can listen on the chart or on any ancestor. Event names start with the element name: `a11y-line-chart-`, `a11y-bar-chart-`, or `a11y-segmented-bar-chart-`. In TypeScript, listeners are typed without casts once the package is imported: `event.detail` has the right payload type on the chart, on any ancestor, on `document` and on `window`. Each package also exports a type for every detail, such as `A11yLineChartPointChangeDetail`, and an event map such as `A11yBarChartEventMap`. See [TypeScript](/reference/typescript/).
 
 ```ts
-import type { A11yBarChartDataChangeDetail } from '@mzebley-aem/bar-chart';
+import '@mzebley-aem/bar-chart/define';
 
-chart.addEventListener('a11y-bar-chart-data-change', (event) => {
-	const { data, model } = (event as CustomEvent<A11yBarChartDataChangeDetail>).detail;
+const chart = document.querySelector('a11y-bar-chart'); // A11yBarChartElement | null
+chart?.addEventListener('a11y-bar-chart-data-change', (event) => {
+	const { data, model } = event.detail; // A11yBarChartDataChangeDetail
 });
 ```
 

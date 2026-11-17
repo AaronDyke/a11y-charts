@@ -1,10 +1,10 @@
-import type { A11yBarChartConfig, A11yBarChartGroupElement, BarViewSection } from '@mzebley-aem/bar-chart';
+import type { A11yBarChartConfig, A11yBarChartGroupElement, A11yBarChartViewSection } from '@mzebley-aem/bar-chart';
 
 /** Live settings for a grouped bar chart example: scale, data view, and an external report filter. */
 export function mountGroupSettings(
 	container: HTMLElement,
 	group: A11yBarChartGroupElement,
-	original: { config: A11yBarChartConfig; sections: BarViewSection[] },
+	original: { config: A11yBarChartConfig; sections: A11yBarChartViewSection[] },
 	changed: () => void,
 ): { reset(): void } {
 	const maximum = original.config.scaleMaximum;

@@ -128,9 +128,7 @@ function renderMeasure() {
   const targetNote = measure.id === '6B' ? 'The 18.29% detailed target is under review: the supplied PDF summary gives 28.12%. Any target outcome using 18.29% is conditional and needs confirmation.' : '';
   const stage = $('#chart-stage');
   if (view === 'trend') {
-    const chart = document.createElement(
-      'a11y-line-chart',
-    ) as A11yLineChartElement;
+    const chart = document.createElement('a11y-line-chart');
     chart.chartTitle = `Measure ${measure.id}: actual vs. target`;
     chart.dataNote = targetNote;
     if (targetNote) chart.messages = { outcomeNotMet: 'Target not met using the detailed target (under review)' };
@@ -191,9 +189,7 @@ function renderMeasure() {
     });
     stage.append(chart);
   } else {
-    const chart = document.createElement(
-      'a11y-bar-chart',
-    ) as A11yBarChartElement;
+    const chart = document.createElement('a11y-bar-chart');
     chart.chartTitle = `Measure ${measure.id}: rate comparison`;
     chart.dataNote = targetNote;
     chart.config = {

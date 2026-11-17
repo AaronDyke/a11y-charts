@@ -4,7 +4,7 @@ import { formatTarget } from './target.js';
 import { lineRichContentToText } from './rich-content.js';
 import { encodeCsvCell } from '../../chart-core/src/csv.js';
 
-export interface BuildLineCsvOptions {
+export interface A11yLineChartCsvOptions {
   data: readonly A11yLineChartDatum[];
   model: A11yLineChartSemanticModel;
   headers: readonly string[];
@@ -27,7 +27,7 @@ export interface BuildLineCsvOptions {
 }
 
 /** Build a CRLF CSV of the current line-chart values and canonical outcomes. */
-export function buildLineCsv(options: BuildLineCsvOptions): string {
+export function buildLineCsv(options: A11yLineChartCsvOptions): string {
   const data = normalizeLineData(options.data);
   const rows: string[][] = [];
   if (typeof options.contextText === 'string') {

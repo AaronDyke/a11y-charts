@@ -1,45 +1,45 @@
 import type { A11yBarChartDatum } from './model.js';
-import type { BarViewSection, PreparedBarView } from './grouped-model.js';
+import type { A11yBarChartViewSection, A11yBarChartPreparedView } from './grouped-model.js';
 import { validateBarData, validateBarTotal } from './validation.js';
 import { canonicalLocaleOrDefault } from '../../chart-core/src/validation.js';
 
 /** Resolve application-specific fields and glossary content before calling this helper. */
-export interface BarPopulationRecord extends A11yBarChartDatum {
+export interface A11yBarChartPopulationRecord extends A11yBarChartDatum {
   filterId: string;
 }
-export interface BarPopulationOption {
+export interface A11yBarChartPopulationOption {
   id: string;
   label: string;
   definition?: string;
   /** Omit to sum only complete reported records. null explicitly means unknown. */
   total?: number | null;
 }
-export interface BarPreparedViewContext {
-  option: BarPopulationOption;
+export interface A11yBarChartPreparedViewContext {
+  option: A11yBarChartPopulationOption;
   isAll: boolean;
   data: readonly A11yBarChartDatum[];
   total: number | null;
   populationTotal: number | null;
   populationShare: number | null;
 }
-export interface PrepareBarViewsOptions {
+export interface A11yBarChartPrepareViewsOptions {
   id: string;
   label: string;
   description?: string;
-  all: BarPopulationOption;
-  options: readonly BarPopulationOption[];
-  records: readonly BarPopulationRecord[];
+  all: A11yBarChartPopulationOption;
+  options: readonly A11yBarChartPopulationOption[];
+  records: readonly A11yBarChartPopulationRecord[];
   /** Chart-wide suppression: zeros read as Suppressed, and aggregates never infer a total. */
   suppressed?: boolean;
   filtered?: boolean;
   sort?: 'source' | 'value-descending';
   locale?: string;
   /** Author localized content from safe values; no ADAPT template grammar is embedded. */
-  describe?: (context: BarPreparedViewContext) => Pick<PreparedBarView, 'chartTitle' | 'context' | 'dataNote' | 'explanation' | 'emptyMessage'>;
+  describe?: (context: A11yBarChartPreparedViewContext) => Pick<A11yBarChartPreparedView, 'chartTitle' | 'context' | 'dataNote' | 'explanation' | 'emptyMessage'>;
 }
 
 /** Aggregate prepared population records without mutating sources or inferring protected totals. */
-export function prepareBarViewSection(input: PrepareBarViewsOptions): BarViewSection {
+export function prepareBarViewSection(input: A11yBarChartPrepareViewsOptions): A11yBarChartViewSection {
   if (!input || typeof input.id !== 'string' || !input.id.trim() || !input.all || typeof input.all.id !== 'string' || !input.all.id.trim()) {
     throw new TypeError('Section and All IDs must be non-empty.');
   }
@@ -93,7 +93,7 @@ export function prepareBarViewSection(input: PrepareBarViewsOptions): BarViewSec
       (b.value ?? -1) - (a.value ?? -1) || a.label.localeCompare(b.label, locale, { numeric: true }));
     return data;
   };
-  const resolveTotal = (option: BarPopulationOption, data: A11yBarChartDatum[]): number | null => {
+  const resolveTotal = (option: A11yBarChartPopulationOption, data: A11yBarChartDatum[]): number | null => {
     if (option.total !== undefined) {
       const result = validateBarTotal(option.total);
       if (!result.valid) throw new TypeError(result.message);

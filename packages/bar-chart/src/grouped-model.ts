@@ -1,5 +1,5 @@
 import type { A11yBarChartConfig, A11yBarChartDatum, A11yBarChartTheme, A11yBarChartValueFormatter } from './model.js';
-import type { MessageDictionary } from './messages.js';
+import type { A11yBarChartMessageDictionary } from './messages.js';
 
 /** One synchronous, already-prepared population view. IDs must be stable across locale changes. */
 export interface A11yBarChartPreparedView {
@@ -41,5 +41,3 @@ export interface A11yBarChartGroupSelectionChangeDetail {
   origin: 'user' | 'fallback' | 'property';
 }
 
-export type PreparedBarView = A11yBarChartPreparedView;
-export type BarViewSection = A11yBarChartViewSection;

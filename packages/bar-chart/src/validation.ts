@@ -1,9 +1,9 @@
-import type { A11yBarChartDatum, BarValidationResult } from './model.js';
+import type { A11yBarChartDatum, A11yBarChartValidationResult } from './model.js';
 import { message } from './messages.js';
 import { copyTarget } from './target.js';
 import { isFiniteNumber, isFiniteScalarOrRange } from '../../chart-core/src/validation.js';
 
-export function validateBarData(input: unknown): BarValidationResult {
+export function validateBarData(input: unknown): A11yBarChartValidationResult {
   if (!Array.isArray(input)) {
     return { valid: false, code: 'validationInvalidData', message: message('validationInvalidData') };
   }

@@ -1,16 +1,16 @@
 import type { A11yBarChartSemanticModel } from './model.js';
-import { message, type MessageDictionary } from './messages.js';
+import { message, type A11yBarChartMessageDictionary } from './messages.js';
 import { richContentToText } from './rich-content.js';
 import { encodeCsvCell } from '../../chart-core/src/csv.js';
 
-export interface BarCsvOptions {
+export interface A11yBarChartCsvOptions {
   chartTitle?: string;
   categoryHeader?: string;
   countHeader?: string;
   percentageHeader?: string;
   totalHeader?: string;
   targetHeader?: string;
-  messages?: MessageDictionary;
+  messages?: A11yBarChartMessageDictionary;
   locale?: string;
   /** Authored rich HTML; converting it requires a browser DOM unless contextText is supplied. */
   context?: string;
@@ -32,7 +32,7 @@ export interface BarCsvOptions {
  * including suppression redaction. Spreadsheet writers that evaluate formulas must escape cells
  * themselves; `buildBarCsv` does that for CSV.
  */
-export function buildBarExportRows(model: A11yBarChartSemanticModel, options: BarCsvOptions = {}): string[][] {
+export function buildBarExportRows(model: A11yBarChartSemanticModel, options: A11yBarChartCsvOptions = {}): string[][] {
   const locale = options.locale ?? 'en-US';
   const metadata: string[][] = [];
   if (options.chartTitle?.trim()) metadata.push([message('title', options.messages, {}, locale), options.chartTitle.trim()]);
@@ -63,6 +63,6 @@ export function buildBarExportRows(model: A11yBarChartSemanticModel, options: Ba
   return rows.map((row) => row.map(String));
 }
 
-export function buildBarCsv(model: A11yBarChartSemanticModel, options: BarCsvOptions = {}): string {
+export function buildBarCsv(model: A11yBarChartSemanticModel, options: A11yBarChartCsvOptions = {}): string {
   return buildBarExportRows(model, options).map((row) => row.map((cell) => encodeCsvCell(cell)).join(',')).join('\r\n');
 }

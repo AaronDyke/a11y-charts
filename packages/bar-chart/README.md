@@ -114,7 +114,7 @@ The package root exports the element-facing model types and pure helpers:
 `resolveConfig`, `validateBarData`, `validateBarTotal`, `buildBarModel`,
 `renderRichContent`, `richContentToText`, and `buildBarCsv`. English defaults
 are exported as `ENGLISH_BAR_CHART_MESSAGES` (with `ENGLISH_MESSAGES` kept as
-a compatibility alias of the same object); `MessageKey` and `MessageDictionary` list
+a compatibility alias of the same object); `A11yBarChartMessageKey` and `A11yBarChartMessageDictionary` list
 the supported message keys, and `formatMessage` formats whole templates with
 named placeholders. Plurals use whole-string keys such as
 `summaryAllZero.one` and `summaryAllZero.other`, selected by
@@ -416,6 +416,29 @@ shrink-to-fit parent (a plain `display: flex` row with default item sizing,
 `inline-block`, or an absolutely positioned box) it falls back to 20rem, the
 320 px reflow width. Give the chart, or the wrapper element around it, a width
 there, for example `width: 100%` or `flex: 1 1 0%; min-width: 0`.
+
+## TypeScript
+
+Type declarations ship with the package and need TypeScript 5.5 or newer
+(`moduleResolution` `NodeNext`, `Node16`, or `Bundler`). Importing the package or
+its `/define` entry registers the tag, so no casts are needed:
+
+```ts
+import '@mzebley-aem/bar-chart/define';
+
+const chart = document.createElement('a11y-bar-chart'); // A11yBarChartElement
+document.addEventListener('a11y-bar-chart-data-change', (event) => {
+  event.detail; // A11yBarChartDataChangeDetail
+});
+```
+
+- Listeners on the chart, any ancestor, `document`, and `window` get a typed
+  `event.detail`. `A11yBarChartEventMap` (and `A11yBarChartGroupEventMap` for `<a11y-bar-chart-group>`) lists every event.
+- `headingLevel`, `dataView`, and `percentScale` read the value the chart is using (attribute, then `config`, then
+  the default) and write the matching attribute; `null` removes it.
+- `/core` has no DOM types, so it type-checks without the `DOM` library.
+- 0.2 renamed the unprefixed types (`MessageKey`, `BarCsvOptions`, `ValidationFailure`, and others) to carry the package prefix. The old names remain as
+  deprecated aliases until 1.0; see CHANGELOG.md.
 
 ## Server rendering (SSR) and prerendering
 

@@ -4,7 +4,7 @@ import './adapt-report-theme.css';
 import './theme-comparison.css';
 import type { A11yBarChartElement } from '@mzebley-aem/bar-chart';
 import type { A11yBarChartGroupElement } from '@mzebley-aem/bar-chart';
-import type { BarViewSection } from '@mzebley-aem/bar-chart';
+import type { A11yBarChartViewSection } from '@mzebley-aem/bar-chart';
 
 const text = <K extends keyof HTMLElementTagNameMap>(tag: K, value: string, className = ''): HTMLElementTagNameMap[K] => {
   const element = document.createElement(tag);
@@ -24,7 +24,7 @@ const ageData = [
   { id: 'age-5', label: 'Age 5', value: 70 }
 ];
 
-function ageSection(): BarViewSection {
+function ageSection(): A11yBarChartViewSection {
   const allAges = {
     id: 'all-ages', label: 'All Ages', chartTitle: 'Children by age',
     context: 'Illustrative values shown to compare chart themes.',
@@ -45,7 +45,7 @@ function ageSection(): BarViewSection {
 }
 
 function standalone(title: string, reportPresentation = false): A11yBarChartElement {
-  const chart = document.createElement('a11y-bar-chart') as A11yBarChartElement;
+  const chart = document.createElement('a11y-bar-chart');
   if (reportPresentation) chart.classList.add('a11y-bar-chart--endpoint-values');
   chart.chartTitle = title;
   chart.context = 'There are 27 children, male or female, who received early intervention services from 1/1/2024 to 12/31/2024.';
@@ -67,7 +67,7 @@ function standalone(title: string, reportPresentation = false): A11yBarChartElem
 }
 
 function grouped(title: string): A11yBarChartGroupElement {
-  const chart = document.createElement('a11y-bar-chart-group') as A11yBarChartGroupElement;
+  const chart = document.createElement('a11y-bar-chart-group');
   chart.config = { headingLevel: 4, showActions: true, showSummary: false, showContext: false, dataView: 'dialog' };
   chart.groupMessages = { selectorLabel: `${title}: age selection` };
   chart.sections = [ageSection()];

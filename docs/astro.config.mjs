@@ -54,7 +54,10 @@ export default defineConfig({
 				},
 				{
 					label: 'Reference',
-					items: [{ label: 'Events', slug: 'reference/events' }],
+					items: [
+						{ label: 'Events', slug: 'reference/events' },
+						{ label: 'TypeScript', slug: 'reference/typescript' },
+					],
 				},
 				{
 					label: 'Examples',

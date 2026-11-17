@@ -117,10 +117,10 @@ const PLURAL_VARIANT_PATTERN = new RegExp(`^(${PLURAL_BASE_KEYS.join('|')})\\.(z
 /** True for plural variant keys such as `summaryAllZero.one`. */
 export function isPluralVariantKey(key: string): boolean { return PLURAL_VARIANT_PATTERN.test(key); }
 type PluralCategory = 'zero' | 'one' | 'two' | 'few' | 'many' | 'other';
-export type MessageKey = CatalogKey | PluralBaseKey | `${PluralBaseKey}.${PluralCategory}`;
-export type MessageDictionary = Partial<Record<MessageKey, string>>;
+export type A11yBarChartMessageKey = CatalogKey | PluralBaseKey | `${PluralBaseKey}.${PluralCategory}`;
+export type A11yBarChartMessageDictionary = Partial<Record<A11yBarChartMessageKey, string>>;
 
-export function resolveMessages(messages?: MessageDictionary | null): Record<CatalogKey, string> {
+export function resolveMessages(messages?: A11yBarChartMessageDictionary | null): Record<CatalogKey, string> {
   const result = { ...ENGLISH_MESSAGES } as Record<CatalogKey, string>;
   if (messages && typeof messages === 'object') {
     for (const [key, value] of Object.entries(messages)) {
@@ -145,11 +145,11 @@ export function formatMessage(
   return formatTemplate(template, params);
 }
 
-export type MessageTranslator = (key: MessageKey, params?: Record<string, string | number>) => string;
+export type MessageTranslator = (key: A11yBarChartMessageKey, params?: Record<string, string | number>) => string;
 
 /** Create a translator for one operation, reusing its resolved catalog and plural rules. */
 export function createMessageResolver(
-  messages?: MessageDictionary | null,
+  messages?: A11yBarChartMessageDictionary | null,
   locale = 'en-US'
 ): MessageTranslator {
   const catalog = resolveMessages(messages);
@@ -180,8 +180,8 @@ export function createMessageResolver(
 }
 
 export function message(
-  key: MessageKey,
-  messages?: MessageDictionary | null,
+  key: A11yBarChartMessageKey,
+  messages?: A11yBarChartMessageDictionary | null,
   params: Record<string, string | number> = {},
   locale = 'en-US'
 ): string {

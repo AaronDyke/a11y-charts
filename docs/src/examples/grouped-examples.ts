@@ -1,4 +1,4 @@
-import type { BarViewSection, PreparedBarView } from '@mzebley-aem/bar-chart';
+import type { A11yBarChartViewSection, A11yBarChartPreparedView } from '@mzebley-aem/bar-chart';
 import type { A11yBarChartDatum } from '@mzebley-aem/bar-chart';
 import { prepareBarViewSection } from '@mzebley-aem/bar-chart/core';
 
@@ -10,13 +10,13 @@ const categories = [
 const rows = (values: (number | null)[], withheld = false): A11yBarChartDatum[] => categories.map((category, index) => ({
   ...category, value: withheld && index > 0 ? 0 : values[index] ?? null
 }));
-function view(id: string, label: string, total: number, data: A11yBarChartDatum[], filtered: boolean, screenshot: boolean, description: string): PreparedBarView {
+function view(id: string, label: string, total: number, data: A11yBarChartDatum[], filtered: boolean, screenshot: boolean, description: string): A11yBarChartPreparedView {
   return { id, label, chartTitle: label, total, data, filtered, suppressed: screenshot || data.some(row => row.value === 0),
     context: description,
     explanation: `<p>The selected population is <strong>${total}</strong> children, or ${(total / 510 * 100).toFixed(2)}% of the overall population of 510. Each bar’s percentage uses the selected population as its denominator.</p><p>Suppressed values are intentionally withheld.</p>`,
     dataNote: screenshot ? 'Visible values and totals transcribed from the supplied screenshot. Definitions are illustrative. The full underlying dataset was not supplied.' : 'Illustrative selection data for reviewing the interaction; these values are not production data.' };
 }
-export function ageSection(): BarViewSection {
+export function ageSection(): A11yBarChartViewSection {
   return { id: 'age', label: 'Age range', description: 'Choose an age range to see specific data and insights.', allViewId: 'age-all', views: [
     view('age-all', 'All Ages', 510, rows([365, 80, 20]), false, true, 'There are 510 (100.00%) children, ages birth through 2, served in various settings.'),
     view('birth-1', 'Birth to 1', 135, rows([110, 20, 5]), true, false, 'Illustrative selection: 135 children (26.47% of the overall population).'),
@@ -24,7 +24,7 @@ export function ageSection(): BarViewSection {
     view('age-2-3', '2 to 3', 195, rows([115, 30, 5]), true, false, 'Illustrative selection: 195 children (38.24% of the overall population). The authoritative total exceeds the sum of displayed categories.')
   ] };
 }
-export function raceSection(): BarViewSection {
+export function raceSection(): A11yBarChartViewSection {
   const names = ['American Indian or Alaska Native', 'Asian', 'Black or African American', 'Hispanic/Latino', 'Two or more races', 'Native Hawaiian or Other Pacific Islander', 'White'];
   return { id: 'race', label: 'Race/ethnicity', description: 'Choose a race/ethnicity to see specific data and insights.', allViewId: 'race-all', views: [
     view('race-all', 'All Race/Ethnicities', 510, rows([322, null, null], true), false, true, 'There are 510 (100.00%) children, of all race/ethnicity, served in various settings.'),
@@ -33,7 +33,7 @@ export function raceSection(): BarViewSection {
       : view(`race-${index}`, label, 40 + index * 5, rows([30 + index * 5, 8, 2]), true, false, `Illustrative selection: ${40 + index * 5} children (${((40 + index * 5) / 510 * 100).toFixed(2)}% of the overall population).`))
   ] };
 }
-export function availabilitySection(): BarViewSection {
+export function availabilitySection(): A11yBarChartViewSection {
   return prepareBarViewSection({
     id: 'availability', label: 'Data availability', description: 'Compare reported, suppressed, missing, and empty results.', suppressed: true,
     all: { id: 'availability-all', label: 'All demonstration records', total: 100 },
@@ -53,9 +53,9 @@ export function availabilitySection(): BarViewSection {
 }
 
 /** Fictional counts and independently authored goals, expressed in the same units. */
-export function targetSection(): BarViewSection {
+export function targetSection(): A11yBarChartViewSection {
   const services = ['Home visits', 'Community sessions', 'Family consultations'];
-  const make = (id: string, label: string, counts: number[], targets: A11yBarChartDatum['target'][], total: number): PreparedBarView => ({
+  const make = (id: string, label: string, counts: number[], targets: A11yBarChartDatum['target'][], total: number): A11yBarChartPreparedView => ({
     id, label, chartTitle: `${label}: completed services`, total,
     filtered: id !== 'regions-all', suppressed: false,
     context: 'Fictional completed services compared with goals for the selected region. Counts and targets share a fixed scale of 180.',
