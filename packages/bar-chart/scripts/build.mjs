@@ -1,15 +1,15 @@
-import { execFileSync } from 'node:child_process';
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { build } from 'vite';
+import { bundleTypes } from '../../../scripts/bundle-types.mjs';
 import { createLibraryConfig, createStylesConfig } from '../vite.library.config.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const dist = resolve(root, 'dist');
 await rm(dist, { recursive: true, force: true });
 await mkdir(dist, { recursive: true });
-execFileSync(process.execPath, [resolve(root, 'node_modules/typescript/bin/tsc'), '-p', 'tsconfig.build.json'], { cwd: root, stdio: 'inherit' });
+await bundleTypes({ root });
 
 for (const [entry, fileName] of [
   ['src/index.ts', 'index.js'],

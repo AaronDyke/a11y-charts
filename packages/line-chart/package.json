@@ -24,19 +24,19 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/types/line-chart/index.d.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/index.js"
     },
     "./core": {
-      "types": "./dist/types/line-chart/core.d.ts",
+      "types": "./dist/types/core.d.ts",
       "import": "./dist/core.js"
     },
     "./define": {
-      "types": "./dist/types/line-chart/define.d.ts",
+      "types": "./dist/types/define.d.ts",
       "import": "./dist/define.js"
     },
     "./loader": {
-      "types": "./dist/types/line-chart/loader.d.ts",
+      "types": "./dist/types/loader.d.ts",
       "import": "./dist/loader.js"
     },
     "./chart.js": "./dist/chart.js",
@@ -68,6 +68,7 @@
     "rollup": "^4.64.12",
     "rollup-plugin-dts": "^6.5.1",
     "typescript": "^7.0.2",
+    "typescript-5.5": "npm:typescript@~5.5.4",
     "vite": "^8.2.1",
     "vitest": "^4.1.11"
   }

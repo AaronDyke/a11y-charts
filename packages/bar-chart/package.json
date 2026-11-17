@@ -24,19 +24,19 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/types/bar-chart/src/index.d.ts",
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/index.js"
     },
     "./core": {
-      "types": "./dist/types/bar-chart/src/core.d.ts",
+      "types": "./dist/types/core.d.ts",
       "import": "./dist/core.js"
     },
     "./define": {
-      "types": "./dist/types/bar-chart/src/define.d.ts",
+      "types": "./dist/types/define.d.ts",
       "import": "./dist/define.js"
     },
     "./loader": {
-      "types": "./dist/types/bar-chart/src/loader.d.ts",
+      "types": "./dist/types/loader.d.ts",
       "import": "./dist/loader.js"
     },
     "./chart.js": "./dist/chart.js",
@@ -54,9 +54,13 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
+    "@typescript/typescript6": "^6.0.2",
     "es-module-lexer": "^2.3.2",
     "happy-dom": "^20.11.2",
+    "rollup": "^4.68.5",
+    "rollup-plugin-dts": "^6.5.1",
     "typescript": "^7.0.2",
+    "typescript-5.5": "npm:typescript@~5.5.4",
     "vite": "^8.2.1",
     "vitest": "^4.1.11"
   }

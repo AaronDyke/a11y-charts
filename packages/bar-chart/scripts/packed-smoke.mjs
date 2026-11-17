@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { init, parse } from 'es-module-lexer';
+import { checkPackedTypes } from '../../../scripts/check-packed-types.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
@@ -30,28 +31,7 @@ try {
   `;
   execFileSync(process.execPath, ['--input-type=module', '-e', runtimeSmoke], { cwd: consumer, stdio: 'inherit' });
 
-  await writeFile(join(consumer, 'smoke.mts'), `
-    import { buildBarModel, resolveConfig, validateBarData, type A11yBarChartDatum } from '${manifest.name}/core';
-    import { A11yBarChartElement, A11yBarChartGroupElement, buildBarCsv, type BarViewSection } from '${manifest.name}';
-    import { defineA11yBarChart, defineA11yBarChartGroup } from '${manifest.name}/define';
-    import { loadA11yBarChart } from '${manifest.name}/loader';
-    const loaded: Promise<boolean> = loadA11yBarChart();
-    void loaded;
-    const rows: A11yBarChartDatum[] = [{ id: 'typed', label: 'Typed', value: 2 }];
-    const config = resolveConfig(undefined);
-    resolveConfig(undefined);
-    buildBarModel(rows);
-    validateBarData(rows);
-    buildBarCsv(buildBarModel(rows));
-    void config;
-    void A11yBarChartElement;
-    void defineA11yBarChart;
-    void defineA11yBarChartGroup;
-    void A11yBarChartGroupElement;
-    const sections: BarViewSection[] = [];
-    void sections;
-  `);
-  execFileSync(process.execPath, [resolve(root, 'node_modules/typescript/bin/tsc'), '--strict', '--noEmit', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--target', 'ES2022', 'smoke.mts'], { cwd: consumer, stdio: 'inherit' });
+  await checkPackedTypes({ root, consumer });
 
   const dist = join(consumer, 'node_modules', ...manifest.name.split('/'), 'dist');
   for (const name of ['index.js', 'core.js', 'define.js', 'loader.js', 'chart.js', 'styles.css']) {
