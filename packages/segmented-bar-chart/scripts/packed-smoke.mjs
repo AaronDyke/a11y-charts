@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { init, parse } from 'es-module-lexer';
+import { checkPackedTypes } from '../../../scripts/check-packed-types.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const manifest = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
@@ -27,18 +28,7 @@ try {
     if (await loader.loadA11ySegmentedBarChart() !== false) throw new Error('Packed loader should resolve false without a DOM.');
   `;
   execFileSync(process.execPath, ['--input-type=module', '-e', runtimeSmoke], { cwd: consumer, stdio: 'inherit' });
-  await writeFile(join(consumer, 'smoke.mts'), `
-    import { buildSegmentedBarModel, buildSegmentedBarCsv, type A11ySegmentedBarChartDatum } from '${manifest.name}/core';
-    import { A11ySegmentedBarChartElement } from '${manifest.name}';
-    import { defineA11ySegmentedBarChart } from '${manifest.name}/define';
-    import { loadA11ySegmentedBarChart } from '${manifest.name}/loader';
-    const loaded: Promise<boolean> = loadA11ySegmentedBarChart();
-    void loaded;
-    const rows: A11ySegmentedBarChartDatum[] = [{ id: 'x', label: 'X', value: 2 }];
-    buildSegmentedBarCsv(buildSegmentedBarModel(rows));
-    void A11ySegmentedBarChartElement; void defineA11ySegmentedBarChart;
-  `);
-  execFileSync(process.execPath, [resolve(root, 'node_modules/typescript/bin/tsc'), '--strict', '--noEmit', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--target', 'ES2022', 'smoke.mts'], { cwd: consumer, stdio: 'inherit' });
+  await checkPackedTypes({ root, consumer });
 
   const dist = join(consumer, 'node_modules', ...manifest.name.split('/'), 'dist');
   for (const name of ['index.js', 'core.js', 'define.js', 'loader.js', 'chart.js', 'styles.css']) {
