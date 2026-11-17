@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
   "installCommand": "npm ci --prefix packages/line-chart && npm ci --prefix packages/bar-chart && npm ci --prefix packages/segmented-bar-chart && npm ci --prefix docs",
   "buildCommand": "npm run deploy:build",
   "outputDirectory": "dist/site",
@@ -12,12 +13,14 @@
     { "source": "/gallery/:page(spp-apr|dispute-resolution)/", "destination": "/reports/:page/", "permanent": true },
     { "source": "/gallery/:page(spp-apr|dispute-resolution)/:path+", "destination": "/reports/:page/:path+", "permanent": true },
     { "source": "/gallery/segmented", "destination": "/examples/segmented-bar-charts/", "permanent": true },
-    { "source": "/gallery/segmented/:path*", "destination": "/examples/segmented-bar-charts/", "permanent": true },
+    { "source": "/gallery/segmented/", "destination": "/examples/segmented-bar-charts/", "permanent": true },
+    { "source": "/gallery/segmented/:path+", "destination": "/examples/segmented-bar-charts/", "permanent": true },
     { "source": "/demo/report-demo.html", "destination": "/reports/report-demo/", "permanent": true },
     { "source": "/:page(spp-apr|dispute-resolution)", "destination": "/reports/:page/", "permanent": true },
     { "source": "/:page(spp-apr|dispute-resolution)/", "destination": "/reports/:page/", "permanent": true },
     { "source": "/:page(spp-apr|dispute-resolution)/:path+", "destination": "/reports/:page/:path+", "permanent": true },
     { "source": "/segmented", "destination": "/examples/segmented-bar-charts/", "permanent": true },
-    { "source": "/segmented/:path*", "destination": "/examples/segmented-bar-charts/", "permanent": true }
+    { "source": "/segmented/", "destination": "/examples/segmented-bar-charts/", "permanent": true },
+    { "source": "/segmented/:path+", "destination": "/examples/segmented-bar-charts/", "permanent": true }
   ]
 }
