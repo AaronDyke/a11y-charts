@@ -1,0 +1,108 @@
+/* Segmented bar chart examples page. Page chrome comes from the docs site; these
+   rules style the demo controls and the light chart frames. */
+.segmented-demo .cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+	gap: 1rem;
+}
+
+.segmented-demo :is(#breakdown, #comparison, #grouping, .cards > div) {
+	color-scheme: light;
+	min-width: 0;
+	padding: 1.25rem;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 0.5rem;
+	background: #fff;
+	color: #17212b;
+}
+
+.segmented-demo .controls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	align-items: end;
+	margin-block: 1rem;
+	padding: 1rem;
+	border: 1px solid var(--sl-color-gray-5);
+	border-radius: 0.5rem;
+}
+
+.segmented-demo .controls label {
+	display: flex;
+	flex: 1 1 12rem;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.5rem;
+	min-width: 0;
+	max-width: 100%;
+	font-weight: 600;
+}
+
+.segmented-demo .controls label:has(input[type='checkbox']) {
+	flex-direction: row;
+	flex-wrap: nowrap;
+	align-items: center;
+	min-height: 2.75rem;
+}
+
+.segmented-demo .controls input[type='checkbox'] {
+	flex: none;
+	width: 1.25rem;
+	height: 1.25rem;
+	accent-color: var(--sl-color-accent);
+}
+
+.segmented-demo .controls select {
+	width: 100%;
+	min-width: 0;
+	max-width: 100%;
+	min-height: 2.75rem;
+	padding: 0.5rem;
+	border: 1px solid var(--sl-color-gray-4);
+	border-radius: 0.25rem;
+	background: var(--sl-color-bg);
+	color: var(--sl-color-text);
+}
+
+.segmented-demo #group-picks {
+	flex: 1 1 100%;
+	min-width: 0;
+	border: 1px solid var(--sl-color-gray-4);
+	border-radius: 0.25rem;
+}
+
+.segmented-demo #group-pick-options {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+}
+
+.segmented-demo #group-pick-options label {
+	flex: 0 1 auto;
+	flex-direction: row;
+	align-items: center;
+}
+
+.segmented-demo #group-update {
+	min-height: 2.75rem;
+	padding: 0.5rem 1rem;
+	border: 1px solid var(--sl-color-accent);
+	border-radius: 0.25rem;
+	background: transparent;
+	color: var(--sl-color-accent-high);
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.segmented-demo .controls :is(select, input, button):focus-visible {
+	outline: 3px solid var(--sl-color-accent);
+	outline-offset: 3px;
+}
+
+/* The docs content column already pads its sides, so keep the chart frames
+   compact on narrow screens, where enlarged text needs the room. */
+@media (max-width: 30rem) {
+	.segmented-demo :is(#breakdown, #comparison, #grouping, .cards > div) {
+		padding: 0.75rem;
+	}
+}

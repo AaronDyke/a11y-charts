@@ -7,7 +7,6 @@ coverage/
 dist/
 packages/line-chart/.demo-dist/
 packages/line-chart/demo/build/
-packages/line-chart/demo/report-build/
 packages/line-chart/dist/
 packages/bar-chart/dist/
 packages/bar-chart/.demo-dist/
@@ -17,3 +16,5 @@ packages/line-chart/playwright-report/
 .playwright-mcp/
 audit-evidence/
 packages/line-chart/demo.zip
+docs/dist/
+docs/.astro/

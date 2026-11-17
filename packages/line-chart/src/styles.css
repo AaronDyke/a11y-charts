@@ -103,14 +103,19 @@ a11y-line-chart .a11y-line-chart__viewport {
 a11y-line-chart .a11y-line-chart__stepper {
   container: line-stepper / inline-size;
   align-items: stretch;
-  display: grid;
+  /* A wrapping row in the same 1 : 1.25 : 1 proportions as a grid. Labels stay
+     whole, so when enlarged text makes the row too wide its items wrap onto a
+     second line instead of forcing horizontal scrolling (WCAG 1.4.10). */
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.5rem;
-  grid-template-columns: minmax(min-content, 1fr) minmax(0, 1.25fr) minmax(min-content, 1fr);
   margin: 0.75rem auto 1.25rem;
   max-width: 30rem;
   width: 100%;
 }
 a11y-line-chart .a11y-line-chart__stepper[hidden] { display: none; }
+a11y-line-chart .a11y-line-chart__stepper > .a11y-line-chart__stepper-button { flex: 1 1 0; min-width: max-content; }
+a11y-line-chart .a11y-line-chart__stepper > .a11y-line-chart__stepper-status { flex: 1.25 1 0; min-width: min-content; }
 a11y-line-chart .a11y-line-chart__stepper-button {
   align-items: center;
   background: #fff;
@@ -242,6 +247,7 @@ a11y-line-chart :is(.a11y-line-chart__data-action, .a11y-line-chart__dialog-clos
 a11y-line-chart :is(.a11y-line-chart__data-action, .a11y-line-chart__dialog-close, .a11y-line-chart__inline-data > summary):focus-visible { outline: 3px solid var(--a11y-line-chart-focus-color, #005fcc); outline-offset: 2px; }
 a11y-line-chart .a11y-line-chart__data-dialog {
   box-sizing: border-box; width: min(60rem, calc(100vw - 2rem)); max-width: calc(100vw - 2rem);
+  margin: auto;
   max-height: min(85vh, 56rem); overflow: auto; padding: 1.5rem; border: 1px solid currentColor;
   color: CanvasText; background: Canvas;
 }

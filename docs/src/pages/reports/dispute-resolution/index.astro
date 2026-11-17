@@ -1,0 +1,22 @@
+---
+// A full-page report prototype, outside the docs layout. Its markup is kept as
+// written in body.html; the script below renders the charts and handles URL state.
+import body from '../../../examples/dispute-resolution/body.html?raw';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content="IDEA Part B dispute resolution report for 2022–23: written signed complaints, mediation, due process complaints, and expedited due process complaints." />
+		<link rel="icon" href="data:," />
+		<title>Dispute resolution · IDEA Part B · 2022–23</title>
+	</head>
+	<body>
+		<Fragment set:html={body} />
+		<script>
+			import '../../../examples/dispute-resolution/main.ts';
+		</script>
+	</body>
+</html>

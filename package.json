@@ -15,10 +15,6 @@
     "reference:build": "ng build",
     "reference:test": "ng test",
     "artifacts:test": "npm run build && npm run artifacts:test --prefix packages/line-chart",
-    "gallery:dev": "npm run gallery:dev --prefix packages/line-chart",
-    "gallery:build": "npm run gallery:build --prefix packages/line-chart",
-    "site:build": "npm run gallery:build && npm run demo:build --prefix packages/line-chart && npm run demo:build --prefix packages/bar-chart && npm run report:build --prefix packages/line-chart && node scripts/assemble-demo-site.mjs",
-    "gallery:typecheck": "packages/line-chart/node_modules/.bin/tsc -p demo-gallery/tsconfig.json",
     "browser:grouped": "npm run browser:grouped --prefix packages/line-chart",
     "browser:spp-apr": "npm exec --prefix packages/line-chart -- playwright test --config packages/line-chart/playwright.spp-apr.config.mjs",
     "browser:themes": "npm run browser:themes --prefix packages/line-chart",
@@ -26,7 +22,13 @@
     "browser:segmented": "npm exec --prefix packages/line-chart -- playwright test --config packages/line-chart/playwright.segmented.config.mjs",
     "release:version": "node scripts/set-version.mjs",
     "release:check": "node scripts/check-release.mjs",
-    "test:scripts": "node --test scripts/release-scripts.test.mjs"
+    "test:scripts": "node --test scripts/release-scripts.test.mjs",
+    "docs:dev": "npm run dev --prefix docs",
+    "docs:build": "npm run packages:dist && npm run build --prefix docs",
+    "packages:dist": "node packages/line-chart/scripts/build.mjs && node packages/bar-chart/scripts/build.mjs && node packages/segmented-bar-chart/scripts/build.mjs",
+    "deploy:build": "npm run packages:dist && npm run demo:build --prefix packages/line-chart && npm run demo:build --prefix packages/bar-chart && npm run build --prefix docs && node scripts/assemble-deploy-site.mjs",
+    "browser:docs": "npm exec --prefix packages/line-chart -- playwright test --config packages/line-chart/playwright.docs.config.mjs",
+    "docs:typecheck": "npm exec --prefix docs -- tsc -p docs/src/examples/tsconfig.json"
   },
   "private": true,
   "dependencies": {

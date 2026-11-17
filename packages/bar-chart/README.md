@@ -541,8 +541,33 @@ view IDs must be stable across translated labels. View IDs are unique within a
 section. Selecting a new section chooses its All view; collapsing the active
 section preserves the selection. Replacing sections preserves a surviving
 selection, falls back to the same section's All when a view disappears, then to
-the first section when that section disappears. Invalid inputs show an error;
-empty sections collections show an empty state. Authored host children remain.
+the first section when that section disappears. Empty sections collections show
+an empty state. Authored host children remain.
+
+### Required section and view fields
+
+`sections` is validated as a whole. If any section or view is invalid, the group
+replaces the chart with its `invalid` message (an `alert`) and shows no data. It
+dispatches no error event, so check prepared views in your own tests.
+
+- **Section:** a nonempty, unique `id`; a string `label`; an optional string
+  `description`; a `views` array; and an `allViewId` that matches one of its views.
+- **View:** a nonempty `id`, unique within its section; string `label` and
+  `chartTitle`; valid bar `data`; a `total` that is a finite, nonnegative number or
+  `null`; and the `filtered` and `suppressed` booleans.
+- **Optional view fields:** `definition`, `context`, `dataNote`, `explanation`,
+  and `emptyMessage` must be strings, and `scaleMaximum` a finite, nonnegative
+  number.
+
+`filtered` and `suppressed` are required even when they're `false`. Leaving
+either out is the most common cause of the invalid message:
+
+```ts
+{ id: 'all', label: 'All children', chartTitle: 'All children', total: 510, data,
+  filtered: false, suppressed: false }
+```
+
+`prepareBarViewSection` sets every required field for you.
 
 `a11y-bar-chart-group-selection-change` bubbles `{ sectionId, viewId, origin }`,
 where origin is `user`, `property`, or `fallback`. Chart events also bubble

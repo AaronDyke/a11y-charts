@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { sections } from '../../../demo-gallery/dispute-resolution/data.js';
+import { sections } from '../../../docs/src/examples/dispute-resolution/data.js';
 
 test('all source counts use their intended denominators without double-counting totals or meetings', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   for (const section of sections) {
-    await page.goto(`/dispute-resolution/?section=${section.id}`);
+    await page.goto(`/reports/dispute-resolution/?section=${section.id}`);
     await expect(page.locator('#view-title')).toHaveText(section.title);
     await expect(page.locator('a11y-bar-chart, a11y-segmented-bar-chart')).toHaveCount(section.panels.length);
     for (const panel of section.panels) {
@@ -25,7 +25,7 @@ test('all source counts use their intended denominators without double-counting 
 });
 
 test('keyboard navigation, deep links, history, display preferences and chart dialogs work', async ({ page }) => {
-  await page.goto('/dispute-resolution/');
+  await page.goto('/reports/dispute-resolution/');
   await page.keyboard.press('Tab');
   await expect(page.locator('.skip-link')).toBeFocused();
   await page.keyboard.press('Enter');
@@ -64,7 +64,7 @@ test('clipboard failure provides recovery and invalid routes use overview', asyn
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'clipboard', { value: { writeText: async () => { throw new Error('blocked'); } } });
   });
-  await page.goto('/dispute-resolution/?section=missing');
+  await page.goto('/reports/dispute-resolution/?section=missing');
   await expect(page.locator('#view-title')).toHaveText('Overview');
   await page.locator('#share').click();
   await expect(page.locator('#share-fallback input')).toBeFocused();
@@ -74,7 +74,7 @@ test('clipboard failure provides recovery and invalid routes use overview', asyn
 
 test('all sections reflow, including enlarged text and opened chart settings', async ({ page }) => {
   for (const section of ['overview', ...sections.map(s => s.id)]) {
-    await page.goto(`/dispute-resolution/?section=${section}`);
+    await page.goto(`/reports/dispute-resolution/?section=${section}`);
     const settings = page.locator('.display-settings');
     if (await settings.count()) await settings.locator('summary').click();
     for (const width of [320, 375, 390, 480, 640, 768, 1024, 1280, 1440]) {
@@ -89,7 +89,7 @@ test('all sections reflow, including enlarged text and opened chart settings', a
 
 test('QA-style application menu works on mobile with Escape and enlarged text', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 900 });
-  await page.goto('/dispute-resolution/');
+  await page.goto('/reports/dispute-resolution/');
   const menu = page.locator('#site-menu');
   await expect(page.locator('#app-navigation')).not.toBeVisible();
   await menu.click();
@@ -113,7 +113,7 @@ test('all seven single-value panels expose their reported values and usable acti
     ['expedited', 'expedited-placement', 8, 26, 18],
   ] as const;
   for (const [section, id, value, base, remainder] of cases) {
-    await page.goto(`/dispute-resolution/?section=${section}`);
+    await page.goto(`/reports/dispute-resolution/?section=${section}`);
     const chart = page.locator(`#${id} a11y-segmented-bar-chart`);
     await expect(chart).toHaveJSProperty('total', base);
     const values = await chart.evaluate((element: any) => element.data.map((row: any) => row.value));

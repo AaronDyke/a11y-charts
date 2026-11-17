@@ -5,7 +5,8 @@ import { resolve } from 'node:path';
 const require=createRequire(import.meta.url), out=resolve(process.env.AUDIT_OUTPUT||'../../audit-evidence/2026-10-21');
 await mkdir(out,{recursive:true});
 const base=process.env.AUDIT_BASE||'http://127.0.0.1:5189';
-const routes=[['gallery','/demo-gallery/index.html'],['line-source','/packages/line-chart/demo/dev.html'],['line-standalone','/packages/line-chart/demo/index.html'],['report','/packages/line-chart/demo/report-demo.html'],['bar-standalone','/packages/bar-chart/demo/index.html']];
+// The examples and report prototypes moved to the docs site; `npm run browser:docs` covers them.
+const routes=[['line-source','/packages/line-chart/demo/dev.html'],['line-standalone','/packages/line-chart/demo/index.html'],['bar-standalone','/packages/bar-chart/demo/index.html']];
 const browser=await chromium.launch({channel:'chrome',headless:true}), ledger=[],scans=[];
 for(const [name,path] of routes){
  const page=await browser.newPage({viewport:{width:1280,height:900},reducedMotion:'reduce'}),errors=[];

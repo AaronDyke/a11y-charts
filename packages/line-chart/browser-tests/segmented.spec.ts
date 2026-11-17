@@ -1,12 +1,13 @@
 import { expect, test } from '@playwright/test';
 import { createRequire } from 'node:module';
 import { readFile } from 'node:fs/promises';
+import { catalogs, ENGLISH_MESSAGES } from '../../../docs/src/examples/segmented/locales.js';
 const require = createRequire(import.meta.url);
 
 test('keyboard detail cards, data dialog and exports retain the reported comparison', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
-  await page.goto('/segmented/');
+  await page.goto('/examples/segmented-bar-charts/');
   const breakdown = page.locator('#breakdown a11y-segmented-bar-chart');
   const item = breakdown.getByRole('button', { name: /Resolved/ });
   await item.focus();
@@ -33,7 +34,7 @@ test('keyboard detail cards, data dialog and exports retain the reported compari
 });
 
 test('compact links and detail controls are independent', async ({ page }) => {
-  await page.goto('/segmented/');
+  await page.goto('/examples/segmented-bar-charts/');
   const linked = page.locator('#linked a11y-segmented-bar-chart');
   await expect(linked.getByRole('link', { name: /Request status summary/ })).toHaveAttribute('href', '#details');
   await linked.scrollIntoViewIfNeeded();
@@ -46,10 +47,18 @@ test('compact links and detail controls are independent', async ({ page }) => {
   await expect(interactive.getByRole('button', { name: /Resolved/ })).toBeVisible();
 });
 
+/** The rightmost visible edge of the segmented demo's content. */
+const demoRightEdge = (page: import('@playwright/test').Page) => page.evaluate(() =>
+  Math.max(0, ...[...document.querySelectorAll<HTMLElement>('.segmented-demo *')]
+    .filter(element => !element.closest('[class*="visually-hidden"]') && element.getBoundingClientRect().width > 0)
+    .map(element => element.getBoundingClientRect().right)));
+
+// Scans cover the page's main content: the demo and its dialogs. The docs site
+// header around it comes from Starlight.
 test('WCAG 2.2 AA automated checks, reflow and forced colors', async ({ page }) => {
-  await page.goto('/segmented/');
+  await page.goto('/examples/segmented-bar-charts/');
   await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') });
-  const scan = () => page.evaluate(async () => (await (window as any).axe.run(document, {
+  const scan = () => page.evaluate(async () => (await (window as any).axe.run({ include: [['main']] }, {
     runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'] },
   })).violations.map((v: any) => ({ id: v.id, nodes: v.nodes.map((n: any) => ({ target: n.target, failure: n.failureSummary })) })));
   expect(await scan()).toEqual([]);
@@ -70,11 +79,13 @@ test('WCAG 2.2 AA automated checks, reflow and forced colors', async ({ page }) 
   await page.evaluate(() => document.documentElement.style.fontSize = '200%');
   await page.setViewportSize({ width: 320, height: 900 });
   await expect(page.locator('#breakdown').getByRole('button', { name: /Resolved/ })).toBeVisible();
-  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+  // With enlarged text and spacing, measure the demo itself: the docs site header
+  // around it comes from Starlight. Visually hidden table copies are clipped.
+  await expect.poll(() => demoRightEdge(page)).toBeLessThanOrEqual(320);
 });
 
 test('display options localize the chart and availability states do not invent data', async ({ page }) => {
-  await page.goto('/segmented/');
+  await page.goto('/examples/segmented-bar-charts/');
   const chart = page.locator('#breakdown a11y-segmented-bar-chart');
   await page.locator('#locale').selectOption('fr-FR');
   await expect(chart.getByRole('heading', { name: 'État des demandes' })).toBeVisible();
@@ -94,23 +105,18 @@ test('display options localize the chart and availability states do not invent d
   await expect(page.locator('#above a11y-segmented-bar-chart')).toContainText('exceeds');
 });
 
-test('localized catalogs cover all component messages and preserve placeholders', async ({ page }) => {
-  await page.goto('/segmented/');
-  const failures = await page.evaluate(async () => {
-    const { catalogs, ENGLISH_MESSAGES } = await import('/segmented/locales.ts');
-    const placeholders = (value: string) => [...value.matchAll(/\{([^}]+)\}/g)].map(match => match[1]).sort().join(',');
-    const errors: string[] = [];
-    for (const locale of ['fr-FR', 'es-MX']) for (const [key, english] of Object.entries(ENGLISH_MESSAGES)) {
-      const translated = catalogs[locale][key];
-      if (typeof translated !== 'string' || placeholders(translated) !== placeholders(english as string)) errors.push(`${locale}: ${key}`);
-    }
-    return errors;
-  });
+test('localized catalogs cover all component messages and preserve placeholders', () => {
+  const placeholders = (value: string) => [...value.matchAll(/\{([^}]+)\}/g)].map(match => match[1]).sort().join(',');
+  const failures: string[] = [];
+  for (const locale of ['fr-FR', 'es-MX'] as const) for (const [key, english] of Object.entries(ENGLISH_MESSAGES)) {
+    const translated = (catalogs[locale] as Record<string, unknown>)[key];
+    if (typeof translated !== 'string' || placeholders(translated) !== placeholders(english as string)) failures.push(`${locale}: ${key}`);
+  }
   expect(failures).toEqual([]);
 });
 
 test('grouping keeps complete data and supports keyboard details and updates', async ({ page }) => {
-  await page.goto('/segmented/');
+  await page.goto('/examples/segmented-bar-charts/');
   const chart = page.locator('#grouping a11y-segmented-bar-chart');
   const other = chart.getByRole('button', { name: /Other categories/ });
   await expect(other).toBeVisible();
@@ -147,9 +153,9 @@ test('grouping keeps complete data and supports keyboard details and updates', a
 });
 
 test('grouped detail view passes automated accessibility and reflows', async ({ page }) => {
-  await page.goto('/segmented/');
+  await page.goto('/examples/segmented-bar-charts/');
   await page.addScriptTag({ path: require.resolve('axe-core/axe.min.js') });
-  const scan = () => page.evaluate(async () => (await (window as any).axe.run(document, {
+  const scan = () => page.evaluate(async () => (await (window as any).axe.run({ include: [['main']] }, {
     runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'] },
   })).violations.map((v: any) => v.id));
   expect(await scan()).toEqual([]);
@@ -162,7 +168,7 @@ test('grouped detail view passes automated accessibility and reflows', async ({ 
 });
 
 test('regrouping and long member lists retain keyboard access without overflow', async ({ page }) => {
-  await page.goto('/segmented/');
+  await page.goto('/examples/segmented-bar-charts/');
   const chart = page.locator('#grouping a11y-segmented-bar-chart');
   const alpha = chart.locator('[data-focus-key="row:alpha"]');
   await alpha.focus();
@@ -193,7 +199,7 @@ test('regrouping and long member lists retain keyboard access without overflow',
 });
 
 test('detail cards follow their segment or legend trigger and clamp at the right edge', async ({ page }) => {
-  await page.goto('/segmented/');
+  await page.goto('/examples/segmented-bar-charts/');
   const chart = page.locator('#grouping a11y-segmented-bar-chart');
   const button = chart.locator('[data-focus-key="group:other"]');
   const card = chart.locator('[data-group-members] .a11y-segmented-bar-chart__card');

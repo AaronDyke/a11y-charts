@@ -28,7 +28,7 @@ The chart supports the shared visibility options `showSummary`, `showContext`, `
 
 Use `theme.segments[id]` to assign a stable category's `color`, `pattern` (`none`, `diagonal`, `dots`, or `horizontal`), and `patternColor`; shared theme properties and `--a11y-segmented-bar-chart-*` CSS custom properties adjust the surrounding chart. The element emits `a11y-segmented-bar-chart-ready`, `-data-change`, `-data-view-change`, `-disclosure-change`, and `-error` events. The segmented bar chart has no reader-changeable settings, so it does not fire a settings-change event; the line chart does. An invalid `messages` attribute dispatches an `-error` with code `invalid-messages`; the message text is still looked up by the `invalidMessages` key.
 
-The standalone gallery example is served from `demo-gallery/segmented/` using the repository gallery scripts.
+Interactive examples are in the docs site's [segmented bar chart examples](../../docs/src/content/docs/examples/segmented-bar-charts.mdx), at `/examples/segmented-bar-charts/`.
 
 ## Reference comparisons and unavailable data
 

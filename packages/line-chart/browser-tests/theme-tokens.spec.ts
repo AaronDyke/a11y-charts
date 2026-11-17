@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('Adapt token adapter inherits scoped values while neighboring themes stay isolated', async ({ page }) => {
-  await page.goto('/#theme-comparison');
+  await page.goto('/examples/theme-comparison/');
   const cards = page.locator('#theme-comparison .theme-demo-card');
   await expect(cards).toHaveCount(7);
   const standaloneCards = page.locator('#theme-comparison .theme-demo-grid').first().locator('.theme-demo-card');

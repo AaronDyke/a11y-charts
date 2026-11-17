@@ -9,11 +9,13 @@ import { fileURLToPath } from 'node:url';
 // resolver is deliberately absent so an accidental workspace dependency fails.
 const packages = fileURLToPath(new URL('../../', import.meta.url));
 const temporary = await mkdtemp(join(tmpdir(), 'a11y-chart-artifacts-'));
-for (const kind of ['line', 'bar']) {
+const packageFolder = kind => (kind === 'segmented' ? 'segmented-bar-chart' : `${kind}-chart`);
+const tagName = kind => `a11y-${packageFolder(kind)}`;
+for (const kind of ['line', 'bar', 'segmented']) {
   const folder = join(temporary, kind);
   await mkdir(folder);
   const result = JSON.parse(execFileSync('npm', ['pack', '--ignore-scripts', '--json', '--pack-destination', folder], {
-    cwd: join(packages, `${kind}-chart`), encoding: 'utf8'
+    cwd: join(packages, packageFolder(kind)), encoding: 'utf8'
   }));
   execFileSync('tar', ['-xzf', join(folder, result[0].filename), '-C', folder]);
   for (const file of ['chart.js', 'define.js', 'styles.css']) {
@@ -23,15 +25,18 @@ for (const kind of ['line', 'bar']) {
 const server = createServer(async (request, response) => {
   const url = new URL(request.url, 'http://127.0.0.1:5190');
   const route = url.pathname;
-  if (['/line', '/bar', '/both', '/'].includes(route)) {
-    const kinds = route === '/line' ? ['line'] : route === '/bar' ? ['bar'] : ['line', 'bar'];
+  if (['/line', '/bar', '/segmented', '/both', '/'].includes(route)) {
+    const kinds = ['/line', '/bar', '/segmented'].includes(route) ? [route.slice(1)] : ['line', 'bar'];
+    // `?reset=1` adds a universal margin reset after the chart styles, as host
+    // pages using Starlight, Tailwind preflight, or similar resets do.
+    const reset = url.searchParams.get('reset') === '1' ? '<style>*{margin:0;padding:0}</style>' : '';
     const esm = url.searchParams.get('esm') === '1';
     const entry = esm ? (url.searchParams.has('root') ? 'index.js' : 'define.js') : 'chart.js';
     response.setHeader('Content-Type', 'text/html; charset=utf-8');
-    response.end(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Packed charts</title>${kinds.map(kind => `<link rel="stylesheet" href="/${kind}/styles.css"><script ${esm ? 'type="module"' : 'defer'} src="/${kind}/${entry}"></script>`).join('')}<style>body{margin:16px}main{max-width:100%}</style></head><body><main>${kinds.map(kind => `<a11y-${kind}-chart chart-title="${kind} chart"></a11y-${kind}-chart>`).join('')}</main><button id="outside">Outside</button></body></html>`);
+    response.end(`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Packed charts</title>${kinds.map(kind => `<link rel="stylesheet" href="/${kind}/styles.css"><script ${esm ? 'type="module"' : 'defer'} src="/${kind}/${entry}"></script>`).join('')}<style>body{margin:16px}main{max-width:100%}</style>${reset}</head><body><main>${kinds.map(kind => `<${tagName(kind)} chart-title="${kind} chart"></${tagName(kind)}>`).join('')}</main><button id="outside">Outside</button></body></html>`);
     return;
   }
-  const match = /^\/(line|bar)\/(.+)$/.exec(route);
+  const match = /^\/(line|bar|segmented)\/(.+)$/.exec(route);
   if (!match) { response.writeHead(404); response.end(); return; }
   const root = resolve(temporary, match[1], 'package', 'dist');
   const path = resolve(root, decodeURIComponent(match[2]));

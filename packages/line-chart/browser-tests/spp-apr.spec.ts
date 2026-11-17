@@ -5,7 +5,7 @@ test('report switches measures, preserves share state, and keeps source uncertai
 }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.goto('/spp-apr/');
+  await page.goto('/reports/spp-apr/');
   await expect(page.locator('#indicator-title')).toHaveText('Drop Out');
   await expect(page.locator('.result-summary')).toContainText('7.72%');
   await page.getByRole('link', { name: '06 Preschool Environments' }).click();
@@ -62,7 +62,7 @@ test('report switches measures, preserves share state, and keeps source uncertai
 test('report remains within the viewport and chart dialogs work with a keyboard', async ({
   page,
 }) => {
-  await page.goto('/spp-apr/');
+  await page.goto('/reports/spp-apr/');
   const data = page
     .locator('#chart-stage')
     .getByRole('button', { name: /^(Data|View complete data)$/ });
@@ -86,14 +86,14 @@ test('report remains within the viewport and chart dialogs work with a keyboard'
         .toBeLessThanOrEqual(width);
     }
   }
-  await page.goto('/');
-  await expect(page.locator('h1')).toContainText('The same data deserves');
+  await page.getByRole('link', { name: 'Chart examples ↗' }).click();
+  await expect(page.locator('h1')).toHaveText('Examples');
 });
 
 test('native anchors keep focus and draft notes; Back and Forward restore report choices', async ({
   page,
 }) => {
-  await page.goto('/spp-apr/');
+  await page.goto('/reports/spp-apr/');
   await page.keyboard.press('Tab');
   await expect(page.locator('.skip-link')).toBeFocused();
   await page.keyboard.press('Enter');
@@ -142,7 +142,7 @@ test('native anchors keep focus and draft notes; Back and Forward restore report
 test('comparison data and explanation describe independent rates', async ({
   page,
 }) => {
-  await page.goto('/spp-apr/?indicator=6&measure=6B&view=comparison');
+  await page.goto('/reports/spp-apr/?indicator=6&measure=6B&view=comparison');
   const stage = page.locator('#chart-stage');
   await stage.getByRole('button', { name: 'Explain', exact: true }).click();
   await expect(stage).toContainText('percentage scale from 0% to 100%');
@@ -167,7 +167,7 @@ test('comparison data and explanation describe independent rates', async ({
 test('trend controls retain keyboard focus, expose series choices and preserve view links', async ({
   page,
 }) => {
-  await page.goto('/spp-apr/?indicator=5&measure=5A');
+  await page.goto('/reports/spp-apr/?indicator=5&measure=5A');
   await page.locator('.display-settings summary').click();
   await page.locator('#actual').focus();
   await page.keyboard.press('Space');
@@ -187,7 +187,7 @@ test('trend controls retain keyboard focus, expose series choices and preserve v
 test('text-spacing and reflow keep the report and open data dialogs contained', async ({
   page,
 }) => {
-  await page.goto('/spp-apr/?indicator=5&measure=5A');
+  await page.goto('/reports/spp-apr/?indicator=5&measure=5A');
   await page.setViewportSize({ width: 320, height: 900 });
   await page.locator('.display-settings summary').click();
   await page.addStyleTag({
@@ -211,7 +211,7 @@ test('text-spacing and reflow keep the report and open data dialogs contained', 
 test('source uncertainty is part of the 6B headline and overview', async ({
   page,
 }) => {
-  await page.goto('/spp-apr/?indicator=6&measure=6B');
+  await page.goto('/reports/spp-apr/?indicator=6&measure=6B');
   await expect(page.locator('#overview')).toContainText(
     'Target needs confirmation',
   );
@@ -235,7 +235,7 @@ test('reviewers can copy the current measure and reach notes without returning t
   context,
 }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
-  await page.goto('/spp-apr/?indicator=6&measure=6B&view=comparison');
+  await page.goto('/reports/spp-apr/?indicator=6&measure=6B&view=comparison');
   await page.setViewportSize({ width: 390, height: 844 });
   await page
     .getByRole('button', { name: 'Copy link to this measure', exact: true })

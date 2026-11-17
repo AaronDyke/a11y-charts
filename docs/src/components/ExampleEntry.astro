@@ -1,0 +1,17 @@
+---
+/** One example on an Examples page: what it shows, what to try, and the live chart with settings. */
+import ChartExample from './ChartExample.astro';
+import type { DocsExample } from '../examples/example-properties';
+
+interface Props {
+	example: DocsExample;
+}
+
+const { example } = Astro.props;
+---
+
+<div class="example-entry" id={example.id} data-example-id={example.id}>
+	<p>{example.description}</p>
+	<p class="example-hint"><strong>Try this:</strong> {example.hint}</p>
+	<ChartExample type={example.type} properties={example.properties} settings />
+</div>

@@ -1,0 +1,34 @@
+---
+title: Theme comparison
+description: The same charts under component defaults, the ADAPT token adapter, and a different local theme.
+---
+
+import ThemeComparisonScript from '../../../components/ThemeComparisonScript.astro';
+
+Compare component defaults, a project adapter that maps ADAPT's `--usa-data-rep-*` token names, and a substantially different local theme. Each theme is scoped to its own card, so neighboring charts keep their own values. See [Theming](/guides/theming/) for how to build an adapter.
+
+<div id="theme-comparison" class="theme-comparison">
+
+## Full-width report example
+
+Source values: Male 14, Female 13, total 27. The plain-language explanation is authored from these reported values.
+
+<div id="adapt-report-preview" class="theme-demo-card theme-adapt adapt-theme-fixture adapt-report-fullwidth not-content"></div>
+
+## Standalone charts
+
+The By Sex (Suppressed) view, 27 total, under each theme.
+
+<div id="theme-standalone" class="theme-demo-grid not-content" role="group" aria-label="Standalone chart themes"></div>
+
+## Grouped charts
+
+An illustrative age distribution, 510 total, under each theme.
+
+<div id="theme-grouped" class="theme-demo-grid theme-demo-group-row not-content" role="group" aria-label="Grouped chart themes"></div>
+
+Standalone values are from the observed By Sex report view. Grouped age values are a consistent illustrative fixture (175 + 140 + 125 + 70 = 510).
+
+</div>
+
+<ThemeComparisonScript />

@@ -1,0 +1,92 @@
+---
+title: Theming
+description: Style the charts with inherited CSS custom properties or a per-chart theme object.
+---
+
+import ChartExample from '../../../components/ChartExample.astro';
+
+There are two ways to change how a chart looks:
+
+- **CSS custom properties** (`--a11y-charts-*`), set on any wrapper. They inherit, so one rule can theme every chart in a report. Use these for a project theme.
+- **The `theme` property**, a JavaScript object on one chart. It overrides the inherited properties for that chart only. Use it for one-off changes, such as a single chart's series color.
+
+The defaults live inside each package's stylesheet as fallbacks, so they never mask values inherited from a wrapper. No USWDS dependency is needed.
+
+## Shared roles
+
+Set these once on a report wrapper. The bar, grouped bar, and segmented charts read them; the line chart doesn't yet, so set its own properties alongside:
+
+| Property | Role | Bar and grouped | Segmented | Line chart |
+| --- | --- | --- | --- | --- |
+| `--a11y-charts-text` | Body text | ✓ | ✓ | Use `--a11y-charts-line-color` |
+| `--a11y-charts-muted` | Secondary text | ✓ | ✓ | No equivalent |
+| `--a11y-charts-surface` | Card and dialog background | ✓ | ✓ | No equivalent; its dialog uses system colors (`Canvas`, `CanvasText`) |
+| `--a11y-charts-border` | Borders and dividers | ✓ | ✓ | No equivalent |
+| `--a11y-charts-focus` | Focus outline | ✓ | ✓ | Use `--a11y-charts-line-focus-color` |
+| `--a11y-charts-font-family` | Typeface | ✓ | ✓ | No equivalent; it uses the system UI font |
+| `--a11y-charts-font-size` | Base text size | Use `--a11y-charts-bar-font-size` | ✓ | No equivalent |
+
+Each chart also has its own prefix for chart-specific properties: `--a11y-charts-line-*`, `--a11y-charts-bar-*`, `--a11y-charts-group-*` for the grouped selector, and `--a11y-segmented-bar-chart-*`. Where a chart reads a shared role, a chart-specific value takes precedence over it.
+
+## A project adapter
+
+Keep a small adapter stylesheet in the consuming project that maps its own design tokens to chart properties. This one maps ADAPT's compiled USWDS+ `--usa-data-rep-*` tokens, with fallbacks for pages that don't load that stylesheet:
+
+```css
+.adapt-report-theme {
+	--a11y-charts-text: var(--usa-data-rep-container-ink, #1b1b1b);
+	--a11y-charts-surface: var(--usa-data-rep-container-background, #fff);
+	--a11y-charts-border: var(--usa-data-rep-container-border-color, #dfe1e2);
+	--a11y-charts-font-family: var(--usa-data-rep-container-content-font-family, system-ui, sans-serif);
+	--a11y-charts-bar-color: var(--usa-data-rep-series-item-background, #005ea8);
+	--a11y-charts-bar-label-font-size: var(--usa-data-rep-series-label-font-size, 1rem);
+	--a11y-charts-bar-value-font-size: var(--usa-data-rep-series-value-font-size, 1.25rem);
+	--a11y-charts-bar-percentage-surface: var(--usa-data-rep-series-percentage-background, #dfe1e2);
+	--a11y-charts-bar-value-layout: column;
+	--a11y-charts-bar-track: transparent;
+	--a11y-charts-group-selector-background: var(--usa-base-lighter, #dfe1e2);
+}
+```
+
+The complete adapter is [`docs/src/examples/adapt-report-theme.css`](https://github.com/mzebley-aem/a11y-charts/blob/main/docs/src/examples/adapt-report-theme.css), and the [theme comparison](/examples/theme-comparison/) shows it beside the defaults. Two wrappers with different themes can sit on the same page. If the report has line charts, add `--a11y-charts-line-*` properties to the adapter too, because the line chart doesn't read the shared roles.
+
+## Per-chart overrides
+
+Inline custom properties work on a single chart:
+
+<ChartExample
+	type="bar"
+	attributes={{ style: '--a11y-charts-bar-color: #0b6e4f; --a11y-charts-bar-track: #dcefe7' }}
+	properties={{
+		chartTitle: 'By setting',
+		data: [
+			{ id: 'home', label: 'Home', value: 322 },
+			{ id: 'community', label: 'Community-based setting', value: 121 },
+			{ id: 'other', label: 'Other setting', value: 67 },
+		],
+		total: 510,
+	}}
+/>
+
+Or use the `theme` property, which takes the same roles in camelCase:
+
+```ts
+barChart.theme = { color: '#0b6e4f', track: '#dcefe7', barHeight: '2.5rem' };
+lineChart.theme = { actualColor: '#1e62d0', targetColor: '#765f00' };
+segmentedChart.theme = {
+	segments: { hearing: { color: '#1d467e', pattern: 'diagonal' } },
+	other: { color: '#6b7280' },
+};
+```
+
+## Value types
+
+Most properties are ordinary CSS values. The line chart is the exception: ECharts draws it on a canvas, so its sizes and widths, such as `--a11y-charts-line-line-width` and `--a11y-charts-line-axis-label-font-size`, are pixel numbers. Write `4` or `4px`. Don't use other units: the chart reads only the number, so `1rem` becomes 1 pixel rather than an error. The default table in [`CHART-THEMING.md`](https://github.com/mzebley-aem/a11y-charts/blob/main/CHART-THEMING.md#token-defaults) lists every property with its default and type.
+
+## Keep meaning beyond color
+
+Themes change colors, not meaning. The charts never rely on color alone: line series also differ in line style and point shape, bars carry labels and values, and segments have patterns, legends, and a data table. Keep it that way when theming:
+
+- Keep text and its background at a contrast ratio of at least 4.5:1, and bars, lines, and focus outlines at 3:1 against what's next to them.
+- For segmented charts, give neighboring segments a `pattern` as well as distinct colors.
+- Check the result in Windows High Contrast (forced colors). The charts switch to system colors there, and your theme won't apply.

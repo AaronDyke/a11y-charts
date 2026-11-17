@@ -1,0 +1,49 @@
+---
+title: A11y Charts
+description: Framework-free, accessible chart components for ADAPT reports.
+template: splash
+hero:
+  tagline: Framework-free chart components for ADAPT reports, built to work with keyboards, screen readers, braille, magnification, forced colors, and touch.
+  actions:
+    - text: Install the packages
+      link: /getting-started/installation/
+      icon: right-arrow
+    - text: Build your first chart
+      link: /getting-started/first-chart/
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## The charts
+
+Each chart is a standard custom element that renders into the page's Light DOM. They work in any framework, or none, and every chart includes a summary, a complete data table, and CSV export.
+
+<CardGrid>
+	<Card title="Line chart">
+		Actual versus target over time. Answers one question first: was the target met in the latest
+		reported period?
+	</Card>
+	<Card title="Bar chart">
+		Horizontal category counts and population shares, with definitions, suppression, and grouped
+		population views.
+	</Card>
+	<Card title="Segmented bar chart">
+		The breakdown of a total, or a single value compared with a reference total.
+	</Card>
+</CardGrid>
+
+## Start here
+
+<CardGrid>
+	<LinkCard
+		title="Installation"
+		description="Install from GitHub Packages and register the elements."
+		href="/getting-started/installation/"
+	/>
+	<LinkCard
+		title="Data views"
+		description="How readers reach the complete data: dialog, inline, or none."
+		href="/guides/data-views/"
+	/>
+</CardGrid>

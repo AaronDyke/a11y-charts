@@ -1,0 +1,141 @@
+---
+/**
+ * Renders a live chart from the installed package build and, below it, the code
+ * that produces it. The snippet is generated from the same `properties` object
+ * the live chart receives, so the example and its code cannot drift apart.
+ *
+ * With `settings`, a panel lets readers change the chart's options. The panel's
+ * own snippet follows their changes, and Reset restores the original example.
+ */
+import { Code } from '@astrojs/starlight/components';
+import { CHARTS, chartSnippet, type ChartType } from './chart-snippet';
+
+interface Props {
+	type: ChartType;
+	/** Element properties, assigned in order after the element is defined. */
+	properties: Record<string, unknown>;
+	/**
+	 * Heading level for the chart title; 3 fits under a page's `##` sections.
+	 * The grouped element has no `heading-level` attribute: set
+	 * `config.headingLevel` in `properties` instead.
+	 */
+	headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
+	/** Plain HTML attributes for the element (for example `data-view`). */
+	attributes?: Record<string, string>;
+	showCode?: boolean;
+	/** Add a panel for trying other options (line, bar, and grouped charts). */
+	settings?: boolean;
+}
+
+const { type, properties, headingLevel = 3, attributes = {}, showCode = true, settings = false } = Astro.props;
+const { tag: Tag } = CHARTS[type];
+
+const allAttributes: Record<string, string> =
+	type === 'group' ? { ...attributes } : { 'heading-level': String(headingLevel), ...attributes };
+const snippet = chartSnippet(type, allAttributes, properties);
+const hasSettings = settings && type !== 'segmented';
+---
+
+<div class="chart-example not-content">
+	<Tag {...allAttributes} data-example-properties={JSON.stringify(properties)} />
+</div>
+{
+	hasSettings && (
+		<details
+			class="chart-example__settings not-content"
+			data-example-settings={type}
+			data-example-attributes={JSON.stringify(allAttributes)}
+		>
+			<summary>Try other settings</summary>
+			<div class="chart-example__settings-body">
+				<p class="chart-example__settings-intro">
+					Changes apply to this chart only. They're separate from the controls readers get inside the chart.
+				</p>
+				<div data-settings-controls />
+				<div class="chart-example__settings-footer">
+					<button type="button" class="chart-example__reset" data-settings-reset>
+						Reset example
+					</button>
+					<span class="chart-example__settings-status" role="status" data-settings-status>
+						Original example settings.
+					</span>
+				</div>
+				<p class="chart-example__settings-code-label">Code for these settings</p>
+				<pre class="chart-example__settings-code" tabindex="0" data-settings-code />
+			</div>
+		</details>
+	)
+}
+{showCode && <Code code={snippet} lang="ts" title="Example" />}
+
+<script>
+	import '@mzebley-aem/line-chart/define';
+	import '@mzebley-aem/bar-chart/define';
+	import '@mzebley-aem/segmented-bar-chart/define';
+	import '@mzebley-aem/line-chart/styles.css';
+	import '@mzebley-aem/bar-chart/styles.css';
+	import '@mzebley-aem/segmented-bar-chart/styles.css';
+	import type { A11yBarChartGroupElement } from '@mzebley-aem/bar-chart';
+	import type { A11yLineChartElement } from '@mzebley-aem/line-chart';
+	import type { A11yBarChartElement } from '@mzebley-aem/bar-chart';
+	import { chartSnippet, type ChartType } from './chart-snippet';
+	import { mountSettings } from '../examples/settings';
+	import { mountGroupSettings } from '../examples/group-settings';
+
+	// The define imports above have upgraded every chart element on the page,
+	// so assigning here goes through each element's property setters.
+	let panelCount = 0;
+	for (const element of document.querySelectorAll<HTMLElement>('[data-example-properties]')) {
+		const properties = JSON.parse(element.dataset.exampleProperties ?? '{}');
+		Object.assign(element, properties);
+
+		const panel = element.parentElement?.nextElementSibling;
+		if (!(panel instanceof HTMLDetailsElement) || !panel.dataset.exampleSettings) continue;
+		const type = panel.dataset.exampleSettings as ChartType;
+		const attributes = JSON.parse(panel.dataset.exampleAttributes ?? '{}');
+		const controls = panel.querySelector<HTMLElement>('[data-settings-controls]')!;
+		const status = panel.querySelector<HTMLElement>('[data-settings-status]')!;
+		const code = panel.querySelector<HTMLElement>('[data-settings-code]')!;
+		const codeLabel = panel.querySelector<HTMLElement>('.chart-example__settings-code-label')!;
+		codeLabel.id = `chart-example-code-${++panelCount}`;
+		code.setAttribute('aria-labelledby', codeLabel.id);
+
+		const chart = element as unknown as { config: Record<string, unknown>; sections?: unknown };
+		const updateCode = () => {
+			const current = { ...properties, config: chart.config };
+			if (type === 'group') current.sections = chart.sections;
+			code.textContent = chartSnippet(type, attributes, current);
+		};
+		const customized = () => {
+			updateCode();
+			status.textContent = 'Custom settings applied.';
+		};
+
+		let reset: () => void;
+		if (type === 'group') {
+			const group = element as unknown as A11yBarChartGroupElement;
+			const settings = mountGroupSettings(controls, group, { config: properties.config, sections: properties.sections }, customized);
+			reset = () => settings.reset();
+			group.addEventListener('a11y-bar-chart-group-selection-change', updateCode);
+		} else {
+			const settings = mountSettings(controls, element as unknown as A11yLineChartElement | A11yBarChartElement, type as 'line' | 'bar');
+			controls.addEventListener('demo-settings-change', customized);
+			// Reader controls inside a line chart also change its config.
+			element.addEventListener(`a11y-${type}-chart-settings-change`, () => {
+				settings.refresh();
+				updateCode();
+			});
+			reset = () => {
+				Object.assign(element, structuredClone(properties));
+				settings.refresh();
+			};
+		}
+
+		panel.querySelector('[data-settings-reset]')!.addEventListener('click', () => {
+			reset();
+			updateCode();
+			status.textContent = 'Original example restored.';
+		});
+		updateCode();
+	}
+</script>

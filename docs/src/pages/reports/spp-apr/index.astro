@@ -1,0 +1,22 @@
+---
+// A full-page report prototype, outside the docs layout. Its markup is kept as
+// written in body.html; the script below renders the charts and handles URL state.
+import body from '../../../examples/spp-apr/body.html?raw';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content="Interactive SPP/APR report mockup for Hawaii Part B, FFY 2023. For design review." />
+		<link rel="icon" href="data:," />
+		<title>SPP/APR · Hawaii Part B · Report mockup</title>
+	</head>
+	<body>
+		<Fragment set:html={body} />
+		<script>
+			import '../../../examples/spp-apr/main.ts';
+		</script>
+	</body>
+</html>
